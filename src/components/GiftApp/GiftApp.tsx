@@ -28,7 +28,7 @@ const GiftApp = () => {
   const packType = sessionStorage.getItem('selectedPackType') || 'Pack Trio';
 
   const containerCount = React.useMemo(() => {
-    if (['Pack Chemise', 'Pack Ceinture', 'Pack Cravatte', 'Pack Malette'].includes(packType)) return 1;
+    if (packType === 'Pack Chemise') return 1;
     return ['Pack Duo', 'Pack Mini Duo'].includes(packType) ? 2 : 3;
   }, [packType]);
 

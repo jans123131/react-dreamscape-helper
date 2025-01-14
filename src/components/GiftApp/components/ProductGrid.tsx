@@ -4,16 +4,11 @@ import { Product } from '@/types/product';
 interface ProductGridProps {
   products: Product[];
   onProductSelect: (product: Product) => void;
-  onDragStart?: (e: React.DragEvent<HTMLDivElement>, product: Product) => void;
 }
 
-const ProductGrid: React.FC<ProductGridProps> = ({ products, onProductSelect, onDragStart }) => {
+const ProductGrid: React.FC<ProductGridProps> = ({ products, onProductSelect }) => {
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, product: Product) => {
-    if (onDragStart) {
-      onDragStart(e, product);
-    } else {
-      e.dataTransfer.setData('application/json', JSON.stringify(product));
-    }
+    e.dataTransfer.setData('application/json', JSON.stringify(product));
   };
 
   const handleClick = (product: Product) => {
