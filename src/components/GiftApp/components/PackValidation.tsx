@@ -25,6 +25,45 @@ export const validatePackSelection = (selectedItems: Product[], containerCount: 
       break;
     }
 
+    case 'Pack Ceinture': {
+      const ceintures = selectedItems.filter(item => item.itemgroup_product === 'ceintures');
+      if (ceintures.length !== 1) {
+        toast({
+          title: "Sélection invalide",
+          description: "Le Pack Ceinture doit contenir exactement 1 ceinture",
+          variant: "destructive",
+        });
+        return false;
+      }
+      break;
+    }
+
+    case 'Pack Cravatte': {
+      const cravates = selectedItems.filter(item => item.itemgroup_product === 'cravates');
+      if (cravates.length !== 1) {
+        toast({
+          title: "Sélection invalide",
+          description: "Le Pack Cravatte doit contenir exactement 1 cravate",
+          variant: "destructive",
+        });
+        return false;
+      }
+      break;
+    }
+
+    case 'Pack Malette': {
+      const malettes = selectedItems.filter(item => item.itemgroup_product === 'mallettes');
+      if (malettes.length !== 1) {
+        toast({
+          title: "Sélection invalide",
+          description: "Le Pack Malette doit contenir exactement 1 malette",
+          variant: "destructive",
+        });
+        return false;
+      }
+      break;
+    }
+
     case 'Pack Prestige': {
       const chemises = selectedItems.filter(item => item.itemgroup_product === 'chemises');
       const accessoiresCount = selectedItems.filter(item => item.type_product === 'Accessoires').length;

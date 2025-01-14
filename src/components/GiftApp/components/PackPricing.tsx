@@ -12,6 +12,12 @@ export const getPackPrice = (packType: string): number => {
       return 0;
     case 'Pack Chemise':
       return 10;
+    case 'Pack Ceinture':
+      return 10;
+    case 'Pack Cravatte':
+      return 10;
+    case 'Pack Malette':
+      return 10;
     default:
       return 0;
   }
