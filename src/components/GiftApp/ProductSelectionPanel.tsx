@@ -62,7 +62,7 @@ const ProductSelectionPanel = ({
       case 'Pack Mini Duo':
         return selectedContainerIndex === 0
           ? [{ label: 'Porte-cartes', type: 'itemgroup', value: 'porte-cartes' }]
-          : [{ label: 'Porte-clés', type: 'itemgroup', value: 'porte-clés' }];
+          : [{ label: 'Porte-clés', type: 'itemgroup', value: 'porte-cles' }];
       case 'Pack Ceinture':
         return [{ label: 'Ceintures', type: 'itemgroup', value: 'ceintures' }];
       case 'Pack Cravatte':
