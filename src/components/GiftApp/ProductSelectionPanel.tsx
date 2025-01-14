@@ -13,7 +13,7 @@ import { playTickSound } from '@/utils/audio';
 import { toast } from '@/hooks/use-toast';
 
 interface ProductSelectionPanelProps {
-  onItemDrop: (item: Product) => void;
+  onItemDrop: (item: Product, size: string, personalization: string) => void;
   packType: string;
   selectedContainerIndex: number;
   selectedItems: Product[];
@@ -63,6 +63,12 @@ const ProductSelectionPanel = ({
         return selectedContainerIndex === 0
           ? [{ label: 'Porte-cartes', type: 'itemgroup', value: 'Porte-cartes' }]
           : [{ label: 'Porte-clés', type: 'itemgroup', value: 'Porte-clés' }];
+      case 'Pack Ceinture':
+        return [{ label: 'Ceintures', type: 'itemgroup', value: 'Ceintures' }];
+      case 'Pack Cravatte':
+        return [{ label: 'Cravates', type: 'itemgroup', value: 'Cravates' }];
+      case 'Pack Malette':
+        return [{ label: 'Mallettes', type: 'itemgroup', value: 'Mallettes' }];
       default:
         return [];
     }
@@ -138,7 +144,7 @@ const ProductSelectionPanel = ({
         size: selectedSize,
         personalization: personalization
       };
-      onItemDrop(productWithSize);
+      onItemDrop(productWithSize, selectedSize, personalization);
       setShowAddDialog(false);
       setSelectedSize('');
       setPersonalization('');

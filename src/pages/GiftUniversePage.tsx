@@ -12,6 +12,9 @@ import WelcomePackPremium from '@/components/GiftApp/WelcomePackPremium';
 import WelcomePackPrestige from '@/components/GiftApp/WelcomePackPrestige';
 import WelcomePackMiniDuo from '@/components/GiftApp/WelcomePackMiniDuo';
 import WelcomePackChemise from '@/components/GiftApp/WelcomePackChemise';
+import WelcomePackCeinture from '@/components/GiftApp/WelcomePackCeinture';
+import WelcomePackCravatte from '@/components/GiftApp/WelcomePackCravatte';
+import WelcomePackMalette from '@/components/GiftApp/WelcomePackMalette';
 
 const GiftUniversePage = () => {
   const [showGiftBox, setShowGiftBox] = useState(false);
@@ -32,6 +35,9 @@ const GiftUniversePage = () => {
       packduo: 'Pack Duo',
       packminiduo: 'Pack Mini Duo',
       packchemise: 'Pack Chemise',
+      packceinture: 'Pack Ceinture',
+      packcravatte: 'Pack Cravatte',
+      packmalette: 'Pack Malette',
     };
 
     // Set the pack type in sessionStorage
@@ -49,6 +55,9 @@ const GiftUniversePage = () => {
       packduo: <WelcomePackDuo onCompose={() => setShowGiftBox(true)} />,
       packminiduo: <WelcomePackMiniDuo onCompose={() => setShowGiftBox(true)} />,
       packchemise: <WelcomePackChemise onCompose={() => setShowGiftBox(true)} />,
+      packceinture: <WelcomePackCeinture onCompose={() => setShowGiftBox(true)} />,
+      packcravatte: <WelcomePackCravatte onCompose={() => setShowGiftBox(true)} />,
+      packmalette: <WelcomePackMalette onCompose={() => setShowGiftBox(true)} />,
     };
 
     setCurrentComponent(componentMap[lastSegment] || null);
