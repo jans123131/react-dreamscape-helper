@@ -30,13 +30,26 @@ const ProductImageCarousel = ({ images, name }: ProductImageCarouselProps) => {
     if (!imageRef.current) return;
 
     const rect = imageRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
-    setMagnifierPosition({ 
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    });
+    // Calculate relative positions (0 to 1)
+    const relativeX = x / rect.width;
+    const relativeY = y / rect.height;
+
+    setMagnifierPosition({ x, y });
+
+    // Update magnifier background position
+    const magnifierSize = 128; // 32 * 4 (w-32 h-32)
+    const zoomFactor = 2; // Magnification level
+
+    const bgX = relativeX * (rect.width * zoomFactor - magnifierSize);
+    const bgY = relativeY * (rect.height * zoomFactor - magnifierSize);
+
+    const magnifier = document.querySelector('.magnifier-content') as HTMLElement;
+    if (magnifier) {
+      magnifier.style.backgroundPosition = `-${bgX}px -${bgY}px`;
+    }
   };
 
   return (
@@ -94,10 +107,9 @@ const ProductImageCarousel = ({ images, name }: ProductImageCarouselProps) => {
               }}
             >
               <div 
-                className="absolute w-full h-full"
+                className="magnifier-content absolute w-full h-full"
                 style={{
                   backgroundImage: `url(${filteredImages[selectedImage]})`,
-                  backgroundPosition: `${-magnifierPosition.x * 2 + 64}px ${-magnifierPosition.y * 2 + 64}px`,
                   backgroundSize: '200%',
                   backgroundRepeat: 'no-repeat'
                 }}
