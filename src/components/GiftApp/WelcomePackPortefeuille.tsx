@@ -3,9 +3,9 @@ import { VideoModal } from './VideoModal';
 import { VideoPreview } from './VideoPreview';
 import { getPackContent } from '@/config/packContent';
 
-function WelcomePackPrestige({ onCompose }) {
+function WelcomePackPortefeuille({ onCompose }) {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
-  const content = getPackContent('Pack Prestige');
+  const content = getPackContent('Pack Portefeuille');
 
   return (
     <>
@@ -59,4 +59,4 @@ function WelcomePackPrestige({ onCompose }) {
   );
 }
 
-export default WelcomePackPrestige;
+export default WelcomePackPortefeuille;

@@ -10,7 +10,7 @@ import ConfirmationButton from "./ConfirmationButton";
 import { Product } from "@/types/product";
 import PackTypeHeader from "./components/PackTypeHeader";
 import { validatePackSelection } from "./components/PackValidation";
-import { getPackPrice } from "./components/PackPricing";
+import { getPackPrice, getPackImage } from "@/config/packPrices";
 
 export interface GiftPack {
   items: Product[];
@@ -46,6 +46,7 @@ const GiftApp = () => {
 
     setIsLoading(true);
     const packPrice = getPackPrice(packType);
+    const packImage = getPackImage(packType);
     
     if (packPrice > 0) {
       addToCart({
@@ -53,7 +54,7 @@ const GiftApp = () => {
         name: `${packType} - Frais de packaging`,
         price: packPrice,
         quantity: 1,
-        image: "/Menu/Sur musure .png",
+        image: packImage,
         type_product: "Pack",
         itemgroup_product: "Pack",
         size: "-",

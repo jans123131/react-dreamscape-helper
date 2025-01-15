@@ -75,11 +75,13 @@ const PaymentSuccessPage = () => {
           // Check if the item is a pack charge
           const isPackCharge = item.type_product === "Pack";
           
-          // Determine if item is from pack and which pack
-          const packInfo = isPackCharge ? "aucun" : 
-                          item.fromPack ? currentPackType || "aucun" : "aucun";
+          // Determine pack information
+          let packInfo = "aucun";
+          if (item.fromPack && currentPackType) {
+            packInfo = currentPackType;
+          }
 
-          const formattedItem = {
+          return {
             item_id: item.id.toString(),
             quantity: item.quantity,
             price: itemPrice,
@@ -92,9 +94,6 @@ const PaymentSuccessPage = () => {
             box: item.withBox ? 'Avec box' : 'Sans box',
             image: imageUrl
           };
-
-          console.log('Formatted item:', formattedItem);
-          return formattedItem;
         });
 
         const orderData = {

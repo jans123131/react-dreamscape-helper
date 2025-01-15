@@ -68,11 +68,7 @@ const MobileMenu = ({
                       { href: "/univers-cadeaux/packpremuim", title: "Pack Premium", description: "Collection premium" },
                       { href: "/univers-cadeaux/packtrio", title: "Pack Trio", description: "Ensemble de trois pièces" },
                       { href: "/univers-cadeaux/packduo", title: "Pack Duo", description: "Ensemble de deux pièces" },
-                      { href: "/univers-cadeaux/packminiduo", title: "Pack Mini Duo", description: "Petit ensemble duo" },
-                      { href: "/univers-cadeaux/packchemise", title: "Pack Chemise", description: "Pack chemise exclusive" },
-                      { href: "/univers-cadeaux/packceinture", title: "Pack Ceinture", description: "Pack ceinture élégante" },
-                      { href: "/univers-cadeaux/packcravatte", title: "Pack Cravatte", description: "Pack cravatte raffinée" },
-                      { href: "/univers-cadeaux/packmalette", title: "Pack Malette", description: "Pack malette professionnelle" }
+                      { href: "/univers-cadeaux/packminiduo", title: "Pack Mini Duo", description: "Petit ensemble duo" }
                     ]}
                   />
                 </div>
@@ -109,15 +105,6 @@ const MobileMenu = ({
               </li>
 
               <li className="text-white/90">
-                <Link
-                  to="/sur-mesure"
-                  className="block py-3 px-4 text-lg text-white hover:text-white/80 transition-colors duration-300 hover:bg-white/5 rounded-lg"
-                >
-                  Le sur mesure
-                </Link>
-              </li>
-
-              <li className="text-white/90">
                 <div className="group">
                   <SubMenuSectionMobile
                     title="Outlet"
@@ -134,7 +121,7 @@ const MobileMenu = ({
                   />
                 </div>
               </li>
-              
+
               <li className="mt-6 border-t border-white/10 pt-6 space-y-4">
                 <button
                   onClick={onStoreClick}

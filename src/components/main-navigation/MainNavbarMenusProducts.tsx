@@ -6,36 +6,31 @@ import MondeFioriSection from './menu-sections/MondeFioriSection';
 import PretAPorterSection from './menu-sections/PretAPorterSection';
 import AccessoiresSection from './menu-sections/AccessoiresSection';
 import SubMenuSection from '../navigation/SubMenuSection';
-import { Link } from 'react-router-dom';
 
 const MainNavbarMenusProducts = () => {
   return (
     <NavigationMenuList className="flex flex-col lg:flex-row lg:gap-4 gap-4 text-[#700100]  items-center">
-      <NavMenuItem title="Le monde Fiori" image="/Articles/1.png">
+      <NavMenuItem title="Le monde Fiori" image="/Menu/mondefiori.png">
         <MondeFioriSection />
       </NavMenuItem>
 
       <NavMenuItem 
         title="L'univers Cadeaux" 
-        image="/Articles/2.png"
+        image="/Menu/Universcadeau.png"
         href="/univers-cadeaux"
       >
         <GiftUniverseMenu />
       </NavMenuItem>
 
-      <NavMenuItem title="Le prêt à porter" image="/Articles/3.png">
+      <NavMenuItem title="Le prêt à porter" image="/Menu/lepresaporte.png">
         <PretAPorterSection />
       </NavMenuItem>
 
-      <NavMenuItem title="Accessoires" image="/Articles/4.png">
+      <NavMenuItem title="Accessoires" image="/Menu/accessoires.png">
         <AccessoiresSection />
       </NavMenuItem>
 
-      <Link to="/sur-mesure" className="text-[#700100] text-[16px] lg:text-[21px] hover:text-[#8B0000] transition-colors">
-        Le sur mesure
-      </Link>
-
-      <NavMenuItem title="Outlet" image="/NewCollection/Together We Feast.png">
+      <NavMenuItem title="Outlet" image="/Menu/Ooutlet.png">
         <div className="grid grid-cols-2 gap-3">
           <SubMenuSection
             title="Homme"

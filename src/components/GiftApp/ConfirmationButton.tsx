@@ -67,7 +67,7 @@ const ConfirmationButton = ({ onConfirm, disabled }: ConfirmationButtonProps) =>
       </motion.button>
       {!disabled && (
         <p className="text-center text-sm text-gray-500 mt-2">
-          Maintenez le bouton pour confirmer
+         Ajouter des articles pour continuer
         </p>
       )}
     </motion.div>

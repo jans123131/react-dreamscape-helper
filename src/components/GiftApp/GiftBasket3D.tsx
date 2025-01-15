@@ -7,6 +7,7 @@ import AddItemDialog from './dialogs/AddItemDialog';
 import ProductDetailsDialog from './dialogs/ProductDetailsDialog';
 import AddItemParticles from '../effects/AddItemParticles';
 import BoxRevealAnimation from './animations/BoxRevealAnimation';
+import { packSpaceLabels } from '@/config/packSpaceLabels';
 
 interface GiftBasket3DProps {
   items: Product[];
@@ -32,10 +33,12 @@ const GiftBasket3D = ({
   const [targetContainer, setTargetContainer] = useState<number>(0);
   const [particlePosition, setParticlePosition] = useState<{ x: number; y: number } | null>(null);
 
+  const packType = sessionStorage.getItem('selectedPackType') || 'Pack Prestige';
+  const spaceLabels = packSpaceLabels[packType];
+
   const handleDrop = (containerId: number) => (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const item = JSON.parse(e.dataTransfer.getData('product'));
-    console.log('Dropped item:', item);
     setDroppedItem(item);
     setTargetContainer(containerId);
     onContainerSelect(containerId);
@@ -55,7 +58,6 @@ const GiftBasket3D = ({
 
   const handleConfirm = () => {
     if (droppedItem && selectedSize) {
-      console.log('Confirming item with size:', selectedSize, 'and personalization:', personalization);
       onItemDrop(droppedItem, selectedSize, personalization);
       setShowAddDialog(false);
       setSelectedSize('');
@@ -92,10 +94,9 @@ const GiftBasket3D = ({
         
         {containerCount === 3 ? (
           <div className="flex gap-3">
-            {/* Left side - GRAND FORMAT container */}
             <div className="w-[65%] h-[583px]">
               <GiftPackContainer
-                title="GRAND FORMAT"
+                title={spaceLabels?.mainSpace || "ESPACE PRINCIPAL"}
                 item={items[0]}
                 onDrop={handleDrop(0)}
                 onItemClick={handleProductClick}
@@ -108,33 +109,43 @@ const GiftBasket3D = ({
               )}
             </div>
             
-            {/* Right side - Two MINI containers stacked */}
             <div className="w-[35%] flex flex-col gap-3">
-              {[1, 2].map((index) => (
-                <div key={index} className="h-[280px]">
-                  <GiftPackContainer
-                    title="MINI"
-                    item={items[index]}
-                    onDrop={handleDrop(index)}
-                    onItemClick={handleProductClick}
-                    onRemoveItem={() => onRemoveItem?.(index)}
-                    containerIndex={index}
-                    className="h-full bg-black/90 backdrop-blur-sm shadow-2xl rounded-xl border border-gray-800 transition-all duration-300 hover:shadow-2xl hover:border-gray-700"
-                  />
-                  {particlePosition && targetContainer === index && (
-                    <AddItemParticles position={particlePosition} />
-                  )}
-                </div>
-              ))}
+              <div className="h-[280px]">
+                <GiftPackContainer
+                  title={spaceLabels?.secondarySpace || "ESPACE SECONDAIRE"}
+                  item={items[1]}
+                  onDrop={handleDrop(1)}
+                  onItemClick={handleProductClick}
+                  onRemoveItem={() => onRemoveItem?.(1)}
+                  containerIndex={1}
+                  className="h-full bg-black/90 backdrop-blur-sm shadow-2xl rounded-xl border border-gray-800 transition-all duration-300 hover:shadow-2xl hover:border-gray-700"
+                />
+                {particlePosition && targetContainer === 1 && (
+                  <AddItemParticles position={particlePosition} />
+                )}
+              </div>
+              <div className="h-[280px]">
+                <GiftPackContainer
+                  title={spaceLabels?.tertiarySpace || "ESPACE TERTIAIRE"}
+                  item={items[2]}
+                  onDrop={handleDrop(2)}
+                  onItemClick={handleProductClick}
+                  onRemoveItem={() => onRemoveItem?.(2)}
+                  containerIndex={2}
+                  className="h-full bg-black/90 backdrop-blur-sm shadow-2xl rounded-xl border border-gray-800 transition-all duration-300 hover:shadow-2xl hover:border-gray-700"
+                />
+                {particlePosition && targetContainer === 2 && (
+                  <AddItemParticles position={particlePosition} />
+                )}
+              </div>
             </div>
           </div>
         ) : (
-          // For Pack Duo and Pack Mini Duo (2 containers)
           <div className="grid grid-cols-1 gap-4">
             {Array.from({ length: containerCount }).map((_, index) => (
               <div key={index} className="relative h-[300px]">
                 <GiftPackContainer
-                  title="GRAND FORMAT"
+                  title={spaceLabels?.mainSpace || "ESPACE PRINCIPAL"}
                   item={items[index]}
                   onDrop={handleDrop(index)}
                   onItemClick={handleProductClick}

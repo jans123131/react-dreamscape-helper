@@ -34,31 +34,6 @@ const GiftUniverseMenu = () => {
           }
         ]}
       />
-      <SubMenuSection
-        title="Pack Mono"
-        items={[
-          {
-            href: "/univers-cadeaux/packchemise",
-            title: "Pack Chemise",
-            description: "Pack chemise exclusive"
-          },
-          {
-            href: "/univers-cadeaux/packceinture",
-            title: "Pack Ceinture",
-            description: "Pack ceinture élégante"
-          },
-          {
-            href: "/univers-cadeaux/packcravatte",
-            title: "Pack Cravatte",
-            description: "Pack cravatte raffinée"
-          },
-          {
-            href: "/univers-cadeaux/packmalette",
-            title: "Pack Malette",
-            description: "Pack malette professionnelle"
-          }
-        ]}
-      />
     </div>
   );
 };

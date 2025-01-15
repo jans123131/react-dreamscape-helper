@@ -6,12 +6,11 @@ import MondeFioriSection from './menu-sections/MondeFioriSection';
 import PretAPorterSection from './menu-sections/PretAPorterSection';
 import AccessoiresSection from './menu-sections/AccessoiresSection';
 import SubMenuSection from '../navigation/SubMenuSection';
-import { Link } from 'react-router-dom';
 
 const MainNavbarMenus = () => {
   return (
     <NavigationMenuList className="flex flex-col lg:flex-row lg:gap-4 gap-4  items-center">
-      <NavMenuItem title="Le monde Fiori" image="/Menu/Universcadeau.png">
+      <NavMenuItem title="Le monde Fiori" image="/Menu/mondefiori.png">
         <MondeFioriSection />
       </NavMenuItem>
 
@@ -30,10 +29,6 @@ const MainNavbarMenus = () => {
       <NavMenuItem title="Accessoires" image="/Menu/accessoires.png">
         <AccessoiresSection />
       </NavMenuItem>
-
-      <Link to="/sur-mesure" className="text-white text-[16px] lg:text-[21px] hover:text-white/80 transition-colors">
-        Le sur mesure
-      </Link>
 
       <NavMenuItem title="Outlet" image="/Menu/Ooutlet.png">
         <div className="grid grid-cols-2 gap-3">

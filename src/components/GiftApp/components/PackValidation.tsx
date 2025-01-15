@@ -12,6 +12,100 @@ export const validatePackSelection = (selectedItems: Product[], containerCount: 
   }
 
   switch (packType) {
+    case 'Pack Premium': {
+      // Check if first item is a portefeuille
+      if (selectedItems[0]?.itemgroup_product !== 'portefeuilles') {
+        toast({
+          title: "Sélection invalide",
+          description: "Le premier article doit être un portefeuille",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      // Check if second item is a ceinture
+      if (selectedItems[1]?.itemgroup_product !== 'ceintures') {
+        toast({
+          title: "Sélection invalide",
+          description: "Le deuxième article doit être une ceinture",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      // Check if third item is a cravate
+      if (selectedItems[2]?.itemgroup_product !== 'cravates') {
+        toast({
+          title: "Sélection invalide",
+          description: "Le troisième article doit être une cravate",
+          variant: "destructive",
+        });
+        return false;
+      }
+      break;
+    }
+
+    case 'Pack Prestige': {
+      const chemises = selectedItems.filter(item => item.itemgroup_product === 'chemises');
+      const ceintures = selectedItems.filter(item => item.itemgroup_product === 'ceintures');
+      const cravates = selectedItems.filter(item => item.itemgroup_product === 'cravates');
+      
+      if (chemises.length !== 1) {
+        toast({
+          title: "Sélection invalide",
+          description: "Le Pack Prestige doit contenir exactement 1 chemise",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      if (ceintures.length !== 1) {
+        toast({
+          title: "Sélection invalide",
+          description: "Le Pack Prestige doit contenir exactement 1 ceinture",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      if (cravates.length !== 1) {
+        toast({
+          title: "Sélection invalide",
+          description: "Le Pack Prestige doit contenir exactement 1 cravate",
+          variant: "destructive",
+        });
+        return false;
+      }
+      break;
+    }
+
+    case 'Pack Trio': {
+      // Check if we have either a portefeuille or a ceinture (but not both)
+      const hasPortefeuille = selectedItems.some(item => item.itemgroup_product === 'portefeuilles');
+      const hasCeinture = selectedItems.some(item => item.itemgroup_product === 'ceintures');
+      
+      if ((!hasPortefeuille && !hasCeinture) || (hasPortefeuille && hasCeinture)) {
+        toast({
+          title: "Sélection invalide",
+          description: "Le Pack Trio doit contenir soit 1 portefeuille, soit 1 ceinture (pas les deux)",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      // Check if we have exactly one accessory
+      const accessoiresCount = selectedItems.filter(item => item.type_product === 'Accessoires').length;
+      if (accessoiresCount !== 1) {
+        toast({
+          title: "Sélection invalide",
+          description: "Le Pack Trio doit contenir exactement 1 accessoire",
+          variant: "destructive",
+        });
+        return false;
+      }
+      break;
+    }
+
     case 'Pack Chemise': {
       const chemises = selectedItems.filter(item => item.itemgroup_product === 'chemises');
       if (chemises.length !== 1) {
@@ -57,69 +151,6 @@ export const validatePackSelection = (selectedItems: Product[], containerCount: 
         toast({
           title: "Sélection invalide",
           description: "Le Pack Malette doit contenir exactement 1 malette",
-          variant: "destructive",
-        });
-        return false;
-      }
-      break;
-    }
-
-    case 'Pack Prestige': {
-      const chemises = selectedItems.filter(item => item.itemgroup_product === 'chemises');
-      const accessoiresCount = selectedItems.filter(item => item.type_product === 'Accessoires').length;
-      
-      if (chemises.length !== 1) {
-        toast({
-          title: "Sélection invalide",
-          description: "Le Pack Prestige doit contenir exactement 1 chemise",
-          variant: "destructive",
-        });
-        return false;
-      }
-      
-      if (accessoiresCount !== 2) {
-        toast({
-          title: "Sélection invalide",
-          description: "Le Pack Prestige doit contenir 2 accessoires",
-          variant: "destructive",
-        });
-        return false;
-      }
-      break;
-    }
-
-    case 'Pack Premium': {
-      const cravates = selectedItems.filter(item => item.itemgroup_product === 'Cravates');
-      const accessoiresCount = selectedItems.filter(item => item.type_product === 'Accessoires').length;
-      
-      if (cravates.length !== 1) {
-        toast({
-          title: "Sélection invalide",
-          description: "Le Pack Premium doit contenir exactement 1 cravate",
-          variant: "destructive",
-        });
-        return false;
-      }
-      
-      if (accessoiresCount !== 2) {
-        toast({
-          title: "Sélection invalide",
-          description: "Le Pack Premium doit contenir 2 accessoires",
-          variant: "destructive",
-        });
-        return false;
-      }
-      break;
-    }
-
-    case 'Pack Trio': {
-      const hasPortefeuille = selectedItems.some(item => item.itemgroup_product === 'Portefeuilles');
-      const hasCeinture = selectedItems.some(item => item.itemgroup_product === 'Ceintures');
-      const hasAccessoire = selectedItems.some(item => item.type_product === 'Accessoires');
-      if (!hasPortefeuille || !hasCeinture || !hasAccessoire) {
-        toast({
-          title: "Sélection invalide",
-          description: "Le Pack Trio doit contenir 1 portefeuille, 1 ceinture et 1 accessoire",
           variant: "destructive",
         });
         return false;
