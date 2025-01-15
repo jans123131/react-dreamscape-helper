@@ -35,6 +35,7 @@ const GiftBasket3D = ({
 
   const packType = sessionStorage.getItem('selectedPackType') || 'Pack Prestige';
   const spaceLabels = packSpaceLabels[packType];
+  const isPackPremium = packType === 'Pack Premium';
 
   const handleDrop = (containerId: number) => (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -94,7 +95,7 @@ const GiftBasket3D = ({
         
         {containerCount === 3 ? (
           <div className="flex gap-3">
-            <div className="w-[65%] h-[583px]">
+            <div className={`${isPackPremium ? 'w-[55%]' : 'w-[65%]'} h-[583px]`}>
               <GiftPackContainer
                 title={spaceLabels?.mainSpace || "ESPACE PRINCIPAL"}
                 item={items[0]}
@@ -103,13 +104,14 @@ const GiftBasket3D = ({
                 onRemoveItem={() => onRemoveItem?.(0)}
                 containerIndex={0}
                 className="h-full bg-black/90 backdrop-blur-sm shadow-2xl rounded-xl border border-gray-800 transition-all duration-300 hover:shadow-2xl hover:border-gray-700"
+                imageScale={isPackPremium ? 1.3 : 1}
               />
               {particlePosition && targetContainer === 0 && (
                 <AddItemParticles position={particlePosition} />
               )}
             </div>
             
-            <div className="w-[35%] flex flex-col gap-3">
+            <div className={`${isPackPremium ? 'w-[45%]' : 'w-[35%]'} flex flex-col gap-3`}>
               <div className="h-[280px]">
                 <GiftPackContainer
                   title={spaceLabels?.secondarySpace || "ESPACE SECONDAIRE"}
@@ -119,6 +121,7 @@ const GiftBasket3D = ({
                   onRemoveItem={() => onRemoveItem?.(1)}
                   containerIndex={1}
                   className="h-full bg-black/90 backdrop-blur-sm shadow-2xl rounded-xl border border-gray-800 transition-all duration-300 hover:shadow-2xl hover:border-gray-700"
+                  imageScale={isPackPremium ? 1.3 : 1}
                 />
                 {particlePosition && targetContainer === 1 && (
                   <AddItemParticles position={particlePosition} />
@@ -133,6 +136,7 @@ const GiftBasket3D = ({
                   onRemoveItem={() => onRemoveItem?.(2)}
                   containerIndex={2}
                   className="h-full bg-black/90 backdrop-blur-sm shadow-2xl rounded-xl border border-gray-800 transition-all duration-300 hover:shadow-2xl hover:border-gray-700"
+                  imageScale={isPackPremium ? 1.3 : 1}
                 />
                 {particlePosition && targetContainer === 2 && (
                   <AddItemParticles position={particlePosition} />
