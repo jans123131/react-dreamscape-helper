@@ -1,9 +1,11 @@
-import { Product } from '@/types/product';
-
 type CategoryType = {
   label: string;
   type: string;
   value: string;
+  additionalFilter?: {
+    field: string;
+    value: string;
+  };
 };
 
 export const getAvailableCategories = (
@@ -48,46 +50,47 @@ export const getAvailableCategories = (
   }
 
   if (packType === 'Pack Trio') {
-    // If no items selected yet, show both portefeuilles and ceintures as options
+    // First slot must be portefeuille
     if (selectedItems.length === 0) {
-      return [
-        { label: 'Portefeuilles', type: 'itemgroup', value: 'portefeuilles' },
-        { label: 'Ceintures', type: 'itemgroup', value: 'ceintures' }
-      ];
+      return [{ label: 'Portefeuilles', type: 'itemgroup', value: 'portefeuilles' }];
     }
-
-    // If first item is selected, only show accessoires for the second slot
+    
+    // Second slot must be ceinture
     if (selectedItems.length === 1) {
-      return [{ label: 'Accessoires', type: 'type', value: 'accessoires' }];
+      return [{ label: 'Ceintures', type: 'itemgroup', value: 'ceintures' }];
     }
-
+    
+    // Third slot must be porte-clés
+    if (selectedItems.length === 2) {
+      return [{ label: 'Porte-clés', type: 'itemgroup', value: 'porte-cles' }];
+    }
+    
     return [];
   }
 
-  const categories = {
-    'Pack Duo': [
-      [{ label: 'Portefeuilles', type: 'itemgroup', value: 'portefeuilles' }],
-      [{ label: 'Ceintures', type: 'itemgroup', value: 'ceintures' }]
-    ],
-    'Pack Mini Duo': [
-      [{ label: 'Porte-cartes', type: 'itemgroup', value: 'porte-cartes' }],
-      [{ label: 'Porte-clés', type: 'itemgroup', value: 'porte-cles' }]
-    ]
-  };
-
-  const singleCategories = {
-    'Pack Chemise': [{ label: 'Chemises', type: 'itemgroup', value: 'chemises' }],
-    'Pack Ceinture': [{ label: 'Ceintures', type: 'itemgroup', value: 'ceintures' }],
-    'Pack Cravatte': [{ label: 'Cravates', type: 'itemgroup', value: 'cravates' }],
-    'Pack Malette': [{ label: 'Mallettes', type: 'itemgroup', value: 'mallettes' }]
-  };
-
-  if (singleCategories[packType as keyof typeof singleCategories]) {
-    return singleCategories[packType as keyof typeof singleCategories];
+  if (packType === 'Pack Duo') {
+    if (selectedItems.length === 0) {
+      return [{ label: 'Portefeuilles', type: 'itemgroup', value: 'portefeuilles' }];
+    }
+    
+    if (selectedItems.length === 1) {
+      return [{ label: 'Ceintures', type: 'itemgroup', value: 'ceintures' }];
+    }
+    
+    return [];
   }
 
-  const packCategories = categories[packType as keyof typeof categories];
-  if (!packCategories) return [];
+  if (packType === 'Pack Mini Duo') {
+    if (selectedItems.length === 0) {
+      return [{ label: 'Porte-cartes', type: 'itemgroup', value: 'porte-cartes' }];
+    }
+    
+    if (selectedItems.length === 1) {
+      return [{ label: 'Porte-clés', type: 'itemgroup', value: 'porte-cles' }];
+    }
+    
+    return [];
+  }
 
-  return packCategories[selectedContainerIndex] || [];
+  return [];
 };
