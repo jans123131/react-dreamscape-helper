@@ -33,22 +33,21 @@ const ProductImageCarousel = ({ images, name }: ProductImageCarouselProps) => {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    // Calculate relative positions (0 to 1)
-    const relativeX = x / rect.width;
-    const relativeY = y / rect.height;
-
     setMagnifierPosition({ x, y });
 
-    // Update magnifier background position
-    const magnifierSize = 128; // 32 * 4 (w-32 h-32)
-    const zoomFactor = 2; // Magnification level
-
-    const bgX = relativeX * (rect.width * zoomFactor - magnifierSize);
-    const bgY = relativeY * (rect.height * zoomFactor - magnifierSize);
+    // Calculate the position for the background image
+    // Using a higher zoom factor (4x) for better magnification
+    const zoomFactor = 4;
+    
+    // Calculate the background position as a percentage
+    const bgX = (x / rect.width) * 100;
+    const bgY = (y / rect.height) * 100;
 
     const magnifier = document.querySelector('.magnifier-content') as HTMLElement;
     if (magnifier) {
-      magnifier.style.backgroundPosition = `-${bgX}px -${bgY}px`;
+      // Center the zoom on the cursor position
+      magnifier.style.backgroundPosition = `${bgX}% ${bgY}%`;
+      magnifier.style.backgroundSize = `${zoomFactor * 100}%`;
     }
   };
 
@@ -103,6 +102,7 @@ const ProductImageCarousel = ({ images, name }: ProductImageCarouselProps) => {
               style={{
                 left: magnifierPosition.x - 64,
                 top: magnifierPosition.y - 64,
+                transform: 'translate(-50%, -50%)',
                 boxShadow: '0 0 10px rgba(0,0,0,0.2)',
               }}
             >
@@ -110,7 +110,6 @@ const ProductImageCarousel = ({ images, name }: ProductImageCarouselProps) => {
                 className="magnifier-content absolute w-full h-full"
                 style={{
                   backgroundImage: `url(${filteredImages[selectedImage]})`,
-                  backgroundSize: '200%',
                   backgroundRepeat: 'no-repeat'
                 }}
               />
