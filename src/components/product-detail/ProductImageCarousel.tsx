@@ -36,8 +36,8 @@ const ProductImageCarousel = ({ images, name }: ProductImageCarouselProps) => {
     setMagnifierPosition({ x, y });
 
     // Calculate the position for the background image
-    // Using a higher zoom factor (4x) for better magnification
-    const zoomFactor = 4;
+    // Using a higher zoom factor (4.5x) for better magnification
+    const zoomFactor = 4.5;
     
     // Calculate the background position as a percentage
     const bgX = (x / rect.width) * 100;
