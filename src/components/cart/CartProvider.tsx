@@ -120,30 +120,31 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const removeFromCart = (id: number) => {
     const itemToRemove = cartItems.find(item => item.id === id);
     
-    if (itemToRemove && itemToRemove.fromPack) {
-      const packType = itemToRemove.pack;
-      
-      // Remove all items from the same pack AND the pack itself
+    if (itemToRemove) {
       setCartItems(prevItems => {
-        const remainingItems = prevItems.filter(item => 
-          !(item.pack === packType && (item.fromPack || item.type_product === "Pack"))
-        );
+        // If the item is from a pack, remove all items from that pack including the pack itself
+        if (itemToRemove.fromPack || itemToRemove.type_product === "Pack") {
+          const packType = itemToRemove.pack;
+          const remainingItems = prevItems.filter(item => 
+            !(item.pack === packType && (item.fromPack || item.type_product === "Pack"))
+          );
+          
+          toast({
+            title: "Pack supprimé",
+            description: `Le pack ${packType} et tous ses articles ont été supprimés du panier`,
+            style: {
+              backgroundColor: '#700100',
+              color: 'white',
+              border: '1px solid #590000',
+            },
+          });
+          
+          return remainingItems;
+        }
         
-        toast({
-          title: "Pack supprimé",
-          description: `Le pack ${packType} et ses frais de packaging ont été entièrement supprimés du panier`,
-          style: {
-            backgroundColor: '#700100',
-            color: 'white',
-            border: '1px solid #590000',
-          },
-        });
-        
-        return remainingItems;
+        // Regular item removal
+        return prevItems.filter(item => item.id !== id);
       });
-    } else {
-      // Regular item removal
-      setCartItems(prevItems => prevItems.filter(item => item.id !== id));
     }
   };
 
@@ -199,8 +200,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     const subtotal = itemsSubtotal + boxTotal;
     const discount = hasNewsletterDiscount ? subtotal * 0.05 : 0;
     const total = subtotal - discount;
-    
-    console.log('Cart totals:', { itemsSubtotal, boxTotal, subtotal, discount, total });
     
     return { subtotal: itemsSubtotal, discount, total, boxTotal };
   };
