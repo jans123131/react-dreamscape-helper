@@ -7,6 +7,7 @@ import { updateProductStock } from '@/utils/stockManagement';
 import { submitOrder } from '@/services/orderSubmissionApi';
 import { toast } from "@/hooks/use-toast";
 import { getUserDetails } from '@/utils/userDetailsStorage';
+import { stockReduceManager } from '@/utils/StockReduce';
 
 const PaymentSuccessPage = () => {
   const navigate = useNavigate();
@@ -51,31 +52,43 @@ const PaymentSuccessPage = () => {
           return;
         }
 
+        // Add items to stock reduce manager before updating stock
+        pendingOrder.cartItems.forEach((item: any) => {
+          if (item.size && item.quantity) {
+            stockReduceManager.addItem(
+              item.id.toString(),
+              item.size,
+              item.quantity
+            );
+          }
+        });
+
+        // Send stock reduce update
+        try {
+          await stockReduceManager.sendStockUpdate();
+          console.log('Stock reduce update completed successfully');
+        } catch (error) {
+          console.error('Failed to update stock reduce:', error);
+          // Continue with order processing even if stock reduce fails
+        }
+
         console.log('Retrieved user details:', finalUserDetails);
         await updateProductStock(pendingOrder.cartItems);
 
-        // Get the current pack type from session storage
         const currentPackType = sessionStorage.getItem('selectedPackType');
         console.log('Current pack type:', currentPackType);
 
-        // Format items with correct pack information
         const formattedItems = pendingOrder.cartItems.map((item: any) => {
           console.log('Processing item:', item);
-
-          // Calculate discounted price if applicable
           const itemPrice = item.discount_product ? 
             item.price * (1 - parseFloat(item.discount_product) / 100) : 
             item.price;
 
-          // Format image URL
           const imageUrl = item.image.startsWith('http') ? 
             item.image : 
             `https://respizenmedical.com/fiori/${item.image}`;
 
-          // Check if the item is a pack charge
           const isPackCharge = item.type_product === "Pack";
-          
-          // Determine pack information
           let packInfo = "aucun";
           if (item.fromPack && currentPackType) {
             packInfo = currentPackType;
@@ -105,7 +118,8 @@ const PaymentSuccessPage = () => {
             phone: finalUserDetails.phone || '',
             address: finalUserDetails.address || '',
             country: finalUserDetails.country || '',
-            zip_code: finalUserDetails.zipCode || ''
+            zip_code: finalUserDetails.zipCode || '',
+            order_note: finalUserDetails.orderNote || '-' // Added order note
           },
           items: formattedItems,
           price_details: {
@@ -167,7 +181,6 @@ const PaymentSuccessPage = () => {
           });
         }
         
-        // Clear session storage and cart
         sessionStorage.removeItem('pendingOrder');
         sessionStorage.removeItem('selectedPackType');
         clearCart();

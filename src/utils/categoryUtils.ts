@@ -1,3 +1,5 @@
+import { Product } from '@/types/product';
+
 type CategoryType = {
   label: string;
   type: string;
@@ -14,19 +16,19 @@ export const getAvailableCategories = (
   selectedItems: Product[]
 ): CategoryType[] => {
   if (packType === 'Pack Premium') {
-    // First slot must be portefeuille
+    // First slot must be cravate
     if (selectedItems.length === 0) {
+      return [{ label: 'Cravates', type: 'itemgroup', value: 'cravates' }];
+    }
+    
+    // Second slot must be portefeuille
+    if (selectedItems.length === 1) {
       return [{ label: 'Portefeuilles', type: 'itemgroup', value: 'portefeuilles' }];
     }
     
-    // Second slot must be ceinture
-    if (selectedItems.length === 1) {
-      return [{ label: 'Ceintures', type: 'itemgroup', value: 'ceintures' }];
-    }
-    
-    // Third slot must be cravate
+    // Third slot must be ceinture
     if (selectedItems.length === 2) {
-      return [{ label: 'Cravates', type: 'itemgroup', value: 'cravates' }];
+      return [{ label: 'Ceintures', type: 'itemgroup', value: 'ceintures' }];
     }
     
     return [];
@@ -36,6 +38,7 @@ export const getAvailableCategories = (
     const chemiseCount = selectedItems.filter(item => item.itemgroup_product === 'chemises').length;
     const beltCount = selectedItems.filter(item => item.itemgroup_product === 'ceintures').length;
     const cravateCount = selectedItems.filter(item => item.itemgroup_product === 'cravates').length;
+    const portefeuilleCount = selectedItems.filter(item => item.itemgroup_product === 'portefeuilles').length;
 
     if (chemiseCount === 0) {
       return [{ label: 'Chemises Homme', type: 'itemgroup', value: 'chemises', additionalFilter: { field: 'category_product', value: 'homme' } }];
@@ -43,8 +46,11 @@ export const getAvailableCategories = (
     if (chemiseCount === 1 && beltCount === 0) {
       return [{ label: 'Ceintures', type: 'itemgroup', value: 'ceintures' }];
     }
-    if (chemiseCount === 1 && beltCount === 1 && cravateCount === 0) {
-      return [{ label: 'Cravates', type: 'itemgroup', value: 'cravates' }];
+    if (chemiseCount === 1 && beltCount === 1 && cravateCount === 0 && portefeuilleCount === 0) {
+      return [
+        { label: 'Cravates', type: 'itemgroup', value: 'cravates' },
+        { label: 'Portefeuilles', type: 'itemgroup', value: 'portefeuilles' }
+      ];
     }
     return [];
   }

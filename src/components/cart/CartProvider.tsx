@@ -2,7 +2,9 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { saveCartItems, getCartItems } from '@/utils/cartStorage';
 import { getPersonalizations } from '@/utils/personalizationStorage';
 import { calculateDiscountedPrice } from '@/utils/priceCalculations';
+import { getPersonalizationPrice } from '@/utils/personalizationPricing';
 import { toast } from "@/hooks/use-toast";
+import { stockReduceManager } from '@/utils/StockReduce';
 
 export interface CartItem {
   id: number;
@@ -90,9 +92,21 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         ? calculateDiscountedPrice(item.price, item.discount_product)
         : item.price;
 
+      const personalizationPrice = getPersonalizationPrice(
+        item.itemgroup_product || '',
+        item.personalization,
+        item.fromPack || false
+      );
+
+      console.log('Adding item to cart with prices:', {
+        basePrice: finalPrice,
+        personalizationPrice,
+        total: finalPrice + personalizationPrice
+      });
+
       const itemWithPack = {
         ...item,
-        price: finalPrice,
+        price: finalPrice + personalizationPrice,
         originalPrice: item.discount_product ? item.price : undefined,
         pack: item.pack || 'aucun',
         size: item.size || '-',
@@ -109,15 +123,15 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     if (itemToRemove && itemToRemove.fromPack) {
       const packType = itemToRemove.pack;
       
-      // Remove all items from the same pack
+      // Remove all items from the same pack AND the pack itself
       setCartItems(prevItems => {
         const remainingItems = prevItems.filter(item => 
-          !(item.pack === packType && item.fromPack)
+          !(item.pack === packType && (item.fromPack || item.type_product === "Pack"))
         );
         
         toast({
           title: "Pack supprimé",
-          description: `Le pack ${packType} a été entièrement supprimé du panier`,
+          description: `Le pack ${packType} et ses frais de packaging ont été entièrement supprimés du panier`,
           style: {
             backgroundColor: '#700100',
             color: 'white',
@@ -146,6 +160,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   const clearCart = () => {
     setCartItems([]);
+    stockReduceManager.clearItems();
   };
 
   const applyNewsletterDiscount = () => {
@@ -184,6 +199,8 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     const subtotal = itemsSubtotal + boxTotal;
     const discount = hasNewsletterDiscount ? subtotal * 0.05 : 0;
     const total = subtotal - discount;
+    
+    console.log('Cart totals:', { itemsSubtotal, boxTotal, subtotal, discount, total });
     
     return { subtotal: itemsSubtotal, discount, total, boxTotal };
   };
