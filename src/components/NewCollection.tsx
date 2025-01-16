@@ -7,18 +7,42 @@ const NewCollection = () => {
 
   useEffect(() => {
     if (videoRef.current) {
+      // Set video attributes for better performance
       videoRef.current.preload = "auto";
       videoRef.current.playbackRate = 1.2;
       
       const playVideo = async () => {
         try {
-          await videoRef.current?.play();
+          if (videoRef.current) {
+            // Load video only when it's needed
+            videoRef.current.load();
+            await videoRef.current.play();
+          }
         } catch (error) {
           console.error("Video autoplay failed:", error);
         }
       };
       
-      playVideo();
+      // Use Intersection Observer to load video only when in viewport
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              playVideo();
+              observer.disconnect(); // Disconnect after first intersection
+            }
+          });
+        },
+        { threshold: 0.1 } // Start loading when 10% of the video is visible
+      );
+
+      if (videoRef.current) {
+        observer.observe(videoRef.current);
+      }
+
+      return () => {
+        observer.disconnect();
+      };
     }
   }, []);
 
@@ -40,6 +64,7 @@ const NewCollection = () => {
               <source
                 src="https://www.fioriforyou.com/apis/videos/newcollection.mp4"
                 type="video/mp4"
+                media="all"
               />
               Your browser does not support the video tag.
             </video>
@@ -107,6 +132,7 @@ const NewCollection = () => {
               <source
                 src="https://www.fioriforyou.com/apis/videos/newcollection.mp4"
                 type="video/mp4"
+                media="all"
               />
               Your browser does not support the video tag.
             </video>
