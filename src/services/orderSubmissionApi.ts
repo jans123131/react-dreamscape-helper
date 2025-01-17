@@ -191,7 +191,7 @@ const sendOrderConfirmationEmail = async (orderData: any): Promise<void> => {
 
     console.log('Sending email with payload:', JSON.stringify(emailPayload, null, 2));
 
-    const response = await fetch('https://fioriforyou.com/testsmtp.php', {
+    const response = await fetch('https://www.fioriforyou.com/testsmtp.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

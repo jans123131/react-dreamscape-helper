@@ -11,27 +11,47 @@ import { stockReduceManager } from '@/utils/StockReduce';
 
 const PaymentSuccessPage = () => {
   const navigate = useNavigate();
-  const { clearCart, cartItems, hasNewsletterDiscount, calculateTotal } = useCart();
+  const { clearCart, cartItems, hasNewsletterDiscount, calculateTotal, removeNewsletterDiscount } = useCart();
   const { subtotal, discount: newsletterDiscount, total, boxTotal } = calculateTotal();
   const shipping = subtotal > 500 ? 0 : 7;
   const finalTotal = total + shipping;
 
   useEffect(() => {
+    // Security check: Verify payment session exists
+    const pendingOrderString = sessionStorage.getItem('pendingOrder');
+    const paymentTimestamp = sessionStorage.getItem('paymentInitiated');
+    
+    if (!pendingOrderString || !paymentTimestamp) {
+      console.error('Unauthorized access to success page - redirecting to cart');
+      toast({
+        title: "Accès non autorisé",
+        description: "Veuillez passer par le processus de paiement normal",
+        variant: "destructive",
+      });
+      navigate('/cart');
+      return;
+    }
+
+    // Verify payment timestamp is recent (within last 30 minutes)
+    const timestampAge = Date.now() - parseInt(paymentTimestamp);
+    const maxAge = 30 * 60 * 1000; // 30 minutes in milliseconds
+    
+    if (timestampAge > maxAge) {
+      console.error('Payment session expired - redirecting to cart');
+      sessionStorage.removeItem('pendingOrder');
+      sessionStorage.removeItem('paymentInitiated');
+      toast({
+        title: "Session expirée",
+        description: "Votre session de paiement a expiré. Veuillez réessayer",
+        variant: "destructive",
+      });
+      navigate('/cart');
+      return;
+    }
+
     const handlePaymentSuccess = async () => {
       try {
         console.log('Starting payment success handler...');
-        const pendingOrderString = sessionStorage.getItem('pendingOrder');
-        if (!pendingOrderString) {
-          console.error('No pending order found');
-          toast({
-            title: "Error",
-            description: "No pending order found. Please complete the checkout process.",
-            variant: "destructive",
-            duration: Infinity
-          });
-          return;
-        }
-
         const pendingOrder = JSON.parse(pendingOrderString);
         console.log('Processing pending order:', pendingOrder);
         
@@ -63,7 +83,6 @@ const PaymentSuccessPage = () => {
           }
         });
 
-        // Send stock reduce update
         try {
           await stockReduceManager.sendStockUpdate();
           console.log('Stock reduce update completed successfully');
@@ -180,10 +199,25 @@ const PaymentSuccessPage = () => {
             duration: Infinity
           });
         }
-        
+
+        // Clear payment session after successful processing
         sessionStorage.removeItem('pendingOrder');
+        sessionStorage.removeItem('paymentInitiated');
         sessionStorage.removeItem('selectedPackType');
         clearCart();
+
+        // Remove newsletter discount after successful payment
+        if (hasNewsletterDiscount) {
+          removeNewsletterDiscount();
+          const subscribedEmail = localStorage.getItem('subscribedEmail');
+          if (subscribedEmail) {
+            const usedDiscountEmails = JSON.parse(localStorage.getItem('usedDiscountEmails') || '[]');
+            if (!usedDiscountEmails.includes(subscribedEmail)) {
+              usedDiscountEmails.push(subscribedEmail);
+              localStorage.setItem('usedDiscountEmails', JSON.stringify(usedDiscountEmails));
+            }
+          }
+        }
       } catch (error: any) {
         console.error('Error processing order:', error);
         
@@ -214,7 +248,7 @@ const PaymentSuccessPage = () => {
     };
 
     handlePaymentSuccess();
-  }, [clearCart, hasNewsletterDiscount, subtotal, newsletterDiscount, finalTotal, shipping, navigate, total, boxTotal]);
+  }, [clearCart, hasNewsletterDiscount, removeNewsletterDiscount]);
 
   return (
     <div className="min-h-screen bg-[#F1F0FB] flex items-center justify-center p-4">
