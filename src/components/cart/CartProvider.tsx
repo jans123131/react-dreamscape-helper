@@ -1,29 +1,28 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-export interface CartItem {
+interface CartItem {
   id: number;
   name: string;
   price: number;
-  quantity: number;
   image: string;
-  size?: string;
+  quantity: number;
+  size: string;
+  color: string;
   personalization?: string;
-  type_product?: string;
-  itemgroup_product?: string;
-  originalPrice?: number;
-  boxTotal?: number;
+  withBox?: boolean;
 }
 
-export interface CartContextType {
-  items: CartItem[];
-  addItem: (item: CartItem) => void;
-  removeItem: (id: number) => void;
+interface CartContextType {
+  cartItems: CartItem[];
+  addToCart: (item: CartItem) => void;
+  removeFromCart: (id: number) => void;
   updateQuantity: (id: number, quantity: number) => void;
   clearCart: () => void;
-  hasNewsletterDiscount: boolean;
-  applyNewsletterDiscount: () => void;
-  removeNewsletterDiscount: () => void;
-  getTotals: () => { subtotal: number; discount: number; total: number; boxTotal?: number };
+  calculateTotal: () => {
+    subtotal: number;
+    discount: number;
+    total: number;
+  };
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -36,66 +35,45 @@ export const useCart = () => {
   return context;
 };
 
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [hasNewsletterDiscount, setHasNewsletterDiscount] = useState(false);
+export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  const addItem = (item: CartItem) => {
-    setItems((prevItems) => {
-      const existingItem = prevItems.find((i) => i.id === item.id);
+  const addToCart = (item: CartItem) => {
+    setCartItems((prevItems) => {
+      const existingItem = prevItems.find((cartItem) => cartItem.id === item.id);
       if (existingItem) {
-        return prevItems.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i
+        return prevItems.map((cartItem) =>
+          cartItem.id === item.id ? { ...cartItem, quantity: cartItem.quantity + item.quantity } : cartItem
         );
       }
       return [...prevItems, item];
     });
   };
 
-  const removeItem = (id: number) => {
-    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+  const removeFromCart = (id: number) => {
+    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
   };
 
   const updateQuantity = (id: number, quantity: number) => {
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id ? { ...item, quantity } : item
-      )
+    setCartItems((prevItems) =>
+      prevItems.map((item) => (item.id === id ? { ...item, quantity } : item))
     );
   };
 
   const clearCart = () => {
-    setItems([]);
+    setCartItems([]);
   };
 
-  const applyNewsletterDiscount = () => {
-    setHasNewsletterDiscount(true);
+  const calculateTotal = () => {
+    const subtotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+    const discount = 0; // Implement discount logic if needed
+    const total = subtotal - discount;
+    return { subtotal, discount, total };
   };
 
-  const removeNewsletterDiscount = () => {
-    setHasNewsletterDiscount(false);
-  };
-
-  const getTotals = () => {
-    const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const boxTotal = items.reduce((acc, item) => acc + (item.boxTotal || 0), 0);
-    const discount = hasNewsletterDiscount ? subtotal * 0.05 : 0;
-    const total = subtotal - discount + (boxTotal || 0);
-    
-    return { subtotal, discount, total, boxTotal };
-  };
-
-  const value: CartContextType = {
-    items,
-    addItem,
-    removeItem,
-    updateQuantity,
-    clearCart,
-    hasNewsletterDiscount,
-    applyNewsletterDiscount,
-    removeNewsletterDiscount,
-    getTotals,
-  };
-
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart, calculateTotal }}>
+      {children}
+    </CartContext.Provider>
+  );
 };
