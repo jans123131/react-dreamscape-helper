@@ -1,0 +1,39 @@
+{
+  "navigation": {
+    "home": "Home",
+    "cart": "Cart",
+    "contact": "Contact Us",
+    "stores": "Our Stores",
+    "search": "Search"
+  },
+  "common": {
+    "freeShipping": "Free shipping from 299 TND",
+    "addToCart": "Add to Cart",
+    "customize": "Customize",
+    "size": "Size",
+    "color": "Color",
+    "quantity": "Quantity",
+    "total": "Total",
+    "price": "Price",
+    "description": "Description",
+    "back": "Back",
+    "next": "Next",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "cart": {
+    "empty": "Your cart is empty",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "total": "Total",
+    "checkout": "Checkout",
+    "continue": "Continue Shopping"
+  },
+  "product": {
+    "outOfStock": "Out of Stock",
+    "inStock": "In Stock",
+    "personalization": "Personalization",
+    "giftBox": "Gift Box",
+    "addPersonalization": "Add Personalization"
+  }
+}
