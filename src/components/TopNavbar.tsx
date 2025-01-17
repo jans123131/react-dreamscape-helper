@@ -1,18 +1,25 @@
 import React, { useState } from "react";
-import { Menu, X, MapPin, Phone } from "lucide-react";
+import { Menu, X, MapPin, Phone, Globe } from "lucide-react";
 import CartIcon from "./navigation/CartIcon";
 import MobileMenu from "./navigation/MobileMenu";
 import MobileMenuOverlay from "./navigation/MobileMenuOverlay";
 import { menuItems } from "@/constants/menuItems";
 import StoreLocationsModal from "./StoreLocationsModal";
 import ContactModal from "./ContactModal";
-import LanguageSwitcher from "./LanguageSwitcher";
+import { useLanguage } from './language/LanguageProvider';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const TopNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [isStoreModalOpen, setIsStoreModalOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const { language, setLanguage } = useLanguage();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -21,6 +28,11 @@ const TopNavbar = () => {
 
   const toggleSubmenu = (title: string) => {
     setExpandedItem(expandedItem === title ? null : title);
+  };
+
+  const handleLanguageChange = (lang: string) => {
+    setLanguage(lang);
+    localStorage.setItem('preferredLanguage', lang);
   };
 
   return (
@@ -58,6 +70,20 @@ const TopNavbar = () => {
           </div>
 
           <div className="hidden sm:flex items-center gap-4 sm:h-[90%]">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-2 text-sm text-white whitespace-nowrap hover:text-accent transition-colors duration-300">
+                <Globe size={16} />
+                {language === 'fr' ? 'Français' : 'English'}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => handleLanguageChange('fr')}>
+                  Français
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleLanguageChange('en')}>
+                  English
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <button
               onClick={() => setIsContactModalOpen(true)}
               className="flex items-center gap-2 text-sm text-white whitespace-nowrap hover:text-accent transition-colors duration-300"
@@ -91,6 +117,8 @@ const TopNavbar = () => {
         isOpen={isContactModalOpen}
         onOpenChange={setIsContactModalOpen}
       />
+      
+      <div id="google_translate_element" style={{ display: 'none' }} />
     </div>
   );
 };
