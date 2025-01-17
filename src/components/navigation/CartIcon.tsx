@@ -1,12 +1,12 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { useCart } from '../cart/CartProvider';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CartIcon = () => {
-  const { cartItems } = useCart();
-  const itemCount = cartItems.length;
+  const { items } = useCart();
+  const itemCount = items.length;
 
   return (
     <Link to="/cart" className="relative">
