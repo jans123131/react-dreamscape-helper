@@ -4,6 +4,7 @@ import { Product } from '@/types/product';
 import { GripVertical } from 'lucide-react';
 import { calculateDiscountedPrice } from '@/utils/priceCalculations';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useInView } from 'react-intersection-observer';
 
 interface ProductGridProps {
   products: Product[];
@@ -39,6 +40,11 @@ const ProductGrid = ({ products, onDragStart, onProductSelect }: ProductGridProp
   return (
     <div className="grid grid-cols-2 gap-4 overflow-y-auto flex-1 min-h-0">
       {products.map((product) => {
+        const { ref, inView } = useInView({
+          triggerOnce: true,
+          threshold: 0.1
+        });
+
         const hasDiscount = product.discount_product !== "" && 
                           !isNaN(parseFloat(product.discount_product)) && 
                           parseFloat(product.discount_product) > 0;
@@ -49,6 +55,7 @@ const ProductGrid = ({ products, onDragStart, onProductSelect }: ProductGridProp
 
         return (
           <motion.div
+            ref={ref}
             key={product.id}
             draggable={!isMobile}
             onDragStart={(e) => handleDragStart(e, product)}
@@ -64,12 +71,20 @@ const ProductGrid = ({ products, onDragStart, onProductSelect }: ProductGridProp
           >
             <div className="relative">
               {!isMobile && <GripVertical className="absolute top-0 right-0 text-gray-400" size={16} />}
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-24 object-contain mb-2"
-                loading="lazy"
-              />
+              {inView && (
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-24 object-contain mb-2"
+                  loading="lazy"
+                  decoding="async"
+                  fetchPriority="auto"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+              )}
+              {!inView && (
+                <div className="w-full h-24 bg-gray-100 animate-pulse mb-2" />
+              )}
               <h3 className="text-sm font-medium text-gray-900 truncate">
                 {product.name}
               </h3>

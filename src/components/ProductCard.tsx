@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Product } from '../types/product';
 import { calculateFinalPrice, formatPrice } from '@/utils/priceCalculations';
 import { PenLine } from 'lucide-react';
+import { useInView } from 'react-intersection-observer';
 
 interface ProductCardProps {
   product: Product;
@@ -11,6 +12,10 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState(false);
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.1
+  });
   
   const hasDiscount = product.discount_product !== "" && 
                      !isNaN(parseFloat(product.discount_product)) && 
@@ -25,6 +30,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   return (
     <div 
+      ref={ref}
       className="h-full hover:shadow-lg hover:transform hover:scale-[1.02] transition-all duration-300 cursor-pointer"
       onClick={() => navigate(`/product/${product.id}`)}
     >
@@ -35,17 +41,20 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </div>
         )}
         <div className={`w-full h-full transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}>
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-full h-full object-contain mix-blend-normal"
-            loading="lazy"
-            decoding="async"
-            fetchPriority="auto"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            onLoad={() => setImageLoaded(true)}
-          />
-          {!imageLoaded && (
+          {inView && (
+            <img
+              src={product.image}
+              alt={product.name}
+              className="w-full h-full object-contain mix-blend-normal"
+              loading="lazy"
+              decoding="async"
+              fetchPriority="auto"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageLoaded(true)}
+            />
+          )}
+          {(!imageLoaded || !inView) && (
             <div className="absolute inset-0 bg-gray-100 animate-pulse" />
           )}
         </div>
