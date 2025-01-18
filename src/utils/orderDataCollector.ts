@@ -1,4 +1,4 @@
-import { CartItem } from "@/components/cart/CartProvider";
+import { CartItem } from "@/types/cart";
 import { UserDetails, getUserDetails } from "./userDetailsStorage";
 import { getCartItems } from "./cartStorage";
 import { getPersonalizations } from "./personalizationStorage";
@@ -21,7 +21,7 @@ export const collectOrderData = (): OrderData => {
   // Get cart items and calculate totals
   const cartItems = getCartItems();
   const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = total >= 500 ? 0 : 7; // Free shipping over 500 TND
+  const shipping = total >= 299 ? 0 : 8; // Free shipping over 500 TND
   const finalTotal = total + shipping;
 
   // Get user details

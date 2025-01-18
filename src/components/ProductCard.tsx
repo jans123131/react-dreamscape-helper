@@ -10,7 +10,6 @@ interface ProductCardProps {
 
 const ProductCard = ({ product }: ProductCardProps) => {
   const navigate = useNavigate();
-  console.log('ProductCard discount:', product.discount_product);
   
   const hasDiscount = product.discount_product !== "" && 
                      !isNaN(parseFloat(product.discount_product)) && 
@@ -40,8 +39,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           className="w-full h-full object-contain mix-blend-normal"
           loading="lazy"
           decoding="async"
-          fetchPriority="low"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          fetchPriority="auto"
         />
       </div>
       <div className="p-2 md:p-4">

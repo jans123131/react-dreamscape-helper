@@ -66,7 +66,7 @@ export const updateProductStock = async (cartItems: CartItem[]): Promise<any[]> 
       // Log the request body (query) before sending it
       console.log('Sending query for product ID:', update.id_product, requestBody);
 
-      return fetch('https://respizenmedical.com/fiori/recount_product.php', {
+      return fetch('https://www.fioriforyou.com/backfiori/recount_product.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

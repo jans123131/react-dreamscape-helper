@@ -200,6 +200,8 @@ const GiftApp = () => {
             <ConfirmationButton
               onConfirm={handleConfirmPack}
               disabled={selectedItems.length === 0 || isSubmitting}
+              packType={packType}
+              selectedItemsCount={selectedItems.length}
             />
           </div>
         </div>

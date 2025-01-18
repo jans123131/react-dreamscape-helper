@@ -105,7 +105,7 @@ export const submitOrder = async (orderData: OrderSubmission): Promise<any> => {
 
     console.log('Submitting order with formatted data:', JSON.stringify(formattedOrderData, null, 2));
 
-    const orderResponse = await fetch('https://respizenmedical.com/fiori/submit_all_order.php', {
+    const orderResponse = await fetch('https://www.fioriforyou.com/backfiori/submit_all_order.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
