@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Product } from '@/types/product';
 import { GripVertical } from 'lucide-react';
@@ -14,6 +14,17 @@ interface ProductGridProps {
 
 const ProductGrid = ({ products, onDragStart, onProductSelect }: ProductGridProps) => {
   const isMobile = useIsMobile();
+  const [loadedImages, setLoadedImages] = useState<Record<number, boolean>>({});
+
+  if (products.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-gray-500 text-center italic">
+          Aucun article disponible pour le moment
+        </p>
+      </div>
+    );
+  }
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, product: Product) => {
     if (!isMobile) {
@@ -27,24 +38,16 @@ const ProductGrid = ({ products, onDragStart, onProductSelect }: ProductGridProp
     }
   };
 
-  if (products.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-gray-500 text-center italic">
-          Aucun article disponible pour le moment
-        </p>
-      </div>
-    );
-  }
+  const handleImageLoad = (productId: number) => {
+    setLoadedImages(prev => ({
+      ...prev,
+      [productId]: true
+    }));
+  };
 
   return (
     <div className="grid grid-cols-2 gap-4 overflow-y-auto flex-1 min-h-0">
       {products.map((product) => {
-        const { ref, inView } = useInView({
-          triggerOnce: true,
-          threshold: 0.1
-        });
-
         const hasDiscount = product.discount_product !== "" && 
                           !isNaN(parseFloat(product.discount_product)) && 
                           parseFloat(product.discount_product) > 0;
@@ -52,6 +55,12 @@ const ProductGrid = ({ products, onDragStart, onProductSelect }: ProductGridProp
         const displayPrice = hasDiscount 
           ? calculateDiscountedPrice(product.price, product.discount_product)
           : product.price;
+
+        const { ref, inView } = useInView({
+          triggerOnce: true,
+          threshold: 0.1,
+          rootMargin: '50px'
+        });
 
         return (
           <motion.div
@@ -71,20 +80,25 @@ const ProductGrid = ({ products, onDragStart, onProductSelect }: ProductGridProp
           >
             <div className="relative">
               {!isMobile && <GripVertical className="absolute top-0 right-0 text-gray-400" size={16} />}
-              {inView && (
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-24 object-contain mb-2"
-                  loading="lazy"
-                  decoding="async"
-                  fetchPriority="auto"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
-              )}
-              {!inView && (
-                <div className="w-full h-24 bg-gray-100 animate-pulse mb-2" />
-              )}
+              <div className="relative w-full h-24 mb-2">
+                {inView && (
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className={`w-full h-full object-contain transition-opacity duration-300 ${
+                      loadedImages[product.id] ? 'opacity-100' : 'opacity-0'
+                    }`}
+                    loading="lazy"
+                    decoding="async"
+                    fetchPriority="auto"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    onLoad={() => handleImageLoad(product.id)}
+                  />
+                )}
+                {(!loadedImages[product.id] || !inView) && (
+                  <div className="absolute inset-0 bg-gray-100 animate-pulse" />
+                )}
+              </div>
               <h3 className="text-sm font-medium text-gray-900 truncate">
                 {product.name}
               </h3>

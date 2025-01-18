@@ -15,6 +15,7 @@ import { canItemBePersonalized, getPersonalizationMessage } from '@/utils/person
 import { getPersonalizations } from '@/utils/personalizationStorage';
 import { calculateFinalPrice } from '@/utils/productStorage';
 import { needsSizeSelection, getDefaultSize } from '@/utils/sizeUtils';
+import { useInView } from 'react-intersection-observer';
 
 interface ProductDetailContainerProps {
   product: Product;
