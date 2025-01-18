@@ -1,4 +1,26 @@
 const imageCache = new Map<string, HTMLImageElement>();
+const videoCache = new Map<string, HTMLVideoElement>();
+
+export const preloadVideo = (src: string): Promise<void> => {
+  if (videoCache.has(src)) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video');
+    video.preload = 'auto';
+    video.muted = true;
+    video.playsInline = true;
+    
+    video.onloadeddata = () => {
+      videoCache.set(src, video);
+      resolve();
+    };
+    video.onerror = reject;
+    
+    video.src = src;
+  });
+};
 
 export const preloadImage = (src: string): Promise<void> => {
   if (imageCache.has(src)) {

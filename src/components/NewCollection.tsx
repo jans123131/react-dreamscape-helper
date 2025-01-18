@@ -1,6 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { Button } from './ui/button';
 import { Link } from 'react-router-dom';
+import { preloadVideo } from '../utils/imageOptimization';
+
+const VIDEO_URL = "https://www.fioriforyou.com/apis/videos/newcollection.mp4";
 
 const NewCollection = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -10,16 +13,30 @@ const NewCollection = () => {
       videoRef.current.preload = "auto";
       videoRef.current.playbackRate = 1.2;
       
-      const playVideo = async () => {
+      const initializeVideo = async () => {
         try {
-          await videoRef.current?.play();
+          // Preload the video
+          await preloadVideo(VIDEO_URL);
+          
+          // Play video after preloading
+          if (videoRef.current) {
+            await videoRef.current.play();
+          }
         } catch (error) {
-          console.error("Video autoplay failed:", error);
+          console.error("Video initialization failed:", error);
         }
       };
       
-      playVideo();
+      initializeVideo();
     }
+
+    // Cleanup function
+    return () => {
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.src = '';
+      }
+    };
   }, []);
 
   return (
@@ -38,7 +55,7 @@ const NewCollection = () => {
               className="w-full h-[345px] object-cover"
             >
               <source
-                src="https://www.fioriforyou.com/apis/videos/newcollection.mp4"
+                src={VIDEO_URL}
                 type="video/mp4"
               />
               Your browser does not support the video tag.
@@ -105,7 +122,7 @@ const NewCollection = () => {
               className="w-full h-full object-cover"
             >
               <source
-                src="https://www.fioriforyou.com/apis/videos/newcollection.mp4"
+                src={VIDEO_URL}
                 type="video/mp4"
               />
               Your browser does not support the video tag.
