@@ -6,6 +6,7 @@ import { fetchPaginatedProducts } from "../services/paginatedProductsApi";
 import ProductCard from "./ProductCard";
 import Categories from "./Categories";
 import { useInView } from "react-intersection-observer";
+import { preloadImage } from "@/utils/imageOptimization";
 
 const PRODUCTS_PER_PAGE = 10;
 
@@ -46,17 +47,22 @@ const Products = () => {
     getNextPageParam: (lastPage) => 
       lastPage.currentPage < lastPage.totalPages ? lastPage.currentPage + 1 : undefined,
     initialPageParam: 1,
-    staleTime: 5 * 60 * 1000, // Cache data for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep unused data in cache for 10 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
+  // Preload next page images
   useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
+    if (data?.pages) {
+      const nextPageProducts = data.pages[data.pages.length - 1]?.products || [];
+      nextPageProducts.forEach(product => {
+        if (product.image) {
+          preloadImage(product.image);
+        }
+      });
     }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [data?.pages]);
 
-  // Filter products based on selected category
   const filteredProducts = React.useMemo(() => {
     if (!data?.pages) return [];
     
@@ -112,11 +118,6 @@ const Products = () => {
     };
   }, []);
 
-  if (error) {
-    console.error("Error loading products:", error);
-    return <div className="text-center text-red-500">Failed to load products</div>;
-  }
-
   return (
     <div className="products-wrapper">
       <div className="products-container">
@@ -131,7 +132,7 @@ const Products = () => {
                 </div>
               ))
             ) : (
-              filteredProducts.map((product) => (
+              filteredProducts.slice(0, 10).map((product) => (
                 <div className="embla__slide" key={product.id}>
                   <ProductCard product={product} />
                 </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Product } from '../types/product';
 import { calculateFinalPrice, formatPrice } from '@/utils/priceCalculations';
@@ -10,6 +10,7 @@ interface ProductCardProps {
 
 const ProductCard = ({ product }: ProductCardProps) => {
   const navigate = useNavigate();
+  const [imageLoaded, setImageLoaded] = useState(false);
   
   const hasDiscount = product.discount_product !== "" && 
                      !isNaN(parseFloat(product.discount_product)) && 
@@ -29,18 +30,25 @@ const ProductCard = ({ product }: ProductCardProps) => {
     >
       <div className="h-[300px] bg-transparent overflow-hidden mb-3 relative">
         {hasDiscount && parseFloat(product.discount_product) > 0 && (
-          <div className="absolute top-2 right-2 bg-[#700100] text-white px-2 py-1 rounded-full text-sm font-medium">
+          <div className="absolute top-2 right-2 bg-[#700100] text-white px-2 py-1 rounded-full text-sm font-medium z-10">
             -{product.discount_product}%
           </div>
         )}
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-full object-contain mix-blend-normal"
-          loading="lazy"
-          decoding="async"
-          fetchPriority="auto"
-        />
+        <div className={`w-full h-full transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}>
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-contain mix-blend-normal"
+            loading="lazy"
+            decoding="async"
+            fetchPriority="auto"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            onLoad={() => setImageLoaded(true)}
+          />
+          {!imageLoaded && (
+            <div className="absolute inset-0 bg-gray-100 animate-pulse" />
+          )}
+        </div>
       </div>
       <div className="p-2 md:p-4">
         <div className="text-base font-['WomanFontRegular'] text-[#591C1C]">
