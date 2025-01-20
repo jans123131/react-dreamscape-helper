@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Globe } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
@@ -16,16 +16,19 @@ const LanguageSwitcher = () => {
   );
 
   useEffect(() => {
-    // Set initial language
     const savedLang = localStorage.getItem('preferredLanguage') || 'fr';
-    i18n.changeLanguage(savedLang);
+    if (i18n.changeLanguage) {
+      i18n.changeLanguage(savedLang);
+    }
     setCurrentLang(savedLang);
   }, [i18n]);
 
   const handleLanguageChange = (lang: string) => {
-    setCurrentLang(lang);
-    localStorage.setItem('preferredLanguage', lang);
-    i18n.changeLanguage(lang);
+    if (i18n.changeLanguage) {
+      i18n.changeLanguage(lang);
+      setCurrentLang(lang);
+      localStorage.setItem('preferredLanguage', lang);
+    }
   };
 
   return (
