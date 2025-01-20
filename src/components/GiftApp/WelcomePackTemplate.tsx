@@ -1,8 +1,8 @@
 import React, { Suspense, useState } from 'react';
 import { VideoModal } from './VideoModal';
 import { VideoPreview } from './VideoPreview';
-import { getPackContent } from '@/config/packContent';
 import WhatsAppPopup from '../WhatsAppPopup';
+import { useTranslation } from 'react-i18next';
 
 interface WelcomePackTemplateProps {
   packType: string;
@@ -11,8 +11,15 @@ interface WelcomePackTemplateProps {
 
 const WelcomePackTemplate = ({ packType, onCompose }: WelcomePackTemplateProps) => {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
-  const content = getPackContent(packType);
+  const { t } = useTranslation();
   const isSingleImagePack = packType === 'Pack Duo' || packType === 'Pack Mini Duo';
+
+  const content = {
+    title: t(`packs.${packType.toLowerCase().replace(/\s+/g, '')}.title`),
+    description: t(`packs.${packType.toLowerCase().replace(/\s+/g, '')}.description`),
+    images: ['/Packs/PackPrestige.jpg', '/Packs/PackPrestige2.png'],
+    videoUrl: 'https://example.com/video.mp4'
+  };
 
   return (
     <>
@@ -31,19 +38,19 @@ const WelcomePackTemplate = ({ packType, onCompose }: WelcomePackTemplateProps) 
                   className="w-full lg:w-auto px-8 py-3 bg-[#67000D] text-white text-xl font-medium rounded-none hover:bg-[#4a000a] transition-colors duration-200"
                   onClick={onCompose}
                 >
-                  Composez votre coffret
+                  {t('packs.compose')}
                 </button>
               </div>
             </div>
             <div className={`flex flex-col ${isSingleImagePack ? 'items-center justify-center' : 'lg:grid lg:grid-cols-2'} h-full`}>
               {isSingleImagePack ? (
                 <div className="w-[85%] h-full flex items-center justify-center">
-                <img 
-                  src={content.images[0]}
-                  alt={`${content.title} showcase`}
-                  className="w-full h-auto max-h-[510px] object-contain shadow-md rounded-md border border-gray-200"
-                />
-              </div>
+                  <img 
+                    src={content.images[0]}
+                    alt={`${content.title} showcase`}
+                    className="w-full h-auto max-h-[510px] object-contain shadow-md rounded-md border border-gray-200"
+                  />
+                </div>
               ) : (
                 <>
                   <div className="order-2 lg:order-1 space-y-1 lg:mr-[-40%] mt-6 lg:mt-0">
