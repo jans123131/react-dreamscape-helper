@@ -209,7 +209,7 @@ i18n
         }
       }
     },
-    lng: 'fr',
+    lng: 'fr', // Set French as default
     fallbackLng: 'fr',
     interpolation: {
       escapeValue: false

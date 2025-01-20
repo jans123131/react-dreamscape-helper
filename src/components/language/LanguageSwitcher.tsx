@@ -1,47 +1,57 @@
-import React from 'react';
-import { Flag } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import React, { useEffect, useState } from 'react';
+import { Globe } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { useTranslation } from 'react-i18next';
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
+  const [currentLang, setCurrentLang] = useState(() => 
+    localStorage.getItem('preferredLanguage') || 'fr'
+  );
 
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
-    toast.success(`Language changed to ${lng === 'en' ? 'English' : 'Français'}`);
+  useEffect(() => {
+    // Set initial language
+    const savedLang = localStorage.getItem('preferredLanguage') || 'fr';
+    i18n.changeLanguage(savedLang);
+    setCurrentLang(savedLang);
+  }, [i18n]);
+
+  const handleLanguageChange = (lang: string) => {
+    setCurrentLang(lang);
+    localStorage.setItem('preferredLanguage', lang);
+    i18n.changeLanguage(lang);
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-white hover:text-accent">
-          <Flag className="h-[1.2rem] w-[1.2rem]" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem 
-          onClick={() => changeLanguage('en')}
-          className={`flex items-center gap-2 ${i18n.language === 'en' ? 'bg-accent' : ''}`}
-        >
-          <Flag className="h-4 w-4" />
-          <span>English</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={() => changeLanguage('fr')}
-          className={`flex items-center gap-2 ${i18n.language === 'fr' ? 'bg-accent' : ''}`}
-        >
-          <Flag className="h-4 w-4" />
-          <span>Français</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="text-white hover:text-red-500">
+            <Globe className="h-6 w-6" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem 
+            onClick={() => handleLanguageChange('en')}
+            className={currentLang === 'en' ? 'bg-accent' : ''}
+          >
+            English
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            onClick={() => handleLanguageChange('fr')}
+            className={currentLang === 'fr' ? 'bg-accent' : ''}
+          >
+            Français
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };
 
