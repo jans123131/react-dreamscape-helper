@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Globe } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
@@ -7,18 +7,60 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useLanguage } from './language/LanguageProvider';
+
+declare global {
+  interface Window {
+    google: any;
+    googleTranslateElementInit: () => void;
+  }
+}
 
 const LanguageSwitcher = () => {
-  const { language, setLanguage } = useLanguage();
+  const [currentLang, setCurrentLang] = useState(() => 
+    localStorage.getItem('preferredLanguage') || 'fr'
+  );
+
+  useEffect(() => {
+    // Load Google Translate script
+    const script = document.createElement('script');
+    script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    script.async = true;
+    document.body.appendChild(script);
+
+    // Initialize Google Translate
+    window.googleTranslateElementInit = () => {
+      new window.google.translate.TranslateElement({
+        pageLanguage: 'fr',
+        includedLanguages: 'en,fr',
+        layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
+      }, 'google_translate_element');
+    };
+
+    // Clean up
+    return () => {
+      document.body.removeChild(script);
+      delete window.googleTranslateElementInit;
+    };
+  }, []);
 
   const handleLanguageChange = (lang: string) => {
-    setLanguage(lang);
+    setCurrentLang(lang);
     localStorage.setItem('preferredLanguage', lang);
+    
+    // Find and trigger Google Translate dropdown
+    const iframe = document.querySelector('.goog-te-menu-frame') as HTMLIFrameElement;
+    if (iframe) {
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (iframeDoc) {
+        const langButton = iframeDoc.querySelector(`[value="${lang}"]`) as HTMLElement;
+        if (langButton) langButton.click();
+      }
+    }
   };
 
   return (
     <div className="flex items-center">
+      <div id="google_translate_element" className="hidden" />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="text-white hover:text-red-500">
@@ -28,13 +70,13 @@ const LanguageSwitcher = () => {
         <DropdownMenuContent align="end">
           <DropdownMenuItem 
             onClick={() => handleLanguageChange('en')}
-            className={language === 'en' ? 'bg-accent' : ''}
+            className={currentLang === 'en' ? 'bg-accent' : ''}
           >
             English
           </DropdownMenuItem>
           <DropdownMenuItem 
             onClick={() => handleLanguageChange('fr')}
-            className={language === 'fr' ? 'bg-accent' : ''}
+            className={currentLang === 'fr' ? 'bg-accent' : ''}
           >
             Français
           </DropdownMenuItem>
