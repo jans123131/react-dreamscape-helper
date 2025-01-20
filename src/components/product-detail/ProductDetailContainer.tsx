@@ -23,6 +23,9 @@ interface ProductDetailContainerProps {
 }
 
 const ProductDetailContainer = ({ product, onProductAdded }: ProductDetailContainerProps) => {
+
+const isOutOfStock = Number(product.stock) === 0;
+
   const [quantity, setQuantity] = useState(1);
   const [personalizationText, setPersonalizationText] = useState(() => {
     const savedPersonalizations = getPersonalizations();
