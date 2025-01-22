@@ -25,6 +25,10 @@ export const productTemplates: Record<string, ProductTemplate> = {
     naturalHeight: 400,
     safeZones: [
       {
+        x: 100,
+        y: 50,
+        width: 400,
+        height: 280,
         shape: 'polygon',
         points: [
           [100, 50],

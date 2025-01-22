@@ -10,26 +10,10 @@ import UploadedImagesList from "@/components/personalization/UploadedImagesList"
 import ProductSelector from "@/components/personalization/ProductSelector";
 import { productTemplates } from "@/config/productTemplates";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-// Define missing types
-interface UploadedImage {
-  id: string;
-  url: string;
-  name: string;
-}
-
-// Define available fonts
-const fonts = [
-  "Montserrat",
-  "Arial",
-  "Times New Roman",
-  "Helvetica",
-  "Roboto",
-  "Open Sans"
-];
+import { ProductCategory } from "@/types/personalization";
 
 // Define product categories
-const productCategories = [
+const productCategories: ProductCategory[] = [
   {
     id: "tshirt",
     name: "T-Shirts",
@@ -44,6 +28,16 @@ const productCategories = [
     icon: "Coffee",
     startingPrice: "19.99"
   }
+];
+
+// Define available fonts
+const availableFonts = [
+  { name: "Montserrat", value: "Montserrat" },
+  { name: "Arial", value: "Arial" },
+  { name: "Times New Roman", value: "Times New Roman" },
+  { name: "Helvetica", value: "Helvetica" },
+  { name: "Roboto", value: "Roboto" },
+  { name: "Open Sans", value: "Open Sans" }
 ];
 
 const Personalization = () => {
@@ -138,7 +132,7 @@ const Personalization = () => {
                   setTextColor={setTextColor}
                   activeText={activeText}
                   canvas={canvas}
-                  fonts={fonts}
+                  fonts={availableFonts}
                 />
               </div>
 

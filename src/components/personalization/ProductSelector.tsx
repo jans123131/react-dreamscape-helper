@@ -38,7 +38,7 @@ const ProductSelector = ({
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
         {filteredCategories.map((category) => {
-          const IconComponent = Icons[category.icon as keyof typeof Icons];
+          const IconComponent = Icons[category.icon as keyof typeof Icons] as React.FC<any>;
           return (
             <Card
               key={category.id}

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Canvas as FabricCanvas, Text, Rect, Polygon, Image, loadImage } from "fabric";
+import { Canvas as FabricCanvas, Text, Rect, Polygon, Image } from "fabric";
 import { Card } from "@/components/ui/card";
 import { X } from "lucide-react";
 import { SafeZone, ProductTemplate } from "@/types/personalization";
@@ -57,36 +57,8 @@ const CanvasContainer = ({
       
       fabricCanvas.add(safeZone);
       fabricCanvas.requestRenderAll();
-      // Move safe zone to back
       safeZone.moveTo(0);
     });
-  };
-
-  const enforceZoneConstraints = (obj: any, zones: SafeZone[]) => {
-    const bounds = obj.getBoundingRect();
-    let isInZone = false;
-
-    zones.forEach(zone => {
-      if (zone.shape === 'polygon' && zone.points) {
-        // Polygon intersection check
-        // Implement polygon intersection logic here
-      } else {
-        // Rectangle intersection check
-        if (bounds.left >= zone.x && 
-            bounds.top >= zone.y && 
-            bounds.left + bounds.width <= zone.x + zone.width &&
-            bounds.top + bounds.height <= zone.y + zone.height) {
-          isInZone = true;
-        }
-      }
-    });
-
-    if (!isInZone) {
-      obj.setCoords();
-      toast.error("L'objet doit rester dans la zone de personnalisation");
-      return false;
-    }
-    return true;
   };
 
   useEffect(() => {
@@ -109,12 +81,14 @@ const CanvasContainer = ({
       preserveObjectStacking: true,
     });
 
-    // Load background image using loadImage
-    loadImage(template.backgroundImage).then(img => {
-      if (!img) return;
-      fabricCanvas.setBackgroundImage(img, fabricCanvas.requestRenderAll.bind(fabricCanvas), {
-        scaleX: canvasWidth / img.width,
-        scaleY: canvasHeight / img.height
+    // Load background image
+    new Image.fromURL(template.backgroundImage, {
+      crossOrigin: 'anonymous',
+    }).then((img) => {
+      fabricCanvas.setBackgroundImage(img, () => {
+        img.scaleToWidth(canvasWidth);
+        img.scaleToHeight(canvasHeight);
+        fabricCanvas.requestRenderAll();
       });
     }).catch(() => {
       toast.error("Erreur lors du chargement de l'image de fond");
