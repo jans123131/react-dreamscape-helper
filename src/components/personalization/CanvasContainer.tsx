@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Canvas as FabricCanvas, Text, Rect, Polygon, Image } from "fabric";
+import { Canvas as FabricCanvas, Text, Rect, Polygon, Image, loadImage } from "fabric";
 import { Card } from "@/components/ui/card";
 import { X } from "lucide-react";
 import { SafeZone, ProductTemplate } from "@/types/personalization";
@@ -56,7 +56,9 @@ const CanvasContainer = ({
       }
       
       fabricCanvas.add(safeZone);
-      fabricCanvas.sendToBack(safeZone);
+      fabricCanvas.requestRenderAll();
+      // Move safe zone to back
+      safeZone.moveTo(0);
     });
   };
 
@@ -107,10 +109,15 @@ const CanvasContainer = ({
       preserveObjectStacking: true,
     });
 
-    // Load background image
-    Image.fromURL(template.backgroundImage, (img) => {
-      img.scaleToWidth(canvasWidth);
-      fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas));
+    // Load background image using loadImage
+    loadImage(template.backgroundImage).then(img => {
+      if (!img) return;
+      fabricCanvas.setBackgroundImage(img, fabricCanvas.requestRenderAll.bind(fabricCanvas), {
+        scaleX: canvasWidth / img.width,
+        scaleY: canvasHeight / img.height
+      });
+    }).catch(() => {
+      toast.error("Erreur lors du chargement de l'image de fond");
     });
 
     setupSafeZones(fabricCanvas, template);
@@ -158,7 +165,7 @@ const CanvasContainer = ({
 
       fabricCanvas.setDimensions({ width: newWidth, height: newHeight });
       fabricCanvas.setZoom(newScale);
-      fabricCanvas.renderAll();
+      fabricCanvas.requestRenderAll();
     };
 
     window.addEventListener('resize', handleResize);

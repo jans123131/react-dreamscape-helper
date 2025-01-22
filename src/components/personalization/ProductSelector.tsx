@@ -3,15 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useState } from "react";
+import { ProductCategory } from "@/types/personalization";
 import * as Icons from "lucide-react";
-
-interface ProductCategory {
-  id: string;
-  name: string;
-  description: string;
-  icon: keyof typeof Icons;
-  startingPrice: string;
-}
 
 interface ProductSelectorProps {
   categories: ProductCategory[];
@@ -45,7 +38,7 @@ const ProductSelector = ({
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
         {filteredCategories.map((category) => {
-          const IconComponent = Icons[category.icon];
+          const IconComponent = Icons[category.icon as keyof typeof Icons];
           return (
             <Card
               key={category.id}
