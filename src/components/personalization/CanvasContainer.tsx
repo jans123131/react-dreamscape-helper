@@ -119,20 +119,23 @@ const CanvasContainer = ({
 
     const loadImage = async () => {
       try {
-        const img = await new Promise<Image>((resolve, reject) => {
+        await new Promise<void>((resolve, reject) => {
           Image.fromURL(
-            template.backgroundImage, 
-            (img) => resolve(img), 
+            template.backgroundImage,
+            (img: Image) => {
+              if (img) {
+                fabricCanvas.backgroundImage = img;
+                img.scaleToWidth(canvasWidth);
+                img.scaleToHeight(canvasHeight);
+                fabricCanvas.requestRenderAll();
+                resolve();
+              } else {
+                reject(new Error("Failed to load image"));
+              }
+            },
             { crossOrigin: 'anonymous' }
           );
         });
-
-        if (img) {
-          fabricCanvas.backgroundImage = img;
-          img.scaleToWidth(canvasWidth);
-          img.scaleToHeight(canvasHeight);
-          fabricCanvas.requestRenderAll();
-        }
       } catch (error) {
         toast.error("Erreur lors du chargement de l'image");
       }
