@@ -2,12 +2,49 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Canvas, Text } from "fabric";
+import { toast } from "sonner";
 import CanvasContainer from "@/components/personalization/CanvasContainer";
 import DesignTools from "@/components/personalization/DesignTools";
 import ImageUploader from "@/components/personalization/ImageUploader";
 import UploadedImagesList from "@/components/personalization/UploadedImagesList";
+import ProductSelector from "@/components/personalization/ProductSelector";
 import { productTemplates } from "@/config/productTemplates";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+// Define missing types
+interface UploadedImage {
+  id: string;
+  url: string;
+  name: string;
+}
+
+// Define available fonts
+const fonts = [
+  "Montserrat",
+  "Arial",
+  "Times New Roman",
+  "Helvetica",
+  "Roboto",
+  "Open Sans"
+];
+
+// Define product categories
+const productCategories = [
+  {
+    id: "tshirt",
+    name: "T-Shirts",
+    description: "Personnalisez vos t-shirts",
+    icon: "Shirt",
+    startingPrice: "29.99"
+  },
+  {
+    id: "mug",
+    name: "Tasses",
+    description: "Créez votre tasse unique",
+    icon: "Coffee",
+    startingPrice: "19.99"
+  }
+];
 
 const Personalization = () => {
   const [canvas, setCanvas] = useState<Canvas | null>(null);
@@ -15,8 +52,9 @@ const Personalization = () => {
   const [textColor, setTextColor] = useState("#000000");
   const [selectedFont, setSelectedFont] = useState("Montserrat");
   const [activeText, setActiveText] = useState<Text | null>(null);
-  const [uploadedImages, setUploadedImages] = useState<any[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [selectedProductType, setSelectedProductType] = useState("tshirt");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
   const handleDeleteActiveObject = () => {

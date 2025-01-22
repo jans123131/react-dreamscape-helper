@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Canvas, Text, Rect, Polygon } from "fabric";
+import { Canvas as FabricCanvas, Text, Rect, Polygon, Image } from "fabric";
 import { Card } from "@/components/ui/card";
 import { X } from "lucide-react";
 import { SafeZone, ProductTemplate } from "@/types/personalization";
@@ -7,8 +7,8 @@ import { getProductTemplate } from "@/config/productTemplates";
 import { toast } from "sonner";
 
 interface CanvasContainerProps {
-  canvas: Canvas | null;
-  setCanvas: (canvas: Canvas | null) => void;
+  canvas: FabricCanvas | null;
+  setCanvas: (canvas: FabricCanvas | null) => void;
   isMobile: boolean;
   text: string;
   selectedFont: string;
@@ -28,12 +28,13 @@ const CanvasContainer = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const deleteButtonRef = useRef<HTMLButtonElement>(null);
 
-  const setupSafeZones = (fabricCanvas: Canvas, template: ProductTemplate) => {
+  const setupSafeZones = (fabricCanvas: FabricCanvas, template: ProductTemplate) => {
     template.safeZones.forEach((zone: SafeZone) => {
       let safeZone;
       
       if (zone.shape === 'polygon' && zone.points) {
-        safeZone = new Polygon(zone.points, {
+        const points = zone.points.map(point => ({ x: point[0], y: point[1] }));
+        safeZone = new Polygon(points, {
           fill: 'rgba(0, 255, 0, 0.1)',
           stroke: 'rgba(0, 255, 0, 0.5)',
           strokeDashArray: [5, 5],
@@ -66,7 +67,7 @@ const CanvasContainer = ({
     zones.forEach(zone => {
       if (zone.shape === 'polygon' && zone.points) {
         // Polygon intersection check
-        // ... keep existing code for polygon intersection
+        // Implement polygon intersection logic here
       } else {
         // Rectangle intersection check
         if (bounds.left >= zone.x && 
@@ -99,7 +100,7 @@ const CanvasContainer = ({
     const canvasHeight = isMobile ? window.innerHeight * 0.5 : template.naturalHeight;
     const scale = isMobile ? (window.innerWidth - 32) / template.naturalWidth : 1;
 
-    const fabricCanvas = new Canvas(canvasRef.current, {
+    const fabricCanvas = new FabricCanvas(canvasRef.current, {
       width: canvasWidth,
       height: canvasHeight,
       backgroundColor: "#ffffff",
@@ -107,7 +108,7 @@ const CanvasContainer = ({
     });
 
     // Load background image
-    fabric.Image.fromURL(template.backgroundImage, (img) => {
+    Image.fromURL(template.backgroundImage, (img) => {
       img.scaleToWidth(canvasWidth);
       fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas));
     });

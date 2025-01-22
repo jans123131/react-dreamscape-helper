@@ -2,8 +2,16 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ProductCategory } from "./types";
 import { useState } from "react";
+import * as Icons from "lucide-react";
+
+interface ProductCategory {
+  id: string;
+  name: string;
+  description: string;
+  icon: keyof typeof Icons;
+  startingPrice: string;
+}
 
 interface ProductSelectorProps {
   categories: ProductCategory[];
@@ -35,34 +43,37 @@ const ProductSelector = ({
         />
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {filteredCategories.map((category) => (
-          <Card
-            key={category.id}
-            onClick={() => {
-              onCategorySelect(category.id);
-              toast.success(`Catégorie ${category.name} sélectionnée`);
-            }}
-            className={`p-4 cursor-pointer transition-all duration-300 hover:shadow-lg ${
-              selectedCategory === category.id
-                ? "border-2 border-primary"
-                : "hover:border-primary/50"
-            }`}
-          >
-            <div className="flex flex-col space-y-3">
-              <div className="flex items-center gap-3">
-                <category.icon className="h-6 w-6 text-primary" />
-                <h3 className="font-medium">{category.name}</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+        {filteredCategories.map((category) => {
+          const IconComponent = Icons[category.icon];
+          return (
+            <Card
+              key={category.id}
+              onClick={() => {
+                onCategorySelect(category.id);
+                toast.success(`Catégorie ${category.name} sélectionnée`);
+              }}
+              className={`p-4 cursor-pointer transition-all duration-300 hover:shadow-lg ${
+                selectedCategory === category.id
+                  ? "border-2 border-primary"
+                  : "hover:border-primary/50"
+              }`}
+            >
+              <div className="flex flex-col space-y-3">
+                <div className="flex items-center gap-3">
+                  {IconComponent && <IconComponent className="h-6 w-6 text-primary" />}
+                  <h3 className="font-medium">{category.name}</h3>
+                </div>
+                <p className="text-sm text-gray-600">
+                  {category.description}
+                </p>
+                <p className="text-sm font-medium text-primary">
+                  À partir de {category.startingPrice} TND
+                </p>
               </div>
-              <p className="text-sm text-gray-600">
-                {category.description || "Personnalisez votre produit unique"}
-              </p>
-              <p className="text-sm font-medium text-primary">
-                À partir de {category.startingPrice || "30.00"} TND
-              </p>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
