@@ -56,8 +56,8 @@ const CanvasContainer = ({
       }
       
       fabricCanvas.add(safeZone);
+      fabricCanvas.sendToBack(safeZone);
       fabricCanvas.requestRenderAll();
-      safeZone.moveTo(0);
     });
   };
 
@@ -119,26 +119,21 @@ const CanvasContainer = ({
       preserveObjectStacking: true,
     });
 
-    // Load background image with error handling
-    Image.fromURL(template.backgroundImage, 
-      (img) => {
-        if (!img) {
-          toast.error("Erreur lors du chargement de l'image");
-          return;
-        }
-        fabricCanvas.backgroundImage = img;
-        img.scaleToWidth(canvasWidth);
-        img.scaleToHeight(canvasHeight);
-        fabricCanvas.requestRenderAll();
-      }, 
-      {
-        crossOrigin: 'anonymous',
-        signal: new AbortController().signal
+    // Load background image with proper typing
+    const loadImageOptions = {
+      crossOrigin: 'anonymous'
+    };
+
+    Image.fromURL(template.backgroundImage, function(img) {
+      if (!img) {
+        toast.error("Erreur lors du chargement de l'image");
+        return;
       }
-    ).catch(error => {
-      console.error("Error loading background image:", error);
-      toast.error("Erreur lors du chargement de l'image de fond");
-    });
+      fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas), {
+        scaleX: canvasWidth / img.width!,
+        scaleY: canvasHeight / img.height!
+      });
+    }, loadImageOptions);
 
     setupSafeZones(fabricCanvas, template);
 
