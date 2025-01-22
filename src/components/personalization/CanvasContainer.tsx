@@ -56,7 +56,8 @@ const CanvasContainer = ({
       }
       
       fabricCanvas.add(safeZone);
-      safeZone.sendToBack();
+      // Move the safe zone to the back of the stack
+      fabricCanvas.moveTo(safeZone, 0);
       fabricCanvas.requestRenderAll();
     });
   };
@@ -120,9 +121,9 @@ const CanvasContainer = ({
     const loadImage = async () => {
       try {
         await new Promise<void>((resolve, reject) => {
-          Image.fromURL(
-            template.backgroundImage,
-            (img: Image) => {
+          fabric.Image.fromURL(template.backgroundImage, {
+            crossOrigin: 'anonymous',
+            callback: (img: fabric.Image) => {
               if (img) {
                 fabricCanvas.backgroundImage = img;
                 img.scaleToWidth(canvasWidth);
@@ -132,9 +133,8 @@ const CanvasContainer = ({
               } else {
                 reject(new Error("Failed to load image"));
               }
-            },
-            { crossOrigin: 'anonymous' }
-          );
+            }
+          });
         });
       } catch (error) {
         toast.error("Erreur lors du chargement de l'image");
