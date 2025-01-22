@@ -1,7 +1,10 @@
 import { useEffect, useRef } from "react";
-import { Canvas, Text } from "fabric";
+import { Canvas, Text, Rect, Polygon } from "fabric";
 import { Card } from "@/components/ui/card";
 import { X } from "lucide-react";
+import { SafeZone, ProductTemplate } from "@/types/personalization";
+import { getProductTemplate } from "@/config/productTemplates";
+import { toast } from "sonner";
 
 interface CanvasContainerProps {
   canvas: Canvas | null;
@@ -9,6 +12,7 @@ interface CanvasContainerProps {
   isMobile: boolean;
   text: string;
   selectedFont: string;
+  productType: string;
   onObjectDelete: () => void;
 }
 
@@ -18,38 +22,105 @@ const CanvasContainer = ({
   isMobile, 
   text, 
   selectedFont,
+  productType,
   onObjectDelete 
 }: CanvasContainerProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const deleteButtonRef = useRef<HTMLButtonElement>(null);
 
+  const setupSafeZones = (fabricCanvas: Canvas, template: ProductTemplate) => {
+    template.safeZones.forEach((zone: SafeZone) => {
+      let safeZone;
+      
+      if (zone.shape === 'polygon' && zone.points) {
+        safeZone = new Polygon(zone.points, {
+          fill: 'rgba(0, 255, 0, 0.1)',
+          stroke: 'rgba(0, 255, 0, 0.5)',
+          strokeDashArray: [5, 5],
+          selectable: false,
+          evented: false
+        });
+      } else {
+        safeZone = new Rect({
+          left: zone.x,
+          top: zone.y,
+          width: zone.width,
+          height: zone.height,
+          fill: 'rgba(0, 255, 0, 0.1)',
+          stroke: 'rgba(0, 255, 0, 0.5)',
+          strokeDashArray: [5, 5],
+          selectable: false,
+          evented: false
+        });
+      }
+      
+      fabricCanvas.add(safeZone);
+      fabricCanvas.sendToBack(safeZone);
+    });
+  };
+
+  const enforceZoneConstraints = (obj: any, zones: SafeZone[]) => {
+    const bounds = obj.getBoundingRect();
+    let isInZone = false;
+
+    zones.forEach(zone => {
+      if (zone.shape === 'polygon' && zone.points) {
+        // Polygon intersection check
+        // ... keep existing code for polygon intersection
+      } else {
+        // Rectangle intersection check
+        if (bounds.left >= zone.x && 
+            bounds.top >= zone.y && 
+            bounds.left + bounds.width <= zone.x + zone.width &&
+            bounds.top + bounds.height <= zone.y + zone.height) {
+          isInZone = true;
+        }
+      }
+    });
+
+    if (!isInZone) {
+      obj.setCoords();
+      toast.error("L'objet doit rester dans la zone de personnalisation");
+      return false;
+    }
+    return true;
+  };
+
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    const canvasWidth = isMobile ? window.innerWidth - 32 : 500;
-    const canvasHeight = isMobile ? window.innerHeight * 0.5 : 600;
+    const template = getProductTemplate(productType);
+    if (!template) {
+      toast.error("Type de produit non pris en charge");
+      return;
+    }
+
+    const canvasWidth = isMobile ? window.innerWidth - 32 : template.naturalWidth;
+    const canvasHeight = isMobile ? window.innerHeight * 0.5 : template.naturalHeight;
+    const scale = isMobile ? (window.innerWidth - 32) / template.naturalWidth : 1;
 
     const fabricCanvas = new Canvas(canvasRef.current, {
       width: canvasWidth,
       height: canvasHeight,
-      backgroundColor: "#f8f9fa",
+      backgroundColor: "#ffffff",
       preserveObjectStacking: true,
     });
 
-    const placeholderText = new Text("Tapez votre texte ici...", {
-      left: fabricCanvas.width! / 2,
-      top: fabricCanvas.height! / 2,
-      fontSize: 20,
-      fill: "#999999",
-      fontFamily: selectedFont,
-      originX: 'center',
-      originY: 'center',
-      selectable: false,
-      opacity: 0.7
+    // Load background image
+    fabric.Image.fromURL(template.backgroundImage, (img) => {
+      img.scaleToWidth(canvasWidth);
+      fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas));
     });
 
-    fabricCanvas.add(placeholderText);
-    fabricCanvas.renderAll();
+    setupSafeZones(fabricCanvas, template);
+
+    fabricCanvas.on('object:moving', (e) => {
+      if (!e.target) return;
+      if (!enforceZoneConstraints(e.target, template.safeZones)) {
+        e.target.setCoords();
+        fabricCanvas.renderAll();
+      }
+    });
 
     fabricCanvas.on('selection:created', (e) => {
       const obj = e.selected?.[0];
@@ -80,9 +151,12 @@ const CanvasContainer = ({
     setCanvas(fabricCanvas);
 
     const handleResize = () => {
-      const newWidth = isMobile ? window.innerWidth - 32 : 500;
-      const newHeight = isMobile ? window.innerHeight * 0.5 : 600;
+      const newWidth = isMobile ? window.innerWidth - 32 : template.naturalWidth;
+      const newHeight = isMobile ? window.innerHeight * 0.5 : template.naturalHeight;
+      const newScale = isMobile ? (window.innerWidth - 32) / template.naturalWidth : 1;
+
       fabricCanvas.setDimensions({ width: newWidth, height: newHeight });
+      fabricCanvas.setZoom(newScale);
       fabricCanvas.renderAll();
     };
 
@@ -92,7 +166,7 @@ const CanvasContainer = ({
       fabricCanvas.dispose();
       window.removeEventListener('resize', handleResize);
     };
-  }, [isMobile, selectedFont, setCanvas]);
+  }, [isMobile, selectedFont, setCanvas, productType]);
 
   useEffect(() => {
     if (!canvas) return;

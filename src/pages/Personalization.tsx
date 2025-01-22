@@ -1,24 +1,13 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Coffee, Shirt, Briefcase, Newspaper, Book, ShoppingBag } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { toast } from "sonner";
-import { ProductCategory, UploadedImage, fonts } from "@/components/personalization/types";
-import ProductSelector from "@/components/personalization/ProductSelector";
+import { Canvas, Text } from "fabric";
 import CanvasContainer from "@/components/personalization/CanvasContainer";
 import DesignTools from "@/components/personalization/DesignTools";
 import ImageUploader from "@/components/personalization/ImageUploader";
 import UploadedImagesList from "@/components/personalization/UploadedImagesList";
-import { Canvas, Text } from "fabric";
-
-const productCategories: ProductCategory[] = [
-  { id: 'mugs', name: 'Tasses', icon: Coffee },
-  { id: 'tshirts', name: 'T-shirts', icon: Shirt },
-  { id: 'blouses', name: 'Blouses de travail', icon: Briefcase },
-  { id: 'flyers', name: 'Flyers', icon: Newspaper },
-  { id: 'notebooks', name: 'Carnets', icon: Book },
-  { id: 'bags', name: 'Sacs', icon: ShoppingBag },
-];
+import { productTemplates } from "@/config/productTemplates";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Personalization = () => {
   const [canvas, setCanvas] = useState<Canvas | null>(null);
@@ -26,8 +15,8 @@ const Personalization = () => {
   const [textColor, setTextColor] = useState("#000000");
   const [selectedFont, setSelectedFont] = useState("Montserrat");
   const [activeText, setActiveText] = useState<Text | null>(null);
-  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<any[]>([]);
+  const [selectedProductType, setSelectedProductType] = useState("tshirt");
   const isMobile = useIsMobile();
 
   const handleDeleteActiveObject = () => {
@@ -63,8 +52,22 @@ const Personalization = () => {
           <p className="text-gray-600">Créez votre design unique en quelques clics</p>
         </div>
 
+        <div className="mb-6">
+          <Select value={selectedProductType} onValueChange={setSelectedProductType}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Sélectionnez un produit" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(productTemplates).map(([key, template]) => (
+                <SelectItem key={key} value={key}>
+                  {template.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8">
-          {/* Product Selection Sidebar */}
           <div className="lg:col-span-3 order-first">
             <ProductSelector
               categories={productCategories}
@@ -73,7 +76,6 @@ const Personalization = () => {
             />
           </div>
 
-          {/* Canvas Area */}
           <div className="lg:col-span-6">
             <CanvasContainer
               canvas={canvas}
@@ -81,11 +83,11 @@ const Personalization = () => {
               isMobile={isMobile}
               text={text}
               selectedFont={selectedFont}
+              productType={selectedProductType}
               onObjectDelete={handleDeleteActiveObject}
             />
           </div>
 
-          {/* Design Tools */}
           <div className="lg:col-span-3">
             <Card className="p-4 lg:p-6 space-y-6">
               <div>
