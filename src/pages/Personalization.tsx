@@ -10,7 +10,7 @@ import UploadedImagesList from "@/components/personalization/UploadedImagesList"
 import ProductSelector from "@/components/personalization/ProductSelector";
 import { productTemplates } from "@/config/productTemplates";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ProductCategory } from "@/types/personalization";
+import { ProductCategory, UploadedImage } from "@/types/personalization";
 
 // Define product categories
 const productCategories: ProductCategory[] = [
@@ -181,3 +181,4 @@ const Personalization = () => {
 };
 
 export default Personalization;
+

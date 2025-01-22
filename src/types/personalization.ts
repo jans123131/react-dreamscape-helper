@@ -27,6 +27,12 @@ export interface ProductCategory {
   startingPrice?: string;
 }
 
+export interface UploadedImage {
+  id: string;
+  url: string;
+  name: string;
+}
+
 export const fonts = [
   { name: "Montserrat", value: "Montserrat" },
   { name: "Open Sans", value: "Open Sans" },

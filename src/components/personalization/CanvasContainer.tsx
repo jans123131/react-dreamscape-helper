@@ -119,14 +119,13 @@ const CanvasContainer = ({
       preserveObjectStacking: true,
     });
 
-    // Load background image using the correct static method
-    fabric.Image.fromURL(template.backgroundImage, (img) => {
+    // Load background image using the correct method
+    Image.fromURL(template.backgroundImage, (img) => {
       if (!img) return;
-      fabricCanvas.setBackgroundImage(img, () => {
-        img.scaleToWidth(canvasWidth);
-        img.scaleToHeight(canvasHeight);
-        fabricCanvas.requestRenderAll();
-      });
+      fabricCanvas.backgroundImage = img;
+      img.scaleToWidth(canvasWidth);
+      img.scaleToHeight(canvasHeight);
+      fabricCanvas.requestRenderAll();
     }, { crossOrigin: 'anonymous' });
 
     setupSafeZones(fabricCanvas, template);
