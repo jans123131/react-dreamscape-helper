@@ -56,7 +56,7 @@ const CanvasContainer = ({
       }
       
       fabricCanvas.add(safeZone);
-      fabricCanvas.sendToBack(safeZone);
+      fabricCanvas.bringToBack(safeZone);
       fabricCanvas.requestRenderAll();
     });
   };
@@ -67,8 +67,6 @@ const CanvasContainer = ({
 
     zones.forEach(zone => {
       if (zone.shape === 'polygon' && zone.points) {
-        // Polygon intersection check would go here
-        // For now, we'll use a simple bounding box check
         const zoneRect = {
           left: zone.x,
           top: zone.y,
@@ -119,21 +117,17 @@ const CanvasContainer = ({
       preserveObjectStacking: true,
     });
 
-    // Load background image with proper typing
-    const loadImageOptions = {
-      crossOrigin: 'anonymous'
-    };
-
-    Image.fromURL(template.backgroundImage, function(img) {
+    Image.fromURL(template.backgroundImage, (img: Image) => {
       if (!img) {
         toast.error("Erreur lors du chargement de l'image");
         return;
       }
-      fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas), {
-        scaleX: canvasWidth / img.width!,
-        scaleY: canvasHeight / img.height!
-      });
-    }, loadImageOptions);
+      
+      fabricCanvas.backgroundImage = img;
+      img.scaleToWidth(canvasWidth);
+      img.scaleToHeight(canvasHeight);
+      fabricCanvas.requestRenderAll();
+    }, { crossOrigin: 'anonymous' });
 
     setupSafeZones(fabricCanvas, template);
 
