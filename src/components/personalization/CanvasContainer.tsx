@@ -130,9 +130,7 @@ const CanvasContainer = ({
             } else {
               reject(new Error("Failed to load image"));
             }
-          }, {
-            crossOrigin: 'anonymous'
-          });
+          }, { crossOrigin: 'anonymous' });
         });
       } catch (error) {
         toast.error("Erreur lors du chargement de l'image");
