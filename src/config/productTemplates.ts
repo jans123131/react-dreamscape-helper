@@ -4,7 +4,7 @@ export const productTemplates: Record<string, ProductTemplate> = {
   tshirt: {
     id: 'tshirt',
     name: 'T-Shirt',
-    backgroundImage: '/images/tshirtplaceholder.png',
+    backgroundImage: '/placeholder.svg',
     naturalWidth: 800,
     naturalHeight: 1000,
     safeZones: [
@@ -20,7 +20,7 @@ export const productTemplates: Record<string, ProductTemplate> = {
   mug: {
     id: 'mug',
     name: 'Tasse',
-    backgroundImage: '/images/mugplaceholder.png',
+    backgroundImage: '/placeholder.svg',
     naturalWidth: 600,
     naturalHeight: 400,
     safeZones: [

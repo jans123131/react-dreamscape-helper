@@ -119,14 +119,26 @@ const CanvasContainer = ({
       preserveObjectStacking: true,
     });
 
-    // Load background image using the correct method
-    Image.fromURL(template.backgroundImage, (img) => {
-      if (!img) return;
-      fabricCanvas.backgroundImage = img;
-      img.scaleToWidth(canvasWidth);
-      img.scaleToHeight(canvasHeight);
-      fabricCanvas.requestRenderAll();
-    }, { crossOrigin: 'anonymous' });
+    // Load background image with error handling
+    Image.fromURL(template.backgroundImage, 
+      (img) => {
+        if (!img) {
+          toast.error("Erreur lors du chargement de l'image");
+          return;
+        }
+        fabricCanvas.backgroundImage = img;
+        img.scaleToWidth(canvasWidth);
+        img.scaleToHeight(canvasHeight);
+        fabricCanvas.requestRenderAll();
+      }, 
+      {
+        crossOrigin: 'anonymous',
+        signal: new AbortController().signal
+      }
+    ).catch(error => {
+      console.error("Error loading background image:", error);
+      toast.error("Erreur lors du chargement de l'image de fond");
+    });
 
     setupSafeZones(fabricCanvas, template);
 
