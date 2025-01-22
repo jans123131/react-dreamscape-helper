@@ -56,7 +56,7 @@ const CanvasContainer = ({
       }
       
       fabricCanvas.add(safeZone);
-      fabricCanvas.bringToBack(safeZone);
+      safeZone.sendToBack();
       fabricCanvas.requestRenderAll();
     });
   };
@@ -117,18 +117,28 @@ const CanvasContainer = ({
       preserveObjectStacking: true,
     });
 
-    Image.fromURL(template.backgroundImage, (img: Image) => {
-      if (!img) {
-        toast.error("Erreur lors du chargement de l'image");
-        return;
-      }
-      
-      fabricCanvas.backgroundImage = img;
-      img.scaleToWidth(canvasWidth);
-      img.scaleToHeight(canvasHeight);
-      fabricCanvas.requestRenderAll();
-    }, { crossOrigin: 'anonymous' });
+    const loadImage = async () => {
+      try {
+        const img = await new Promise<Image>((resolve, reject) => {
+          Image.fromURL(
+            template.backgroundImage, 
+            (img) => resolve(img), 
+            { crossOrigin: 'anonymous' }
+          );
+        });
 
+        if (img) {
+          fabricCanvas.backgroundImage = img;
+          img.scaleToWidth(canvasWidth);
+          img.scaleToHeight(canvasHeight);
+          fabricCanvas.requestRenderAll();
+        }
+      } catch (error) {
+        toast.error("Erreur lors du chargement de l'image");
+      }
+    };
+
+    loadImage();
     setupSafeZones(fabricCanvas, template);
 
     fabricCanvas.on('object:moving', (e) => {
