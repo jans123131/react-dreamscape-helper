@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Canvas as FabricCanvas, Text, Rect, Polygon, Image } from "fabric";
+import { Canvas as FabricCanvas, Text, Rect, Polygon, Image as FabricImage } from "fabric";
 import { Card } from "@/components/ui/card";
 import { X } from "lucide-react";
 import { SafeZone, ProductTemplate } from "@/types/personalization";
@@ -57,7 +57,7 @@ const CanvasContainer = ({
       
       fabricCanvas.add(safeZone);
       // Move the safe zone to the back of the stack
-      fabricCanvas.moveTo(safeZone, 0);
+      fabricCanvas.sendObjectToBack(safeZone);
       fabricCanvas.requestRenderAll();
     });
   };
@@ -121,14 +121,13 @@ const CanvasContainer = ({
     const loadImage = async () => {
       try {
         await new Promise<void>((resolve, reject) => {
-          fabric.Image.fromURL(template.backgroundImage, {
+          FabricImage.fromURL(template.backgroundImage, {
             crossOrigin: 'anonymous',
-            callback: (img: fabric.Image) => {
+            callback: (img) => {
               if (img) {
-                fabricCanvas.backgroundImage = img;
+                fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas));
                 img.scaleToWidth(canvasWidth);
                 img.scaleToHeight(canvasHeight);
-                fabricCanvas.requestRenderAll();
                 resolve();
               } else {
                 reject(new Error("Failed to load image"));
