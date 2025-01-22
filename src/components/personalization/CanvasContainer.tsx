@@ -119,19 +119,22 @@ const CanvasContainer = ({
 
     const loadImage = async () => {
       try {
-        await new Promise<void>((resolve, reject) => {
-          FabricImage.fromURL(template.backgroundImage, (img) => {
+        const img = await new Promise<FabricImage>((resolve, reject) => {
+          FabricImage.fromURL(template.backgroundImage, {
+            crossOrigin: 'anonymous',
+            scaleX: canvasWidth / template.naturalWidth,
+            scaleY: canvasHeight / template.naturalHeight,
+          }).then((img) => {
             if (img) {
-              fabricCanvas.backgroundImage = img;
-              img.scaleToWidth(canvasWidth);
-              img.scaleToHeight(canvasHeight);
-              fabricCanvas.requestRenderAll();
-              resolve();
+              resolve(img);
             } else {
               reject(new Error("Failed to load image"));
             }
-          }, { crossOrigin: 'anonymous' });
+          });
         });
+        
+        fabricCanvas.backgroundImage = img;
+        fabricCanvas.renderAll();
       } catch (error) {
         toast.error("Erreur lors du chargement de l'image");
       }
@@ -183,7 +186,7 @@ const CanvasContainer = ({
 
       fabricCanvas.setDimensions({ width: newWidth, height: newHeight });
       fabricCanvas.setZoom(newScale);
-      fabricCanvas.requestRenderAll();
+      fabricCanvas.renderAll();
     };
 
     window.addEventListener('resize', handleResize);
