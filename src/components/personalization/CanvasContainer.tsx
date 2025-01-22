@@ -61,6 +61,44 @@ const CanvasContainer = ({
     });
   };
 
+  const enforceZoneConstraints = (obj: any, zones: SafeZone[]) => {
+    const bounds = obj.getBoundingRect();
+    let isInZone = false;
+
+    zones.forEach(zone => {
+      if (zone.shape === 'polygon' && zone.points) {
+        // Polygon intersection check would go here
+        // For now, we'll use a simple bounding box check
+        const zoneRect = {
+          left: zone.x,
+          top: zone.y,
+          width: zone.width,
+          height: zone.height
+        };
+        if (bounds.left >= zoneRect.left && 
+            bounds.top >= zoneRect.top && 
+            bounds.left + bounds.width <= zoneRect.left + zoneRect.width &&
+            bounds.top + bounds.height <= zoneRect.top + zoneRect.height) {
+          isInZone = true;
+        }
+      } else {
+        if (bounds.left >= zone.x && 
+            bounds.top >= zone.y && 
+            bounds.left + bounds.width <= zone.x + zone.width &&
+            bounds.top + bounds.height <= zone.y + zone.height) {
+          isInZone = true;
+        }
+      }
+    });
+
+    if (!isInZone) {
+      obj.setCoords();
+      toast.error("L'objet doit rester dans la zone de personnalisation");
+      return false;
+    }
+    return true;
+  };
+
   useEffect(() => {
     if (!canvasRef.current) return;
 
@@ -81,18 +119,15 @@ const CanvasContainer = ({
       preserveObjectStacking: true,
     });
 
-    // Load background image
-    new Image.fromURL(template.backgroundImage, {
-      crossOrigin: 'anonymous',
-    }).then((img) => {
+    // Load background image using the correct static method
+    fabric.Image.fromURL(template.backgroundImage, (img) => {
+      if (!img) return;
       fabricCanvas.setBackgroundImage(img, () => {
         img.scaleToWidth(canvasWidth);
         img.scaleToHeight(canvasHeight);
         fabricCanvas.requestRenderAll();
       });
-    }).catch(() => {
-      toast.error("Erreur lors du chargement de l'image de fond");
-    });
+    }, { crossOrigin: 'anonymous' });
 
     setupSafeZones(fabricCanvas, template);
 
