@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Upload } from 'lucide-react';
+import { Upload, FileVideo, Image as ImageIcon } from 'lucide-react';
 import { FileDropzone } from './FileDropzone';
 import { UploadProgress } from './UploadProgress';
 import { uploadVideo } from './uploadUtils';
@@ -29,8 +28,8 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userEmail }) => {
     if (!videoFile || !thumbnailFile) {
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: 'Veuillez sélectionner un fichier vidéo et une miniature à télécharger.'
+        title: "Missing Files",
+        description: 'Please select both a video file and a thumbnail image.'
       });
       return;
     }
@@ -51,78 +50,92 @@ export const UploadForm: React.FC<UploadFormProps> = ({ userEmail }) => {
       });
       
       toast({
-        title: "Succès",
-        description: 'Vidéo téléchargée avec succès !'
+        title: "Success",
+        description: 'Video uploaded successfully!'
       });
+      
+      // Reset form
+      setTitle('');
+      setDescription('');
+      setVideoFile(null);
+      setThumbnailFile(null);
+      setUploadProgress(0);
+      setUploadedMB(0);
+      setTotalMB(0);
     } catch (err) {
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur s'est produite lors du téléchargement."
-      });
+        title: "Upload Failed",
+        description});
     } finally {
       setIsUploading(false);
     }
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <div className="p-6">
-        <h2 className="text-2xl font-bold mb-6">Télécharger une Nouvelle Vidéo</h2>
-        <form onSubmit={handleUpload} className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Titre</label>
-              <Input
-                type="text"
-                placeholder="Titre de la Vidéo"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Description</label>
-              <Textarea
-                placeholder="Description de la Vidéo"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <FileDropzone
-            type="thumbnail"
-            file={thumbnailFile}
-            onFileSelect={setThumbnailFile}
+    <form onSubmit={handleUpload} className="space-y-6">
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Title</label>
+          <Input
+            type="text"
+            placeholder="Enter video title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            className="bg-dashboard-background border-border/40"
           />
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Description</label>
+          <Textarea
+            placeholder="Enter video description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+            className="bg-dashboard-background border-border/40 min-h-[80px]"
+          />
+        </div>
+      </div>
 
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Video File</label>
           <FileDropzone
             type="video"
             file={videoFile}
             onFileSelect={setVideoFile}
             maxSize={2147483648}
+            icon={FileVideo}
           />
-
-          {isUploading && (
-            <UploadProgress
-              progress={uploadProgress}
-              uploadedMB={uploadedMB}
-              totalMB={totalMB}
-            />
-          )}
-
-          <Button
-            type="submit"
-            disabled={isUploading}
-            className="w-full"
-          >
-            <Upload className="mr-2 h-4 w-4" />
-            {isUploading ? 'Téléchargement en cours...' : 'Télécharger la Vidéo'}
-          </Button>
-        </form>
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Thumbnail Image</label>
+          <FileDropzone
+            type="thumbnail"
+            file={thumbnailFile}
+            onFileSelect={setThumbnailFile}
+            icon={ImageIcon}
+          />
+        </div>
       </div>
-    </Card>
+
+      {isUploading && (
+        <UploadProgress
+          progress={uploadProgress}
+          uploadedMB={uploadedMB}
+          totalMB={totalMB}
+        />
+      )}
+
+      <Button
+        type="submit"
+        disabled={isUploading}
+        className="w-full"
+      >
+        <Upload className="mr-2 h-4 w-4" />
+        {isUploading ? 'Uploading...' : 'Upload Video'}
+      </Button>
+    </form>
   );
 };

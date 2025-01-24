@@ -14,10 +14,11 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
 }) => {
   return (
     <div className="space-y-2">
-      <Progress value={progress} />
-      <p className="text-sm text-center text-muted-foreground">
-        {progress}% ({uploadedMB} MB / {totalMB} MB)
-      </p>
+      <Progress value={progress} className="h-2" />
+      <div className="flex justify-between text-sm text-muted-foreground">
+        <span>{progress}% Complete</span>
+        <span>{uploadedMB.toFixed(1)} MB / {totalMB.toFixed(1)} MB</span>
+      </div>
     </div>
   );
 };

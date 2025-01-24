@@ -1,18 +1,20 @@
 import React from 'react';
-import { Image, Video as VideoIcon } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 
 interface FileDropzoneProps {
   type: 'video' | 'thumbnail';
   file: File | null;
   onFileSelect: (file: File) => void;
   maxSize?: number;
+  icon: LucideIcon;
 }
 
 export const FileDropzone: React.FC<FileDropzoneProps> = ({
   type,
   file,
   onFileSelect,
-  maxSize
+  maxSize,
+  icon: Icon
 }) => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -35,19 +37,22 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
     event.preventDefault();
   };
 
-  const Icon = type === 'thumbnail' ? Image : VideoIcon;
   const text = type === 'thumbnail' 
-    ? 'Glissez-déposez votre miniature ici ou cliquez pour sélectionner une miniature'
-    : 'Glissez-déposez votre vidéo ici ou cliquez pour sélectionner un fichier';
+    ? 'Drop thumbnail here or click to browse'
+    : 'Drop video here or click to browse';
 
   return (
     <div 
-      className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-accent/50 transition-colors"
+      className={`
+        border-2 border-dashed border-border/40 rounded-lg p-6 text-center 
+        cursor-pointer hover:bg-dashboard-background/50 transition-colors
+        ${file ? 'bg-primary/5 border-primary/40' : ''}
+      `}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onClick={() => document.getElementById(`${type}Input`)?.click()}
     >
-      <Icon className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+      <Icon className="w-8 h-8 mx-auto mb-4 text-muted-foreground" />
       <input
         type="file"
         id={`${type}Input`}
@@ -55,9 +60,11 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
         accept={type === 'thumbnail' ? 'image/*' : 'video/*'}
         className="hidden"
       />
-      <p className="text-sm text-muted-foreground">{text}</p>
+      <p className="text-sm text-muted-foreground mb-2">{text}</p>
       {file && (
-        <p className="mt-2 text-sm text-primary">{file.name}</p>
+        <p className="text-sm text-primary font-medium truncate max-w-[200px] mx-auto">
+          {file.name}
+        </p>
       )}
     </div>
   );
