@@ -14,9 +14,15 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
   const [shouldRedirect, setShouldRedirect] = useState(false);
 
   useEffect(() => {
-    if (user.role !== 'admin') {
+    let mounted = true;
+
+    if (mounted && user.role !== 'admin') {
       setShouldRedirect(true);
     }
+
+    return () => {
+      mounted = false;
+    };
   }, [user.role]);
 
   if (shouldRedirect) {
