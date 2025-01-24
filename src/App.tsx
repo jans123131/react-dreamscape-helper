@@ -22,11 +22,12 @@ const App = () => {
         <div className="flex-1 ml-64">
           <TopBar />
           <Routes>
+            <Route path="/" element={<MainContent user={user} />} />
             <Route path="/app/settings" element={<ProtectedRoute element={<UserSettings user={user} />} />} />
             <Route path="/app/history" element={<ProtectedRoute element={<History user={user} />} />} />
             <Route path="/app/clients" element={<ProtectedRoute element={<Clients user={user} />} />} />
             <Route path="/app/upload" element={<ProtectedRoute element={<Videos user={user} />} />} />
-            <Route path="/app/" element={<MainContent user={user} />} />
+            <Route path="/app" element={<MainContent user={user} />} />
           </Routes>
           <footer className="p-6 text-center text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} <a href="http://draminesaid.com" className="hover:text-primary">draminesaid.com</a>

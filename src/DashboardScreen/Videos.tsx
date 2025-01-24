@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,7 +20,6 @@ interface FileWithPreview extends File {
 }
 
 const Videos: React.FC<VideosProps> = ({ user }) => {
-  const [shouldRedirect, setShouldRedirect] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [videoFile, setVideoFile] = useState<FileWithPreview | null>(null);
@@ -29,12 +27,6 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (user.role !== 'admin') {
-      setShouldRedirect(true);
-    }
-  }, [user.role]);
 
   const handleFileChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -122,10 +114,6 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
       setIsUploading(false);
     }
   };
-
-  if (shouldRedirect) {
-    return <Navigate to="/" />;
-  }
 
   return (
     <div className="p-6 mt-16 max-w-5xl mx-auto">
