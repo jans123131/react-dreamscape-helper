@@ -76,7 +76,12 @@ const MainContent: React.FC<MainContentProps> = ({ user }) => {
 
   const handlePageChange = (pageNumber: number) => setCurrentPage(pageNumber);
   const handleVideoClick = (video: Video) => setSelectedVideo(video);
-  const handleCloseVideo = () => setSelectedVideo(null);
+  const handleCloseVideo = (e: React.MouseEvent) => {
+    // Only close if clicking the backdrop, not the video player
+    if (e.target === e.currentTarget) {
+      setSelectedVideo(null);
+    }
+  };
 
   const handleDeleteVideo = async () => {
     if (!videoToDelete) return;
@@ -184,12 +189,17 @@ const MainContent: React.FC<MainContentProps> = ({ user }) => {
             <div
               className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
               onClick={handleCloseVideo}
-              onContextMenu={(e) => e.preventDefault()}
             >
-              <div
-                className="w-full max-w-4xl aspect-video"
+              <div 
+                className="relative w-full max-w-4xl aspect-video bg-dashboard-card rounded-lg overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
+                <button
+                  onClick={() => setSelectedVideo(null)}
+                  className="absolute top-4 right-4 z-50 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
+                >
+                  <XCircle className="w-6 h-6 text-white" />
+                </button>
                 <ReactPlayer
                   url={selectedVideo.videoUrl}
                   controls
