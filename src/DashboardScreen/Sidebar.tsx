@@ -36,11 +36,11 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
       {/* Content */}
       <div className="relative z-10 flex flex-col h-full p-6">
         {/* Logo */}
-        <div className="mb-10 flex justify-center">
+        <div className="mb-10 flex items-center justify-center h-16">
           <img 
             src="/lovable-uploads/822785e2-1af0-42b6-b6a6-adde97b0442b.png" 
             alt="Logo" 
-            className="h-16 w-auto"
+            className="h-12 w-auto object-contain"
           />
         </div>
         

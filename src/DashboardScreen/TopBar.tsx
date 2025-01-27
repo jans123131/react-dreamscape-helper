@@ -4,7 +4,14 @@ import { Link } from 'react-router-dom';
 
 const TopBar = () => {
   return (
-    <div className="fixed top-0 right-0 left-64 h-16 bg-dashboard-topbar border-b border-border/40 flex items-center justify-end px-6 z-10">
+    <div className="fixed top-0 right-0 left-72 h-16 bg-dashboard-topbar border-b border-border/40 flex items-center justify-between px-6 z-10">
+      <div className="flex items-center">
+        <img 
+          src="/lovable-uploads/822785e2-1af0-42b6-b6a6-adde97b0442b.png" 
+          alt="Logo" 
+          className="h-8 w-auto"
+        />
+      </div>
       <div className="flex items-center">
         <Link 
           to="/app/settings" 
