@@ -2,7 +2,6 @@ import React from 'react';
 import { FileVideo, ImageIcon, X } from 'lucide-react';
 import { formatFileSize } from '@/utils/compression';
 import { Progress } from '@/components/ui/progress';
-import { useNavigate } from 'react-router-dom';
 
 interface FileWithPreview extends File {
   preview?: string;
@@ -31,16 +30,6 @@ export const FileUploadBox: React.FC<FileUploadBoxProps> = ({
 }) => {
   const Icon = type === 'video' ? FileVideo : ImageIcon;
   const inputId = `${type}Input`;
-  const navigate = useNavigate();
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && type === 'video') {
-      navigate('/app/compress');
-    } else {
-      onFileSelect(event);
-    }
-  };
 
   return (
     <div 
@@ -127,7 +116,7 @@ export const FileUploadBox: React.FC<FileUploadBoxProps> = ({
       <input
         type="file"
         id={inputId}
-        onChange={handleFileSelect}
+        onChange={onFileSelect}
         accept={type === 'thumbnail' ? 'image/*' : 'video/*'}
         className="hidden"
         disabled={isCompressing}
