@@ -1,4 +1,14 @@
 import React from 'react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ModalProps {
   action: string;
@@ -9,26 +19,29 @@ interface ModalProps {
 
 const Modal: React.FC<ModalProps> = ({ action, message, onConfirm, onCancel }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-      <div className="bg-dashboard-card p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
-        <h2 className="text-xl font-bold mb-4">Confirmation</h2>
-        <p className="mb-6">{message}</p>
-        <div className="flex justify-end gap-4">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
-          >
-            Annuler
-          </button>
-          <button
+    <AlertDialog defaultOpen>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+          <AlertDialogDescription>{message}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={onCancel}>Annuler</AlertDialogCancel>
+          <AlertDialogAction 
             onClick={onConfirm}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            className={
+              action === 'activate' 
+                ? 'bg-green-500 hover:bg-green-600' 
+                : action === 'deactivate'
+                ? 'bg-yellow-500 hover:bg-yellow-600'
+                : 'bg-red-500 hover:bg-red-600'
+            }
           >
             {action.charAt(0).toUpperCase() + action.slice(1)}
-          </button>
-        </div>
-      </div>
-    </div>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 

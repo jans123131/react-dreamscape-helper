@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileVideo, Image as ImageIcon, X } from 'lucide-react';
+import { Upload, AlertTriangle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { ChapterManager } from '@/components/video-upload/ChapterManager';
+import { VideoUploadForm } from '@/components/video-upload/VideoUploadForm';
+import { formatFileSize } from '@/utils/compression';
+import { useVideoCompression } from '@/hooks/useVideoCompression';
+import { useVideoUploadForm } from '@/hooks/useVideoUploadForm';
+import { Progress } from '@/components/ui/progress';
 
 interface VideosProps {
   user: {
@@ -15,20 +19,79 @@ interface VideosProps {
   };
 }
 
-interface FileWithPreview extends File {
-  preview?: string;
-}
+const MAX_TOTAL_SIZE = 400 * 1024 * 1024; // 400MB in bytes
 
 const Videos: React.FC<VideosProps> = ({ user }) => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [videoFile, setVideoFile] = useState<FileWithPreview | null>(null);
-  const [thumbnailFile, setThumbnailFile] = useState<FileWithPreview | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
+  const [enableCompression, setEnableCompression] = React.useState(true);
+  const [totalFileSize, setTotalFileSize] = React.useState(0);
   const { toast } = useToast();
 
-  const handleFileChange = (
+  const {
+    isCompressing,
+    originalSize,
+    compressedSize,
+    compressionProgress,
+    loadingMessage,
+    handleFileCompression,
+  } = useVideoCompression();
+
+  const {
+    title,
+    setTitle,
+    description,
+    setDescription,
+    videoFile,
+    setVideoFile,
+    thumbnailFile,
+    setThumbnailFile,
+    uploadProgress,
+    isUploading,
+    selectedChapter,
+    setSelectedChapter,
+    selectedSubchapter,
+    setSelectedSubchapter,
+    handleSubmit
+  } = useVideoUploadForm();
+
+  // Check for compressed video when component mounts
+  useEffect(() => {
+    const compressedVideoInfo = localStorage.getItem('compressedVideo');
+    const compressedVideoBlob = localStorage.getItem('compressedVideoBlob');
+    
+    if (compressedVideoInfo && compressedVideoBlob) {
+      const fileInfo = JSON.parse(compressedVideoInfo);
+      fetch(compressedVideoBlob)
+        .then(res => res.blob())
+        .then(blob => {
+          const file = new File([blob], fileInfo.name, {
+            type: fileInfo.type,
+            lastModified: fileInfo.lastModified,
+          });
+          setVideoFile(file);
+          // Clear the stored video data
+          localStorage.removeItem('compressedVideo');
+          localStorage.removeItem('compressedVideoBlob');
+        });
+    }
+  }, []);
+
+  useEffect(() => {
+    const videoSize = videoFile?.size || 0;
+    const thumbnailSize = thumbnailFile?.size || 0;
+    const newTotalSize = videoSize + thumbnailSize;
+    setTotalFileSize(newTotalSize);
+
+    if (newTotalSize > MAX_TOTAL_SIZE && !enableCompression) {
+      setEnableCompression(true);
+      toast({
+        title: "Compression automatique activée",
+        description: `La taille totale des fichiers (${formatFileSize(newTotalSize)}) dépasse 400MB. La compression a été activée automatiquement.`,
+        duration: 5000,
+      });
+    }
+  }, [videoFile, thumbnailFile]);
+
+  const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
     type: 'video' | 'thumbnail'
   ) => {
@@ -38,8 +101,8 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
     if (type === 'video' && !file.type.startsWith('video/')) {
       toast({
         variant: "destructive",
-        title: "Invalid file type",
-        description: "Please select a video file"
+        title: "Type de fichier invalide",
+        description: "Veuillez sélectionner un fichier vidéo"
       });
       return;
     }
@@ -47,207 +110,138 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
     if (type === 'thumbnail' && !file.type.startsWith('image/')) {
       toast({
         variant: "destructive",
-        title: "Invalid file type",
-        description: "Please select an image file"
+        title: "Type de fichier invalide",
+        description: "Veuillez sélectionner une image"
       });
       return;
     }
 
-    const fileWithPreview = Object.assign(file, {
-      preview: type === 'thumbnail' ? URL.createObjectURL(file) : undefined
-    });
+    const otherFileSize = type === 'video' ? (thumbnailFile?.size || 0) : (videoFile?.size || 0);
+    const newTotalSize = file.size + otherFileSize;
 
-    if (type === 'video') {
-      setVideoFile(fileWithPreview);
-    } else {
-      setThumbnailFile(fileWithPreview);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!videoFile || !thumbnailFile) {
+    if (newTotalSize > MAX_TOTAL_SIZE && !enableCompression) {
+      setEnableCompression(true);
       toast({
-        variant: "destructive",
-        title: "Missing files",
-        description: "Please select both a video and thumbnail"
+        title: "Compression automatique activée",
+        description: `La taille totale des fichiers (${formatFileSize(newTotalSize)}) dépasse 400MB. La compression a été activée automatiquement.`,
+        duration: 5000,
       });
-      return;
     }
-
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append('video', videoFile);
-    formData.append('thumbnail', thumbnailFile);
-    formData.append('title', title);
-    formData.append('description', description);
 
     try {
-      const response = await fetch('https://plateform.draminesaid.com/app/upload.php', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        toast({
-          title: "Success",
-          description: "Video uploaded successfully"
-        });
-        // Reset form
-        setTitle('');
-        setDescription('');
-        setVideoFile(null);
-        setThumbnailFile(null);
-        setUploadProgress(0);
+      if (type === 'video' && (enableCompression || newTotalSize > MAX_TOTAL_SIZE)) {
+        console.log('Starting video compression...');
+        const compressedFile = await handleFileCompression(file, type);
+        if (compressedFile) {
+          console.log('Video compression complete');
+          setVideoFile(compressedFile);
+          toast({
+            title: "Compression réussie",
+            description: `Taille originale: ${formatFileSize(file.size)}\nTaille compressée: ${formatFileSize(compressedFile.size)}`,
+          });
+        }
       } else {
-        throw new Error(data.message || 'Upload failed');
+        if (type === 'video') {
+          setVideoFile(file);
+        } else {
+          const fileWithPreview = Object.assign(file, {
+            preview: URL.createObjectURL(file)
+          });
+          setThumbnailFile(fileWithPreview);
+        }
       }
-    } catch (error: any) {
+    } catch (error) {
+      console.error('Error handling file:', error);
       toast({
         variant: "destructive",
-        title: "Upload failed",
-        description: error.message
+        title: "Erreur",
+        description: "Une erreur est survenue lors du traitement du fichier"
       });
-    } finally {
-      setIsUploading(false);
     }
   };
 
   return (
-    <div className="p-6 mt-16 max-w-5xl mx-auto">
+    <div className="p-6 mt-16 max-w-5xl mx-auto space-y-6">
+      <ChapterManager />
+      
       <Card className="bg-dashboard-card border-border/40">
         <CardHeader className="space-y-1">
-          <div className="flex items-center space-x-2">
-            <Upload className="h-5 w-5 text-primary" />
-            <CardTitle className="text-xl font-semibold">Upload New Video</CardTitle>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Upload className="h-5 w-5 text-primary" />
+              <CardTitle className="text-xl font-semibold">Télécharger une nouvelle vidéo</CardTitle>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">Compression</span>
+              <Switch
+                checked={enableCompression}
+                onCheckedChange={setEnableCompression}
+                disabled={totalFileSize > MAX_TOTAL_SIZE}
+              />
+            </div>
           </div>
+
+          {totalFileSize > 0 && (
+            <Alert variant={totalFileSize > MAX_TOTAL_SIZE ? "destructive" : "default"}>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Taille totale des fichiers</AlertTitle>
+              <AlertDescription>
+                {formatFileSize(totalFileSize)}
+                {totalFileSize > MAX_TOTAL_SIZE && " - Compression automatique activée"}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {isCompressing && (
+            <div className="mt-4 space-y-2">
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>{loadingMessage}</span>
+                <span>{compressionProgress}%</span>
+              </div>
+              <Progress value={compressionProgress} className="h-2" />
+              {originalSize && (
+                <p className="text-sm text-muted-foreground">
+                  Taille originale: {formatFileSize(originalSize)}
+                  {compressedSize && (
+                    <>
+                      <br />
+                      Taille compressée: {formatFileSize(compressedSize)}
+                      <br />
+                      Réduction: {((originalSize - compressedSize) / originalSize * 100).toFixed(1)}%
+                    </>
+                  )}
+                </p>
+              )}
+            </div>
+          )}
+
           <p className="text-sm text-muted-foreground">
-            Share your content with your audience. Upload videos and customize their details.
+            Partagez votre contenu avec votre audience. Téléchargez des vidéos et personnalisez leurs détails.
           </p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Title</label>
-                <Input
-                  type="text"
-                  placeholder="Enter video title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                  className="bg-dashboard-background border-border/40"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Description</label>
-                <Textarea
-                  placeholder="Enter video description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  required
-                  className="bg-dashboard-background border-border/40 min-h-[80px]"
-                />
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Video File</label>
-                <div 
-                  className={`
-                    border-2 border-dashed border-border/40 rounded-lg p-6 text-center 
-                    cursor-pointer hover:bg-dashboard-background/50 transition-colors
-                    ${videoFile ? 'bg-primary/5 border-primary/40' : ''}
-                  `}
-                  onClick={() => document.getElementById('videoInput')?.click()}
-                >
-                  <FileVideo className="w-8 h-8 mx-auto mb-4 text-muted-foreground" />
-                  <input
-                    type="file"
-                    id="videoInput"
-                    onChange={(e) => handleFileChange(e, 'video')}
-                    accept="video/*"
-                    className="hidden"
-                  />
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Drop video here or click to browse
-                  </p>
-                  {videoFile && (
-                    <p className="text-sm text-primary font-medium truncate max-w-[200px] mx-auto">
-                      {videoFile.name}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Thumbnail Image</label>
-                <div 
-                  className={`
-                    border-2 border-dashed border-border/40 rounded-lg p-6 text-center 
-                    cursor-pointer hover:bg-dashboard-background/50 transition-colors relative
-                    ${thumbnailFile ? 'bg-primary/5 border-primary/40' : ''}
-                  `}
-                  onClick={() => document.getElementById('thumbnailInput')?.click()}
-                >
-                  {thumbnailFile?.preview ? (
-                    <>
-                      <img 
-                        src={thumbnailFile.preview} 
-                        alt="Thumbnail preview" 
-                        className="w-32 h-32 object-cover mx-auto rounded-lg"
-                      />
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setThumbnailFile(null);
-                        }}
-                        className="absolute top-2 right-2 p-1 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
-                      >
-                        <X className="w-4 h-4 text-white" />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <ImageIcon className="w-8 h-8 mx-auto mb-4 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">
-                        Drop thumbnail here or click to browse
-                      </p>
-                    </>
-                  )}
-                  <input
-                    type="file"
-                    id="thumbnailInput"
-                    onChange={(e) => handleFileChange(e, 'thumbnail')}
-                    accept="image/*"
-                    className="hidden"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {isUploading && (
-              <div className="space-y-2">
-                <Progress value={uploadProgress} className="h-2" />
-                <p className="text-sm text-muted-foreground text-center">
-                  Uploading... {uploadProgress}%
-                </p>
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              disabled={isUploading}
-              className="w-full"
-            >
-              <Upload className="mr-2 h-4 w-4" />
-              {isUploading ? 'Uploading...' : 'Upload Video'}
-            </Button>
-          </form>
+          <VideoUploadForm
+            title={title}
+            description={description}
+            videoFile={videoFile}
+            thumbnailFile={thumbnailFile}
+            selectedChapter={selectedChapter}
+            selectedSubchapter={selectedSubchapter}
+            isUploading={isUploading}
+            isCompressing={isCompressing}
+            uploadProgress={uploadProgress}
+            compressionProgress={compressionProgress}
+            originalSize={originalSize}
+            compressedSize={compressedSize}
+            onTitleChange={setTitle}
+            onDescriptionChange={setDescription}
+            onVideoSelect={(e) => handleFileChange(e, 'video')}
+            onThumbnailSelect={(e) => handleFileChange(e, 'thumbnail')}
+            onChapterChange={setSelectedChapter}
+            onSubchapterChange={setSelectedSubchapter}
+            onSubmit={handleSubmit}
+            onThumbnailRemove={() => setThumbnailFile(null)}
+          />
         </CardContent>
       </Card>
     </div>

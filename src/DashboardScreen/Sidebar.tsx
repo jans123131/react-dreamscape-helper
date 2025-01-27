@@ -1,6 +1,12 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Settings, History, Users, Upload } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  Settings, 
+  Users, 
+  Upload,
+  ChevronRight
+} from 'lucide-react';
 
 interface SidebarProps {
   user: any;
@@ -10,35 +16,73 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
   const location = useLocation();
 
   const menuItems = [
-    { path: '/app/', icon: Home, label: 'Dashboard' },
-    { path: '/app/settings', icon: Settings, label: 'Settings' },
-    { path: '/app/history', icon: History, label: 'History' },
+    { path: '/app/', icon: LayoutDashboard, label: 'Tableau de bord' },
+    { path: '/app/settings', icon: Settings, label: 'Paramètres' },
     { path: '/app/clients', icon: Users, label: 'Clients' },
-    { path: '/app/upload', icon: Upload, label: 'Videos' },
+    { path: '/app/upload', icon: Upload, label: 'Vidéos' },
   ];
 
   return (
-    <div className="fixed left-0 top-0 h-full w-64 bg-dashboard-sidebar text-white p-4">
-      <div className="mb-8">
-        <h1 className="text-xl font-bold">Dashboard</h1>
-      </div>
+    <div className="fixed left-0 top-0 h-full w-72 bg-dashboard-sidebar text-gray-600 overflow-hidden">
+      {/* Background overlay with gradient */}
+      <div 
+        className="absolute inset-0 opacity-5 bg-cover bg-center z-0" 
+        style={{ 
+          backgroundImage: 'url(/lovable-uploads/822785e2-1af0-42b6-b6a6-adde97b0442b.png)',
+          backgroundBlendMode: 'overlay'
+        }} 
+      />
       
-      <nav>
-        {menuItems.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
-              location.pathname === item.path
-                ? 'bg-primary text-primary-foreground'
-                : 'hover:bg-primary/10'
-            }`}
-          >
-            <item.icon size={20} />
-            <span>{item.label}</span>
-          </Link>
-        ))}
-      </nav>
+      {/* Content */}
+      <div className="relative z-10 flex flex-col h-full p-6">
+        {/* Logo */}
+        <div className="mb-10 flex justify-center">
+          <img 
+            src="/lovable-uploads/822785e2-1af0-42b6-b6a6-adde97b0442b.png" 
+            alt="Logo" 
+            className="h-16 w-auto"
+          />
+        </div>
+        
+        {/* Navigation */}
+        <nav className="space-y-2">
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 group ${
+                  isActive
+                    ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                    : 'hover:bg-primary/10 hover:text-primary'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <item.icon 
+                    size={20} 
+                    className={isActive ? 'text-white' : 'text-gray-500 group-hover:text-primary'}
+                  />
+                  <span className="font-medium">{item.label}</span>
+                </div>
+                <ChevronRight 
+                  size={16} 
+                  className={`transform transition-transform duration-200 ${
+                    isActive ? 'text-white rotate-90' : 'text-gray-400 group-hover:text-primary'
+                  }`}
+                />
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Bottom section with gradient border */}
+        <div className="mt-auto pt-6 border-t border-gray-200/10">
+          <div className="text-sm text-gray-500 text-center">
+            Version 1.0.0
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

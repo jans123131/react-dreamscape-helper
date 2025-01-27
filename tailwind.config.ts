@@ -25,8 +25,15 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "#7792bd",
+          light: "#8ea3c9",
+          dark: "#607aa8",
+        },
+        dashboard: {
+          background: "#ffffff",
+          sidebar: "#D3E4FD", // Updated sidebar background to light blue
+          topbar: "#ffffff",
+          card: "#ffffff",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -51,12 +58,6 @@ export default {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
-        },
-        dashboard: {
-          background: "#1a1b1e",
-          sidebar: "#25262b",
-          topbar: "#2c2d32",
-          card: "#2c2d32",
         },
       },
       borderRadius: {
