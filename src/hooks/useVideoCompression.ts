@@ -59,8 +59,7 @@ export const useVideoCompression = () => {
     }
   };
 
-  const handleFileCompression = async (file: File, type: 'video' | 'thumbnail') => {
-    if (type === 'thumbnail') return file;
+  const handleFileCompression = async (file: File, quality: number = 60) => {
     if (!loaded) {
       toast({
         title: "Please wait",
@@ -81,19 +80,25 @@ export const useVideoCompression = () => {
       
       setLoadingMessage('Compressing video...');
       
+      // Calculate CRF based on quality (1-100)
+      // CRF range is 0-51 where 0 is lossless, 51 is worst
+      // We'll use a range of 17-35 for reasonable quality
+      const crf = Math.round(35 - (quality / 100) * 18);
+      
+      // Calculate scale based on quality
+      const scale = quality / 100;
+      
       await ffmpeg.exec([
         '-i', 'input.mp4',
-        '-c:v', 'libx264',         // Video codec
-        '-crf', '32',              // Higher CRF = more compression
-        '-preset', 'veryfast',     // Much faster encoding
-        '-tune', 'fastdecode',     // Optimize for fast decoding
-        '-movflags', '+faststart', // Enable fast start for web playback
-        '-c:a', 'aac',            // Audio codec
-        '-b:a', '96k',            // Reduced audio bitrate
-        '-ac', '1',               // Convert to mono audio
-        '-vf', 'scale=iw*0.8:-2', // Reduce resolution by 20%
-        '-r', '24',               // Limit framerate to 24fps
-        '-y',                     // Overwrite output files
+        '-c:v', 'libx264',
+        '-crf', crf.toString(),
+        '-preset', 'veryfast',
+        '-tune', 'fastdecode',
+        '-movflags', '+faststart',
+        '-c:a', 'aac',
+        '-b:a', `${Math.max(64, quality)}k`,
+        '-vf', `scale=iw*${scale}:-2`,
+        '-y',
         'output.mp4'
       ]);
 

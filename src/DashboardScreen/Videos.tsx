@@ -10,6 +10,7 @@ import { formatFileSize } from '@/utils/compression';
 import { useVideoCompression } from '@/hooks/useVideoCompression';
 import { useVideoUploadForm } from '@/hooks/useVideoUploadForm';
 import { Progress } from '@/components/ui/progress';
+import { Slider } from '@/components/ui/slider';
 
 interface VideosProps {
   user: {
@@ -24,6 +25,7 @@ const MAX_TOTAL_SIZE = 400 * 1024 * 1024; // 400MB in bytes
 const Videos: React.FC<VideosProps> = ({ user }) => {
   const [enableCompression, setEnableCompression] = React.useState(true);
   const [totalFileSize, setTotalFileSize] = React.useState(0);
+  const [compressionQuality, setCompressionQuality] = React.useState(60); // Default 60% quality
   const { toast } = useToast();
 
   const {
@@ -52,28 +54,6 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
     setSelectedSubchapter,
     handleSubmit
   } = useVideoUploadForm();
-
-  // Check for compressed video when component mounts
-  useEffect(() => {
-    const compressedVideoInfo = localStorage.getItem('compressedVideo');
-    const compressedVideoBlob = localStorage.getItem('compressedVideoBlob');
-    
-    if (compressedVideoInfo && compressedVideoBlob) {
-      const fileInfo = JSON.parse(compressedVideoInfo);
-      fetch(compressedVideoBlob)
-        .then(res => res.blob())
-        .then(blob => {
-          const file = new File([blob], fileInfo.name, {
-            type: fileInfo.type,
-            lastModified: fileInfo.lastModified,
-          });
-          setVideoFile(file);
-          // Clear the stored video data
-          localStorage.removeItem('compressedVideo');
-          localStorage.removeItem('compressedVideoBlob');
-        });
-    }
-  }, []);
 
   useEffect(() => {
     const videoSize = videoFile?.size || 0;
@@ -119,19 +99,10 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
     const otherFileSize = type === 'video' ? (thumbnailFile?.size || 0) : (videoFile?.size || 0);
     const newTotalSize = file.size + otherFileSize;
 
-    if (newTotalSize > MAX_TOTAL_SIZE && !enableCompression) {
-      setEnableCompression(true);
-      toast({
-        title: "Compression automatique activée",
-        description: `La taille totale des fichiers (${formatFileSize(newTotalSize)}) dépasse 400MB. La compression a été activée automatiquement.`,
-        duration: 5000,
-      });
-    }
-
     try {
       if (type === 'video' && (enableCompression || newTotalSize > MAX_TOTAL_SIZE)) {
         console.log('Starting video compression...');
-        const compressedFile = await handleFileCompression(file, type);
+        const compressedFile = await handleFileCompression(file, compressionQuality);
         if (compressedFile) {
           console.log('Video compression complete');
           setVideoFile(compressedFile);
@@ -171,13 +142,27 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
               <Upload className="h-5 w-5 text-primary" />
               <CardTitle className="text-xl font-semibold">Télécharger une nouvelle vidéo</CardTitle>
             </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-muted-foreground">Compression</span>
-              <Switch
-                checked={enableCompression}
-                onCheckedChange={setEnableCompression}
-                disabled={totalFileSize > MAX_TOTAL_SIZE}
-              />
+            <div className="flex items-center space-x-4">
+              <div className="flex flex-col space-y-2">
+                <span className="text-sm text-muted-foreground">Qualité de compression</span>
+                <Slider
+                  value={[compressionQuality]}
+                  onValueChange={(values) => setCompressionQuality(values[0])}
+                  min={1}
+                  max={100}
+                  step={1}
+                  className="w-32"
+                />
+                <span className="text-xs text-muted-foreground text-center">{compressionQuality}%</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-muted-foreground">Compression</span>
+                <Switch
+                  checked={enableCompression}
+                  onCheckedChange={setEnableCompression}
+                  disabled={totalFileSize > MAX_TOTAL_SIZE}
+                />
+              </div>
             </div>
           </div>
 
