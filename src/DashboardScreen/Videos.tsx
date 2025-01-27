@@ -25,7 +25,7 @@ const MAX_TOTAL_SIZE = 400 * 1024 * 1024; // 400MB in bytes
 const Videos: React.FC<VideosProps> = ({ user }) => {
   const [enableCompression, setEnableCompression] = React.useState(true);
   const [totalFileSize, setTotalFileSize] = React.useState(0);
-  const [compressionQuality, setCompressionQuality] = React.useState(60); // Default 60% quality
+  const [compressionQuality, setCompressionQuality] = React.useState(60);
   const { toast } = useToast();
 
   const {

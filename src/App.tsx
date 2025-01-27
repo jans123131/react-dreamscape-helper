@@ -7,7 +7,6 @@ import UserSettings from './DashboardScreen/UserSettings';
 import Clients from './DashboardScreen/Clients';
 import Videos from './DashboardScreen/Videos';
 import Seasons from './DashboardScreen/Seasons';
-import VideoCompressor from './components/video-upload/VideoCompressor';
 
 const App = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -27,7 +26,6 @@ const App = () => {
             <Route path="/app/settings" element={<ProtectedRoute element={<UserSettings user={user} />} />} />
             <Route path="/app/clients" element={<ProtectedRoute element={<Clients user={user} />} />} />
             <Route path="/app/upload" element={<ProtectedRoute element={<Videos user={user} />} />} />
-            <Route path="/app/compress" element={<ProtectedRoute element={<VideoCompressor />} />} />
             <Route path="/app/seasons" element={<ProtectedRoute element={<Seasons />} />} />
             <Route path="/app" element={<MainContent user={user} />} />
           </Routes>
