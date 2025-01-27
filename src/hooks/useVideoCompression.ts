@@ -81,23 +81,21 @@ export const useVideoCompression = () => {
       setLoadingMessage('Compressing video...');
       
       // Calculate CRF based on quality (1-100)
-      // CRF range is 0-51 where 0 is lossless, 51 is worst
-      // We'll use a range of 17-35 for reasonable quality
+      // Higher CRF = lower quality but faster compression
       const crf = Math.round(35 - (quality / 100) * 18);
       
-      // Calculate scale based on quality
-      const scale = quality / 100;
-      
+      // Use ultrafast preset for maximum speed
       await ffmpeg.exec([
         '-i', 'input.mp4',
         '-c:v', 'libx264',
         '-crf', crf.toString(),
-        '-preset', 'veryfast',
+        '-preset', 'ultrafast',  // Changed from veryfast to ultrafast
         '-tune', 'fastdecode',
         '-movflags', '+faststart',
         '-c:a', 'aac',
-        '-b:a', `${Math.max(64, quality)}k`,
-        '-vf', `scale=iw*${scale}:-2`,
+        '-b:a', '128k',          // Fixed audio bitrate for faster processing
+        '-vf', 'scale=iw/2:-2',  // Reduce resolution by half for faster processing
+        '-threads', '0',         // Use all available CPU threads
         '-y',
         'output.mp4'
       ]);
