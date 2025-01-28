@@ -16,6 +16,9 @@ export const useVideoCompression = () => {
   const ffmpegRef = useRef(new FFmpeg());
   const { toast } = useToast();
 
+  const TARGET_SIZE = 300 * 1024 * 1024; // 300MB
+  const COMPRESSION_THRESHOLD = 500 * 1024 * 1024; // Only compress if file is larger than 500MB
+
   useEffect(() => {
     loadFFmpeg();
     return () => {
@@ -47,7 +50,6 @@ export const useVideoCompression = () => {
         const percentage = Math.round(progress * 100);
         setCompressionProgress(percentage);
         
-        // Calculate time left
         const elapsedTime = Date.now() - startTimeRef.current;
         const estimatedTotalTime = elapsedTime / progress;
         const remainingTime = estimatedTotalTime - elapsedTime;
@@ -76,7 +78,13 @@ export const useVideoCompression = () => {
     }
   };
 
-  const handleFileCompression = async (file: File, targetSize: number) => {
+  const handleFileCompression = async (file: File, targetSize: number = TARGET_SIZE) => {
+    // If file is smaller than threshold, return it as is
+    if (file.size <= COMPRESSION_THRESHOLD) {
+      console.log('File is smaller than threshold, skipping compression');
+      return file;
+    }
+
     if (!loaded) {
       toast({
         title: "Please wait",
@@ -100,20 +108,21 @@ export const useVideoCompression = () => {
       const duration = await getVideoDuration(file);
       const targetBitrate = Math.floor((targetSize * 8) / duration);
       const videoBitrate = Math.floor(targetBitrate * 0.95);
-      const audioBitrate = Math.floor(targetBitrate * 0.05);
+      const audioBitrate = '128k'; // Fixed audio bitrate for faster processing
 
-      // Updated compression command with better quality settings
+      // Faster compression settings with 720p resolution
       await ffmpeg.exec([
         '-i', 'input.mp4',
         '-c:v', 'libx264',
-        '-preset', 'medium',
-        '-crf', '23',
-        '-b:v', `${videoBitrate}`,
-        '-maxrate', `${videoBitrate * 2}`,
-        '-bufsize', `${videoBitrate * 3}`,
+        '-preset', 'veryfast', // Using veryfast preset for better speed
+        '-vf', 'scale=-2:720', // Scale to 720p while maintaining aspect ratio
+        '-crf', '28', // Higher CRF for faster compression (23-28 is good range)
+        '-maxrate', `${videoBitrate}`,
+        '-bufsize', `${videoBitrate * 2}`,
         '-c:a', 'aac',
-        '-b:a', `${audioBitrate}`,
+        '-b:a', audioBitrate,
         '-movflags', '+faststart',
+        '-threads', '0', // Use all available CPU threads
         '-y',
         'output.mp4'
       ]);
@@ -153,7 +162,7 @@ export const useVideoCompression = () => {
     const ffmpeg = ffmpegRef.current;
     if (ffmpeg && isCompressing) {
       ffmpeg.terminate();
-      loadFFmpeg(); // Reload FFmpeg after termination
+      loadFFmpeg();
       setIsCompressing(false);
       setCompressionProgress(0);
       setTimeLeft('Cancelled');
