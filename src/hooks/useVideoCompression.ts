@@ -16,8 +16,10 @@ export const useVideoCompression = () => {
   const ffmpegRef = useRef(new FFmpeg());
   const { toast } = useToast();
 
-  // Target 60% compression for large files
-  const TARGET_SIZE_RATIO = 0.4;
+  // Size thresholds in bytes
+  const MIN_SIZE = 400 * 1024 * 1024; // 400MB
+  const MAX_SIZE = 700 * 1024 * 1024; // 700MB
+  const TARGET_SIZE = 300 * 1024 * 1024; // 300MB target for files between thresholds
 
   useEffect(() => {
     loadFFmpeg();
@@ -57,8 +59,6 @@ export const useVideoCompression = () => {
         const minutes = Math.floor(remainingTime / 60000);
         const seconds = Math.floor((remainingTime % 60000) / 1000);
         setTimeLeft(`${minutes}m ${seconds}s`);
-        
-        setLoadingMessage(`Processing: ${percentage}% (${(time / 1000000).toFixed(1)}s)`);
       });
 
       await ffmpeg.load({
@@ -79,6 +79,12 @@ export const useVideoCompression = () => {
   };
 
   const handleFileCompression = async (file: File) => {
+    // Skip compression for files outside our target range
+    if (file.size < MIN_SIZE || file.size > MAX_SIZE) {
+      console.log('File size outside compression range, returning original');
+      return file;
+    }
+
     const ffmpeg = ffmpegRef.current;
     setIsCompressing(true);
     setOriginalSize(file.size);
@@ -91,24 +97,23 @@ export const useVideoCompression = () => {
       console.log('Starting video compression...');
       await ffmpeg.writeFile('input.mp4', await fetchFile(file));
       
-      const targetSize = Math.floor(file.size * TARGET_SIZE_RATIO);
       const duration = await getVideoDuration(file);
-      const targetBitrate = Math.floor((targetSize * 8) / duration);
+      const targetBitrate = Math.floor((TARGET_SIZE * 8) / duration);
       const videoBitrate = Math.floor(targetBitrate * 0.95);
-      const audioBitrate = '128k'; // Fixed audio bitrate for faster processing
+      const audioBitrate = '128k';
 
       // Ultra-fast compression settings optimized for speed
       await ffmpeg.exec([
         '-i', 'input.mp4',
         '-c:v', 'libx264',
-        '-preset', 'ultrafast', // Fastest preset
-        '-tune', 'fastdecode', // Optimize for fast decoding
-        '-vf', 'scale=-2:720', // Force 720p while maintaining aspect ratio
-        '-threads', '0', // Use all available CPU threads
-        '-tile-columns', '6', // Optimize for parallel processing
-        '-frame-parallel', '1', // Enable parallel frame processing
-        '-cpu-used', '8', // Maximum CPU usage
-        '-row-mt', '1', // Enable row-based multithreading
+        '-preset', 'ultrafast',
+        '-tune', 'fastdecode',
+        '-vf', 'scale=-2:720',
+        '-threads', '0',
+        '-tile-columns', '6',
+        '-frame-parallel', '1',
+        '-cpu-used', '8',
+        '-row-mt', '1',
         '-b:v', `${videoBitrate}`,
         '-maxrate', `${videoBitrate * 1.5}`,
         '-bufsize', `${videoBitrate * 2}`,
