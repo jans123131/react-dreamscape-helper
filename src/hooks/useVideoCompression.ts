@@ -16,8 +16,10 @@ export const useVideoCompression = () => {
   const ffmpegRef = useRef(new FFmpeg());
   const { toast } = useToast();
 
-  const TARGET_SIZE = 300 * 1024 * 1024; // 300MB
-  const COMPRESSION_THRESHOLD = 500 * 1024 * 1024; // Only compress if file is larger than 500MB
+  // Only compress if file is larger than 400MB
+  const COMPRESSION_THRESHOLD = 400 * 1024 * 1024;
+  // Target size will be around 40% of original size for large files
+  const TARGET_SIZE_RATIO = 0.4;
 
   useEffect(() => {
     loadFFmpeg();
@@ -78,7 +80,7 @@ export const useVideoCompression = () => {
     }
   };
 
-  const handleFileCompression = async (file: File, targetSize: number = TARGET_SIZE) => {
+  const handleFileCompression = async (file: File) => {
     // If file is smaller than threshold, return it as is
     if (file.size <= COMPRESSION_THRESHOLD) {
       console.log('File is smaller than threshold, skipping compression');
@@ -105,22 +107,22 @@ export const useVideoCompression = () => {
       console.log('Starting video compression...');
       await ffmpeg.writeFile('input.mp4', await fetchFile(file));
       
+      const targetSize = Math.floor(file.size * TARGET_SIZE_RATIO);
       const duration = await getVideoDuration(file);
       const targetBitrate = Math.floor((targetSize * 8) / duration);
       const videoBitrate = Math.floor(targetBitrate * 0.95);
-      const audioBitrate = '128k'; // Fixed audio bitrate for faster processing
 
-      // Faster compression settings with 720p resolution
+      // Ultra-fast compression settings with 720p resolution
       await ffmpeg.exec([
         '-i', 'input.mp4',
         '-c:v', 'libx264',
-        '-preset', 'veryfast', // Using veryfast preset for better speed
-        '-vf', 'scale=-2:720', // Scale to 720p while maintaining aspect ratio
-        '-crf', '28', // Higher CRF for faster compression (23-28 is good range)
+        '-preset', 'ultrafast', // Fastest preset for maximum speed
+        '-vf', 'scale=-2:720', // Force 720p while maintaining aspect ratio
+        '-crf', '28', // Higher CRF for faster compression
         '-maxrate', `${videoBitrate}`,
         '-bufsize', `${videoBitrate * 2}`,
         '-c:a', 'aac',
-        '-b:a', audioBitrate,
+        '-b:a', '128k', // Fixed audio bitrate
         '-movflags', '+faststart',
         '-threads', '0', // Use all available CPU threads
         '-y',
