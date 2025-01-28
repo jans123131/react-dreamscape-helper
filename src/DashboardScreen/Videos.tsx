@@ -19,7 +19,7 @@ interface VideosProps {
 }
 
 const MAX_TOTAL_SIZE = 450 * 1024 * 1024; // 450MB in bytes
-const SIZE_THRESHOLD = 500 * 1024 * 1024; // 500MB threshold
+const SIZE_THRESHOLD = 400 * 1024 * 1024; // 400MB threshold
 
 const Videos: React.FC<VideosProps> = ({ user }) => {
   const [enableCompression, setEnableCompression] = React.useState(true);
@@ -101,11 +101,9 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
     const newTotalSize = file.size + otherFileSize;
 
     try {
-      if (type === 'video' && enableCompression && (file.size > SIZE_THRESHOLD || newTotalSize > MAX_TOTAL_SIZE)) {
+      if (type === 'video' && enableCompression && file.size > SIZE_THRESHOLD) {
         console.log('Starting video compression...');
-        // Calculate target size to ensure final size is under 450MB
-        const targetSize = Math.min(MAX_TOTAL_SIZE - otherFileSize, MAX_TOTAL_SIZE);
-        const compressedFile = await handleFileCompression(file, targetSize);
+        const compressedFile = await handleFileCompression(file);
         if (compressedFile) {
           console.log('Video compression complete');
           setVideoFile(compressedFile);
