@@ -17,9 +17,9 @@ export const useVideoCompression = () => {
   const { toast } = useToast();
 
   // Size thresholds in bytes
-  const MIN_SIZE = 400 * 1024 * 1024; // 400MB
-  const MAX_SIZE = 700 * 1024 * 1024; // 700MB
-  const TARGET_SIZE = 300 * 1024 * 1024; // 300MB target for files between thresholds
+  const MEDIUM_SIZE = 400 * 1024 * 1024; // 400MB
+  const LARGE_SIZE = 700 * 1024 * 1024; // 700MB
+  const VERY_LARGE_SIZE = 1024 * 1024 * 1024; // 1GB
 
   useEffect(() => {
     loadFFmpeg();
@@ -78,9 +78,18 @@ export const useVideoCompression = () => {
     }
   };
 
+  const getTargetSizeRatio = (fileSize: number): number => {
+    if (fileSize >= MEDIUM_SIZE && fileSize < LARGE_SIZE) {
+      return 0.7; // 30% compression
+    } else if (fileSize >= LARGE_SIZE && fileSize <= VERY_LARGE_SIZE) {
+      return 0.4; // 60% compression
+    }
+    return 1; // No compression for other sizes
+  };
+
   const handleFileCompression = async (file: File) => {
-    // Skip compression for files outside our target range
-    if (file.size < MIN_SIZE || file.size > MAX_SIZE) {
+    // Skip compression for files outside our target ranges
+    if (file.size < MEDIUM_SIZE || file.size > VERY_LARGE_SIZE) {
       console.log('File size outside compression range, returning original');
       return file;
     }
@@ -97,8 +106,10 @@ export const useVideoCompression = () => {
       console.log('Starting video compression...');
       await ffmpeg.writeFile('input.mp4', await fetchFile(file));
       
+      const targetSizeRatio = getTargetSizeRatio(file.size);
+      const targetSize = Math.floor(file.size * targetSizeRatio);
       const duration = await getVideoDuration(file);
-      const targetBitrate = Math.floor((TARGET_SIZE * 8) / duration);
+      const targetBitrate = Math.floor((targetSize * 8) / duration);
       const videoBitrate = Math.floor(targetBitrate * 0.95);
       const audioBitrate = '128k';
 
