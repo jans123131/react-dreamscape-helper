@@ -5,6 +5,7 @@ import {
   Settings, 
   Users, 
   Upload,
+  Calendar,
   ChevronRight
 } from 'lucide-react';
 
@@ -20,6 +21,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
     { path: '/app/settings', icon: Settings, label: 'Paramètres' },
     { path: '/app/clients', icon: Users, label: 'Clients' },
     { path: '/app/upload', icon: Upload, label: 'Vidéos' },
+    { path: '/app/seasons', icon: Calendar, label: 'Saisons' },
   ];
 
   return (
