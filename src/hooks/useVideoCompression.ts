@@ -16,9 +16,7 @@ export const useVideoCompression = () => {
   const ffmpegRef = useRef(new FFmpeg());
   const { toast } = useToast();
 
-  // Only compress if file is larger than 400MB
-  const COMPRESSION_THRESHOLD = 400 * 1024 * 1024;
-  // Target size will be around 40% of original size for large files
+  // Target 60% compression for large files
   const TARGET_SIZE_RATIO = 0.4;
 
   useEffect(() => {
@@ -81,20 +79,6 @@ export const useVideoCompression = () => {
   };
 
   const handleFileCompression = async (file: File) => {
-    // If file is smaller than threshold, return it as is
-    if (file.size <= COMPRESSION_THRESHOLD) {
-      console.log('File is smaller than threshold, skipping compression');
-      return file;
-    }
-
-    if (!loaded) {
-      toast({
-        title: "Please wait",
-        description: "Video compression is still loading..."
-      });
-      return null;
-    }
-
     const ffmpeg = ffmpegRef.current;
     setIsCompressing(true);
     setOriginalSize(file.size);
@@ -111,20 +95,26 @@ export const useVideoCompression = () => {
       const duration = await getVideoDuration(file);
       const targetBitrate = Math.floor((targetSize * 8) / duration);
       const videoBitrate = Math.floor(targetBitrate * 0.95);
+      const audioBitrate = '128k'; // Fixed audio bitrate for faster processing
 
-      // Ultra-fast compression settings with 720p resolution
+      // Ultra-fast compression settings optimized for speed
       await ffmpeg.exec([
         '-i', 'input.mp4',
         '-c:v', 'libx264',
-        '-preset', 'ultrafast', // Fastest preset for maximum speed
+        '-preset', 'ultrafast', // Fastest preset
+        '-tune', 'fastdecode', // Optimize for fast decoding
         '-vf', 'scale=-2:720', // Force 720p while maintaining aspect ratio
-        '-crf', '28', // Higher CRF for faster compression
-        '-maxrate', `${videoBitrate}`,
+        '-threads', '0', // Use all available CPU threads
+        '-tile-columns', '6', // Optimize for parallel processing
+        '-frame-parallel', '1', // Enable parallel frame processing
+        '-cpu-used', '8', // Maximum CPU usage
+        '-row-mt', '1', // Enable row-based multithreading
+        '-b:v', `${videoBitrate}`,
+        '-maxrate', `${videoBitrate * 1.5}`,
         '-bufsize', `${videoBitrate * 2}`,
         '-c:a', 'aac',
-        '-b:a', '128k', // Fixed audio bitrate
+        '-b:a', audioBitrate,
         '-movflags', '+faststart',
-        '-threads', '0', // Use all available CPU threads
         '-y',
         'output.mp4'
       ]);
@@ -143,9 +133,6 @@ export const useVideoCompression = () => {
         reduction: ((file.size - compressedFile.size) / file.size * 100).toFixed(1) + '%'
       });
 
-      setLoadingMessage('Compression complete!');
-      setCompressionProgress(100);
-      
       return compressedFile;
     } catch (error) {
       console.error('Error during compression:', error);
