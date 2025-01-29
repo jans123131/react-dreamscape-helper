@@ -27,11 +27,11 @@ const calculateTimeLeft = (progress: number, elapsedTime: number): string => {
 
 export const compressVideo = async (
   file: File,
-  targetSize: number = 400 * 1024 * 1024, // 400MB target
+  targetSize: number = 200 * 1024 * 1024, // Reduced to 200MB target
   onProgress: (progress: CompressionProgress) => void
 ): Promise<File> => {
   console.log('Starting video compression...', { originalSize: formatFileSize(file.size) });
-  
+
   const ff = new FFmpeg();
   const startTime = Date.now();
   let lastProgress = 0;
@@ -88,12 +88,16 @@ export const compressVideo = async (
       duration
     });
 
-    // Updated FFmpeg command with better compression settings
+    // Optimized FFmpeg command for faster compression
     await ff.exec([
       '-i', inputFileName,
       '-c:v', 'libx264',
-      '-preset', 'medium', // Better compression, slower encoding
-      '-crf', '23', // Constant Rate Factor for better quality control
+      '-preset', 'veryfast', // Changed from ultrafast to veryfast for better compression
+      '-threads', '0',
+      '-crf', '40', // Increased from 18 to 23 for faster compression
+      '-vf', 'scale=-2:720', // Scale down to 720p
+      '-g', '30', // Keyframe every 30 frames
+      '-keyint_min', '30',
       '-b:v', `${videoBitrate}`,
       '-maxrate', `${videoBitrate * 1.5}`,
       '-bufsize', `${videoBitrate * 2}`,
@@ -138,3 +142,5 @@ const getVideoDuration = async (file: File): Promise<number> => {
     video.src = URL.createObjectURL(file);
   });
 };
+
+export default compressVideo;

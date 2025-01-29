@@ -26,23 +26,50 @@ export const useVideoUploadForm = () => {
     setSelectedSubchapter('');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!videoFile || !thumbnailFile) {
+  const validateForm = () => {
+    if (!title.trim()) {
       toast({
         variant: "destructive",
-        title: "Fichiers manquants",
-        description: "Veuillez sélectionner une vidéo et une miniature"
+        title: "Titre requis",
+        description: "Veuillez entrer un titre pour la vidéo"
       });
-      return;
+      return false;
     }
 
     if (!selectedChapter || !selectedSubchapter) {
       toast({
         variant: "destructive",
-        title: "Sélection incomplète",
-        description: "Veuillez sélectionner un chapitre et un sous-chapitre"
+        title: "Sélection requise",
+        description: "Veuillez sélectionner une saison et un chapitre"
       });
+      return false;
+    }
+
+    if (!videoFile) {
+      toast({
+        variant: "destructive",
+        title: "Vidéo requise",
+        description: "Veuillez sélectionner une vidéo à télécharger"
+      });
+      return false;
+    }
+
+    if (!thumbnailFile) {
+      toast({
+        variant: "destructive",
+        title: "Miniature requise",
+        description: "Veuillez sélectionner une image miniature"
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
       return;
     }
 
@@ -52,11 +79,11 @@ export const useVideoUploadForm = () => {
     formData.append('thumbnail', thumbnailFile);
     formData.append('title', title);
     formData.append('description', description);
-    formData.append('chapter', selectedChapter);
-    formData.append('subchapter', selectedSubchapter);
+    formData.append('id_saison', selectedChapter);
+    formData.append('id_chapter', selectedSubchapter);
 
     try {
-      const response = await fetch('https://plateform.draminesaid.com/app/upload.php', {
+      const response = await fetch('https://plateform.draminesaid.com/app/uploadnew.php', {
         method: 'POST',
         body: formData,
       });
