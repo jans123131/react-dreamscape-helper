@@ -40,7 +40,7 @@ const VideoCard: React.FC<VideoCardProps> = ({
         {isAdmin && (
           <div className="absolute top-2 right-2 flex gap-2 z-10">
             <button
-              className="p-2 bg-red-500/80 rounded-full hover:bg-red-600 transition-colors"
+              className="p-2 bg-red-500 rounded-full hover:bg-red-600 transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
                 onDeleteClick(video.id);
@@ -50,7 +50,7 @@ const VideoCard: React.FC<VideoCardProps> = ({
               <XCircle className="w-5 h-5 text-white" />
             </button>
             <button
-              className="p-2 bg-blue-500/80 rounded-full hover:bg-blue-600 transition-colors"
+              className="p-2 bg-blue-500 rounded-full hover:bg-blue-600 transition-colors"
               onClick={(e) => onEditClick(video, e)}
               title="تعديل الفيديو"
             >

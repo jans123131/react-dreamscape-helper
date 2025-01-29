@@ -52,13 +52,13 @@ const VideoFilter: React.FC<VideoFilterProps> = ({
       />
       
       <Select value={selectedSeason} onValueChange={onSeasonChange}>
-        <SelectTrigger>
+        <SelectTrigger className="text-black bg-white">
           <SelectValue placeholder="اختر الموسم" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">كل المواسم</SelectItem>
+          <SelectItem value="all" className="text-black">كل المواسم</SelectItem>
           {seasonsData?.saisons.map((season) => (
-            <SelectItem key={season.id_saison} value={season.id_saison}>
+            <SelectItem key={season.id_saison} value={season.id_saison} className="text-black">
               {season.name_saison}
             </SelectItem>
           ))}
@@ -70,13 +70,13 @@ const VideoFilter: React.FC<VideoFilterProps> = ({
         onValueChange={onChapterChange}
         disabled={!selectedSeason || selectedSeason === 'all'}
       >
-        <SelectTrigger>
+        <SelectTrigger className="text-black bg-white">
           <SelectValue placeholder="اختر الفصل" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">كل الفصول</SelectItem>
+          <SelectItem value="all" className="text-black">كل الفصول</SelectItem>
           {filteredChapters.map((chapter) => (
-            <SelectItem key={chapter.id_chapter} value={chapter.id_chapter}>
+            <SelectItem key={chapter.id_chapter} value={chapter.id_chapter} className="text-black">
               {chapter.name_chapter}
             </SelectItem>
           ))}
