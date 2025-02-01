@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import ImageCarousel from './components/ImageCarousel';
 import FoodHeader from './components/FoodHeader';
@@ -125,45 +126,60 @@ const FoodDetail = ({ navigation, route }) => {
       <StatusBar translucent backgroundColor="transparent" />
       <ImageCarousel images={foodData.images} scrollX={scrollX} />
 
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
+      <LinearGradient
+        colors={['rgba(0,0,0,0.5)', 'transparent']}
+        style={styles.headerGradient}
       >
-        <Icon name="arrow-back" size={24} color="#fff" />
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+      </LinearGradient>
 
-      <ScrollView style={styles.contentContainer} showsVerticalScrollIndicator={false}>
-        <FoodHeader 
-          title={foodData.title}
-          hallal={foodData.hallal}
-          foodtype={foodData.foodtype}
-          expiryDate={foodData.expiryDate}
-        />
+      <ScrollView 
+        style={styles.contentContainer} 
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
+        <View style={styles.contentWrapper}>
+          <FoodHeader 
+            title={foodData.title}
+            hallal={foodData.hallal}
+            foodtype={foodData.foodtype}
+            expiryDate={foodData.expiryDate}
+          />
 
-        <QuickInfo 
-          quantity={foodData.actualquantity_food}
-          quantityType={foodData.quantitytype_food}
-          allergens={foodData.allergens}
-          isFrozen={foodData.isfrozen}
-        />
+          <QuickInfo 
+            quantity={foodData.actualquantity_food}
+            quantityType={foodData.quantitytype_food}
+            allergens={foodData.allergens}
+            isFrozen={foodData.isfrozen}
+          />
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About this food</Text>
-          <Text style={styles.description}>{foodData.description}</Text>
-        </View>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>About this food</Text>
+            <Text style={styles.description}>{foodData.description}</Text>
+          </View>
 
-        <LocationInfo location={foodData.location} />
+          <LocationInfo location={foodData.location} />
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Additional Notes</Text>
-          <Text style={styles.description}>{foodData.additionalnote}</Text>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Additional Notes</Text>
+            <Text style={styles.description}>{foodData.additionalnote}</Text>
+          </View>
+          
+          <View style={styles.spacer} />
         </View>
       </ScrollView>
 
       <View style={styles.bottomContainer}>
         <TouchableOpacity 
-          style={[styles.actionButton, 
-            { opacity: foodData.status === 'Available' ? 1 : 0.6 }]}
+          style={[
+            styles.actionButton, 
+            { opacity: foodData.status === 'Available' ? 1 : 0.6 }
+          ]}
           disabled={foodData.status !== 'Available'}
           onPress={() => navigation.navigate('OrderFood', { foodData })}
         >
@@ -186,6 +202,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  headerGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 100,
+    zIndex: 1,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -196,6 +220,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 16,
     color: '#666',
+    fontFamily: 'System',
   },
   errorContainer: {
     flex: 1,
@@ -209,26 +234,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     textAlign: 'center',
+    fontFamily: 'System',
   },
   retryButton: {
     marginTop: 20,
     paddingHorizontal: 20,
     paddingVertical: 10,
     backgroundColor: '#893571',
-    borderRadius: 20,
+    borderRadius: 25,
+    elevation: 3,
   },
   retryButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'System',
   },
   backButton: {
     position: 'absolute',
     top: StatusBar.currentHeight + 10,
     left: 20,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    padding: 8,
-    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    padding: 12,
+    borderRadius: 25,
+    elevation: 2,
   },
   contentContainer: {
     flex: 1,
@@ -236,27 +265,39 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     marginTop: -30,
-    paddingHorizontal: 20,
+  },
+  contentWrapper: {
+    padding: 20,
   },
   section: {
     marginBottom: 25,
+    backgroundColor: '#F8F9FA',
+    padding: 15,
+    borderRadius: 15,
+    elevation: 1,
   },
   sectionTitle: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 12,
+    fontFamily: 'System',
   },
   description: {
-    fontSize: 14,
+    fontSize: 15,
     lineHeight: 24,
     color: '#666',
+    fontFamily: 'System',
+  },
+  spacer: {
+    height: 20,
   },
   bottomContainer: {
     padding: 20,
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
+    elevation: 10,
   },
   actionButton: {
     backgroundColor: '#893571',
@@ -272,6 +313,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginRight: 8,
+    fontFamily: 'System',
   },
 });
 
