@@ -1,130 +1,121 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
+import { View, StyleSheet } from 'react-native';
+import MapView from 'react-native-maps';
 import * as Location from 'expo-location';
-import { mapCustomStyle } from '../mapStyle';
-import { Colors } from '../../../common/design';
-
-const INITIAL_REGION = {
-  latitude: 24.8607,
-  longitude: 67.0011,
-  latitudeDelta: 0.0922,
-  longitudeDelta: 0.0421,
-};
+import CustomMarker from './CustomMarker';
+import { useNavigation } from '@react-navigation/native';
 
 const MapComponent = () => {
-  const [location, setLocation] = useState(null);
   const [foodLocations, setFoodLocations] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [initialRegion, setInitialRegion] = useState(null);
   const mapRef = useRef(null);
-  const isMounted = useRef(true);
+  const navigation = useNavigation();
+  const abortControllerRef = useRef(null);
 
   const fetchFoodLocations = async () => {
     try {
-      const response = await fetch('http://192.168.1.53:5002/api/foods/foodlocations');
+      abortControllerRef.current = new AbortController();
+      const response = await fetch('http://192.168.1.53:5002/api/foods/foodlocations', {
+        signal: abortControllerRef.current.signal
+      });
       const data = await response.json();
-      if (isMounted.current) {
-        const parsedData = data.map((item) => ({
-          id: item.id_food,
-          name: item.name_food,
-          description: item.description_food,
-          coordinate: {
-            latitude: parseFloat(item.availability.altitude_availability.replace(/\"/g, '')),
-            longitude: parseFloat(item.availability.longitude_availability.replace(/\"/g, '')),
-          },
-        }));
-        setFoodLocations(parsedData);
+      setFoodLocations(data);
+
+      // Find the center of the area with most markers
+      if (data.length > 0) {
+        const centerPoint = findCenterOfMostDenseArea(data);
+        setInitialRegion({
+          latitude: centerPoint.latitude,
+          longitude: centerPoint.longitude,
+          latitudeDelta: 0.02,
+          longitudeDelta: 0.02,
+        });
       }
     } catch (error) {
+      if (error.name === 'AbortError') return;
       console.error('Error fetching food locations:', error);
     }
   };
 
-  const getCurrentLocation = async () => {
-    try {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Please grant location permissions');
-        setIsLoading(false);
-        return;
-      }
+  const findCenterOfMostDenseArea = (locations) => {
+    // Simple algorithm to find the center of the area with most markers
+    // You could make this more sophisticated based on your needs
+    const gridSize = 0.01; // roughly 1km
+    const grid = {};
 
-      let currentLocation = await Location.getCurrentPositionAsync({});
-      if (isMounted.current) {
-        setLocation(currentLocation);
-        if (mapRef.current) {
-          mapRef.current.animateToRegion({
-            latitude: currentLocation.coords.latitude,
-            longitude: currentLocation.coords.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }, 1000);
-        }
+    locations.forEach(location => {
+      const lat = parseFloat(location.availability.altitude_availability.replace(/\"/g, ''));
+      const lng = parseFloat(location.availability.longitude_availability.replace(/\"/g, ''));
+      
+      const gridKey = `${Math.floor(lat/gridSize)},${Math.floor(lng/gridSize)}`;
+      if (!grid[gridKey]) grid[gridKey] = [];
+      grid[gridKey].push({ lat, lng });
+    });
+
+    let maxCount = 0;
+    let densestGrid = null;
+
+    Object.entries(grid).forEach(([key, points]) => {
+      if (points.length > maxCount) {
+        maxCount = points.length;
+        densestGrid = points;
       }
-    } catch (error) {
-      console.error('Error fetching location:', error);
+    });
+
+    if (densestGrid) {
+      const centerLat = densestGrid.reduce((sum, point) => sum + point.lat, 0) / densestGrid.length;
+      const centerLng = densestGrid.reduce((sum, point) => sum + point.lng, 0) / densestGrid.length;
+      return { latitude: centerLat, longitude: centerLng };
     }
+
+    // Fallback to first location if no dense area found
+    return {
+      latitude: parseFloat(locations[0].availability.altitude_availability.replace(/\"/g, '')),
+      longitude: parseFloat(locations[0].availability.longitude_availability.replace(/\"/g, '')),
+    };
   };
 
   useEffect(() => {
-    isMounted.current = true;
-    
-    const initializeMap = async () => {
-      setIsLoading(true);
-      await getCurrentLocation();
-      await fetchFoodLocations();
-      if (isMounted.current) {
-        setIsLoading(false);
-      }
-    };
-
-    initializeMap();
+    fetchFoodLocations();
 
     return () => {
-      isMounted.current = false;
+      // Cleanup function
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
     };
   }, []);
 
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={Colors.primary} />
-      </View>
-    );
-  }
+  useEffect(() => {
+    if (initialRegion && mapRef.current) {
+      mapRef.current.animateToRegion(initialRegion, 1000);
+    }
+  }, [initialRegion]);
+
+  const handleMarkerPress = (foodId) => {
+    navigation.navigate('FoodDetail', { foodId });
+  };
 
   return (
     <View style={styles.container}>
       <MapView
         ref={mapRef}
         style={styles.map}
-        provider={PROVIDER_GOOGLE}
-        customMapStyle={mapCustomStyle}
-        initialRegion={INITIAL_REGION}
+        initialRegion={initialRegion || {
+          latitude: 45.5017,
+          longitude: -73.5673,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        }}
         showsUserLocation={true}
         showsMyLocationButton={true}
       >
-        {foodLocations.map((foodLocation) => (
-          <Marker
-            key={foodLocation.id}
-            coordinate={foodLocation.coordinate}
-            tracksViewChanges={false}
-          >
-            <View style={styles.markerContainer}>
-              <View style={styles.markerOuter}>
-                <View style={styles.markerInner}>
-                  <View style={styles.markerDot} />
-                </View>
-              </View>
-              <View style={styles.markerTriangle} />
-            </View>
-            <Callout>
-              <View style={styles.calloutContainer}>
-                <Text style={styles.calloutTitle}>{foodLocation.name}</Text>
-                <Text style={styles.calloutDescription}>{foodLocation.description}</Text>
-              </View>
-            </Callout>
-          </Marker>
+        {foodLocations.map((food) => (
+          <CustomMarker
+            key={food.id_food}
+            food={food}
+            onPress={() => handleMarkerPress(food.id_food)}
+          />
         ))}
       </MapView>
     </View>
@@ -137,72 +128,6 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  markerContainer: {
-    alignItems: 'center',
-  },
-  markerOuter: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  markerInner: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  markerDot: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: Colors.primary,
-  },
-  markerTriangle: {
-    width: 0,
-    height: 0,
-    backgroundColor: 'transparent',
-    borderStyle: 'solid',
-    borderLeftWidth: 10,
-    borderRightWidth: 10,
-    borderBottomWidth: 0,
-    borderTopWidth: 15,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderTopColor: Colors.primary,
-    transform: [{ translateY: -5 }],
-  },
-  calloutContainer: {
-    width: 200,
-    padding: 10,
-  },
-  calloutTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: Colors.textPrimary,
-    marginBottom: 5,
-  },
-  calloutDescription: {
-    fontSize: 14,
-    color: Colors.textSecondary,
   },
 });
 
