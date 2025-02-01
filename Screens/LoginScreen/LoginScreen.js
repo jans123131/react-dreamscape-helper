@@ -23,6 +23,7 @@ import * as Linking from 'expo-linking';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import SocialLoginButton from './SocialLoginButton';
 
 const { width, height } = Dimensions.get('window');
 
@@ -158,6 +159,8 @@ export default function LoginScreen({ navigation }) {
             <Card style={styles.card}>
               <Text style={styles.title}>{t('LoginScreen.welcome_back')}</Text>
               <Text style={styles.subtitle}>{t('LoginScreen.login_to_continue')}</Text>
+              
+              {/* Email and Password inputs */}
               <View style={styles.inputContainer}>
                 <MaterialIcons name="email" size={24} color="#b8658f" />
                 <TextInput
@@ -180,11 +183,20 @@ export default function LoginScreen({ navigation }) {
                   autoCapitalize="none"
                 />
               </View>
+
+              {/* Forgot Password Link */}
               <TouchableOpacity onPress={() => navigation.navigate('ForgetScreen')}>
                 <Text style={styles.forgotPassword}>{t('LoginScreen.forgot_password')}</Text>
               </TouchableOpacity>
+
+              {/* Login Button */}
               <TouchableOpacity onPress={handleLogin} disabled={loading}>
-                <LinearGradient colors={['#b8658f', '#893571']} start={{ x: 0, y: 1 }} end={{ x: 0, y: 0 }} style={styles.gradientButton}>
+                <LinearGradient 
+                  colors={['#b8658f', '#893571']} 
+                  start={{ x: 0, y: 1 }} 
+                  end={{ x: 0, y: 0 }} 
+                  style={styles.gradientButton}
+                >
                   <Text style={styles.buttonText}>
                     {loading ? t('LoginScreen.logging_in') : t('LoginScreen.login')}
                   </Text>
@@ -195,12 +207,14 @@ export default function LoginScreen({ navigation }) {
                 <Text style={styles.orText}>{t('LoginScreen.or')}</Text>
               </View>
 
-              <TouchableOpacity style={styles.googleButton} onPress={onGooglePress}>
-                <FontAwesome name="google" size={24} color="#893571" />
-                <Text style={styles.googleText}>{t('LoginScreen.sign_in_google')}</Text>
-              </TouchableOpacity>
-              
+              {/* Social Login Buttons */}
+              <View style={styles.socialButtonsContainer}>
+                <SocialLoginButton provider="google" navigation={navigation} user={user} />
+                <SocialLoginButton provider="facebook" navigation={navigation} user={user} />
+              </View>
             </Card>
+
+            {/* Bottom Sign Up Link */}
             <View style={styles.bottomContainer}>
               <TouchableOpacity onPress={() => navigation.navigate('SignupScreen')}>
                 <Text style={styles.bottomText}>
@@ -288,19 +302,9 @@ const styles = StyleSheet.create({
     fontSize: width * 0.04,
     fontWeight: 'bold',
   },
-  googleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: height * 0.018,
-  },
-  googleText: {
-    marginLeft: width * 0.03,
-    fontSize: width * 0.04,
-    color: '#333',
+  socialButtonsContainer: {
+    marginTop: 10,
+    gap: 10
   },
   orContainer: {
     alignItems: 'center',
