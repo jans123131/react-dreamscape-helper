@@ -20,6 +20,8 @@ import FoodDetail from '../Screens/FoodPage/FoodDetail';
 import NGODetail from '../Screens/NgoPage/NGODetail';
 import StoreSceen from '../Screens/Store/StoreScreen';
 import AdressPickerScreen from '../Screens/AdressPickerScreen/AdressPickerScreen';
+import OrderFood from '../Screens/FoodPage/OrderFood';
+
 const Stack = createStackNavigator();
 
 export default function AppNavigator() {
@@ -111,6 +113,11 @@ export default function AppNavigator() {
         name="AdressPickerScreen"
         component={AdressPickerScreen}
         options={{ headerShown: false }} // Hide header for this screen
+      />
+      <Stack.Screen
+        name="OrderFood"
+        component={OrderFood}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

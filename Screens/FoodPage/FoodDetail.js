@@ -165,6 +165,7 @@ const FoodDetail = ({ navigation, route }) => {
           style={[styles.actionButton, 
             { opacity: foodData.status === 'Available' ? 1 : 0.6 }]}
           disabled={foodData.status !== 'Available'}
+          onPress={() => navigation.navigate('OrderFood', { foodData })}
         >
           <Text style={styles.actionButtonText}>
             {foodData.status === 'Available' ? 'Request Food' : 'Currently Reserved'}
