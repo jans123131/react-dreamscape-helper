@@ -24,7 +24,7 @@ const LanguageSelector = () => {
         <View style={styles.itemIcon}>
           <MaterialCommunityIcons name="translate" size={24} color="#893571" />
         </View>
-        <Text style={styles.itemText}>{t('language')}</Text>
+        <Text style={styles.itemText}>{t('SettingsScreen.language')}</Text>
         <Text style={styles.selectedLanguage}>
           {languages.find(lang => lang.code === lng)?.label}
         </Text>
@@ -38,7 +38,7 @@ const LanguageSelector = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{t('select_language')}</Text>
+            <Text style={styles.modalTitle}>{t('SettingsScreen.select_language')}</Text>
             {languages.map((language, index) => (
               <TouchableOpacity
                 key={index}
@@ -62,7 +62,7 @@ const LanguageSelector = () => {
               onPress={() => setLanguageModalVisible(false)}
               style={styles.closeModalButton}
             >
-              {t('close')}
+              {t('SettingsScreen.close')}
             </Button>
           </View>
         </View>

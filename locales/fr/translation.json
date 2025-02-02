@@ -26,6 +26,7 @@
         "SupportLocalShareAndConnect": "Soutenez localement, partagez et connectez-vous"
     },
     "DonateScreen": {
+        "shareYourFood": "Partagez Votre Nourriture",
         "donationComplete": "Don terminé",
         "step": "Étape {{currentStep}} sur 4"
     },
@@ -133,7 +134,9 @@
         "country": "Pays",
         "address": "Adresse",
         "postal_code": "Code postal",
-        "select_country": "Sélectionnez un pays"
+        "select_country": "Sélectionnez un pays",
+        "select_language": "Sélectionnez un language",
+        "close": "fermer"
     },
     "FAQ": {
         "title": "FAQs",
@@ -186,5 +189,36 @@
         "login": "Se connecter",
         "united_states": "États-Unis",
         "canada": "Canada"
+    },
+    "StoreScreen": {
+        "search_placeholder": "Rechercher des magasins et des articles..."
+    },
+    "PromoContainer": {
+        "FreshDeals": "Offres Fraîches",
+        "GetFreshDealsDesc": "Profitez d'offres exceptionnelles sur des repas faits maison de votre communauté",
+        "SpecialOffer": "Offre Spéciale",
+        "SpecialOfferDesc": "Rejoignez notre communauté et obtenez des réductions sur votre premier repas partagé",
+        "DailySpecials": "Spécialités du Jour",
+        "DailySpecialsDesc": "Découvrez des plats uniques partagés par des cuisiniers talentueux près de chez vous",
+        "WeekendSale": "Spécial Weekend",
+        "WeekendSaleDesc": "Portions supplémentaires disponibles ce weekend ! Ne manquez pas ça",
+        "OrderNow": "Commander"
+    },
+    "OrderConfirmation": {
+        "CheckingInfo": "Vérification de vos informations...",
+        "ValidatingOrder": "Validation de la commande...",
+        "SendingNotification": "Envoi de la notification...",
+        "OrderCompleted": "Commande terminée !",
+        "Congratulations": "Félicitations ! Votre commande de nourriture a été passée.",
+        "WaitForConfirmation": "Veuillez attendre la confirmation du donneur."
+    },
+    "OrderDetails": {
+        "title": "Détails de la commande",
+        "available_until": "Disponible jusqu'au",
+        "select_quantity": "Sélectionner la quantité",
+        "available": "Disponible",
+        "important_notes": "Notes importantes",
+        "pickup_note": "Assurez-vous de pouvoir récupérer la nourriture à l'endroit et à l'heure spécifiés.",
+        "confirm_request": "Confirmer la demande"
     }
 }

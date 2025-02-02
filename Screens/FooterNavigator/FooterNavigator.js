@@ -3,10 +3,6 @@ import { StyleSheet, View, TouchableOpacity, Text, Platform, Dimensions } from '
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-} from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
 
@@ -23,29 +19,15 @@ const FooterNavigator = () => {
   const TabButton = ({ label, icon, screen, isCenter = false }) => {
     const isActive = activeTab === screen;
 
-    const animatedStyle = useAnimatedStyle(() => {
-      return {
-        transform: [
-          {
-            scale: withSpring(isActive ? 1.2 : 1),
-          },
-        ],
-      };
-    });
-
     return (
       <TouchableOpacity
-        style={[
-          styles.tabButton,
-          isActive && styles.activeTabButton,
-          isCenter && styles.centerButton,
-        ]}
+        style={[styles.tabButton, isCenter && styles.centerButton]}
         onPress={() => {
           setActiveTab(screen);
           navigation.navigate(screen);
         }}
       >
-        <Animated.View style={[styles.iconContainer, animatedStyle]}>
+        <View style={styles.iconContainer}>
           {isCenter ? (
             <View style={styles.centerButtonInner}>
               <Icon name={icon} size={30} color="white" />
@@ -62,7 +44,7 @@ const FooterNavigator = () => {
               </Text>
             </>
           )}
-        </Animated.View>
+        </View>
       </TouchableOpacity>
     );
   };
@@ -70,37 +52,15 @@ const FooterNavigator = () => {
   return (
     <View style={styles.container}>
       <View style={styles.footerContainer}>
-        <TabButton
-          label={t('Footer.Home')}
-          icon="home-outline"
-          screen="HomeScreen"
-        />
-        <TabButton
-          label={t('Footer.Community')}
-          icon="people-outline"
-          screen="CommunityScreen"
-        />
-        <TabButton
-          label=""
-          icon="map-outline"
-          screen="MapScreen"
-          isCenter={true}
-        />
-        <TabButton
-          label={t('Footer.Store')}
-          icon="storefront"
-          screen="StoreScreen"
-        />
-        <TabButton
-          label={t('Footer.Profile')}
-          icon="person-outline"
-          screen="SettingsScreen"
-        />
+        <TabButton label={t('Footer.Home')} icon="home-outline" screen="HomeScreen" />
+        <TabButton label={t('Footer.Community')} icon="people-outline" screen="CommunityScreen" />
+        <TabButton label="" icon="map-outline" screen="MapScreen" isCenter={true} />
+        <TabButton label={t('Footer.Store')} icon="storefront" screen="StoreScreen" />
+        <TabButton label={t('Footer.Profile')} icon="person-outline" screen="SettingsScreen" />
       </View>
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
@@ -116,10 +76,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: -4,
-    },
+    shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 10,
@@ -132,13 +89,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     position: 'relative',
   },
-  activeTabButton: {
-    backgroundColor: 'transparent',
-  },
   centerButton: {
     justifyContent: 'flex-start',
     marginTop: -18,
-    
   },
   centerButtonInner: {
     backgroundColor: '#893571',
@@ -148,10 +101,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#893571',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 8,

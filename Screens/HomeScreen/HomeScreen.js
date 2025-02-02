@@ -1,12 +1,12 @@
 import React from 'react';
 import {
-  Text,
   StyleSheet,
   ScrollView,
   View,
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Colors } from '../../common/design';
 import Header from '../Commons/Header';
 import ImpaContainer from './Components/ImpaContainer';
 import QuickActions from './Components/QuickActions';
@@ -21,7 +21,10 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container}>
       <Header />
       <View style={styles.contentContainer}>
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+        >
           <ImpaContainer />
           <QuickActions />
           <LatestArticles />
@@ -36,14 +39,12 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#EDE7F6',
+    backgroundColor: Colors.background,
   },
   contentContainer: {
-    flex: 1, // Ensures ScrollView takes available space
+    flex: 1,
   },
   scrollContainer: {
-    paddingBottom: 80, // Adjust padding according to FooterNavigator height
-    paddingHorizontal: 16,
+    paddingBottom: 80,
   },
 });
-

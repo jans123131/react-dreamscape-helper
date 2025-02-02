@@ -1,136 +1,159 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Animated, ImageBackground } from 'react-native';
 import { useTranslation } from 'react-i18next';
-const ImpactContainer = () => {
+
+const { width } = Dimensions.get('window');
+
+const PromoContainer = () => {
   const { t } = useTranslation();
+  const [activeSlide, setActiveSlide] = useState(0);
+  const scrollViewRef = useRef(null);
+
+  const promos = [
+    {
+      title: t('PromoContainer.FreshDeals'),
+      description: t('PromoContainer.GetFreshDealsDesc'),
+      image: 'https://i.ibb.co/VYbq539b/Black-Yellow-Modern-Food-Video-Promo-1.png'
+    },
+    {
+      title: t('PromoContainer.SpecialOffer'),
+      description: t('PromoContainer.SpecialOfferDesc'),
+      image: 'https://i.ibb.co/vxgYfrCq/Black-Yellow-Modern-Food-Video-Promo-2.png'
+    
+    },  {
+      title: t('PromoContainer.DailySpecials'),
+      description: t('PromoContainer.DailySpecialsDesc'),
+      image: 'https://i.ibb.co/WWf6yfLj/Black-Yellow-Modern-Food-Video-Promo-3.png'
+    },
+    {
+      title: t('PromoContainer.WeekendSale'),
+      description: t('PromoContainer.WeekendSaleDesc'),
+      image: 'https://i.ibb.co/S7sC5HRH/Black-Yellow-Modern-Food-Video-Promo.png'
+    }
+  ];
+
+  const handleScroll = (event) => {
+    const slideSize = event.nativeEvent.layoutMeasurement.width;
+    const currentIndex = Math.floor(event.nativeEvent.contentOffset.x / slideSize);
+    setActiveSlide(currentIndex);
+  };
 
   return (
-    <View style={styles.pageContainer}>
+    <View style={styles.container}>
       <ScrollView
+        ref={scrollViewRef}
         horizontal
+        pagingEnabled
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContainer}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        style={styles.scrollView}
       >
-        <View style={styles.impactContainer}>
-          <LinearGradient
-            colors={['#893571', '#b8658f']}
-            style={styles.impactCard}
-          >
-            <Text style={styles.impactTitle}>{t('ImpaContainer.YourImpact')}</Text>
-            <View style={styles.impactStats}>
-              <View style={styles.statItem}>
-                <Text style={styles.statNumber}>2,450</Text>
-                <Text style={styles.statLabel}>{t('ImpaContainer.MealsShared')}</Text>
+        {promos.map((promo, index) => (
+          <View key={index} style={styles.slide}>
+            <ImageBackground
+              source={{ uri: promo.image }}
+              style={styles.promoCard}
+              imageStyle={styles.backgroundImage}
+            >
+              <View style={styles.overlay} />
+              <View style={styles.contentContainer}>
+                <Text style={styles.title}>{promo.title}</Text>
+                <Text style={styles.description}>{promo.description}</Text>
+                <TouchableOpacity style={styles.orderButton}>
+                  <Text style={styles.orderButtonText}>{t('PromoContainer.OrderNow')}</Text>
+                </TouchableOpacity>
               </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statNumber}>127</Text>
-                <Text style={styles.statLabel}>{t('ImpaContainer.LivesTouched')}</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statNumber}>15</Text>
-                <Text style={styles.statLabel}>{t('ImpaContainer.NGOsHelped')}</Text>
-              </View>
-            </View>
-          </LinearGradient>
-        </View>
-
-        {/* Second Impact Card */}
-        <View style={styles.impactContainer}>
-          <LinearGradient
-            colors={['#893571', '#b8658f']}
-            style={styles.impactCard}
-          >
-            <Text style={styles.impactTitle}>{t('ImpaContainer.Overall')}</Text>
-            <View style={styles.impactStats}>
-              <View style={styles.statItem}>
-                <Text style={styles.statNumber}>3,100</Text>
-                <Text style={styles.statLabel}>{t('ImpaContainer.MealsShared')}</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statNumber}>215</Text>
-                <Text style={styles.statLabel}>{t('ImpaContainer.LivesTouched')}</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statNumber}>20</Text>
-                <Text style={styles.statLabel}>{t('ImpaContainer.NGOsHelped')}</Text>
-              </View>
-            </View>
-          </LinearGradient>
-        </View>
-
-        {/* Indicator for the next card */}
-        <View style={styles.arrowIndicator}>
-          <Text style={styles.arrowText}>→</Text>
-        </View>
+            </ImageBackground>
+          </View>
+        ))}
       </ScrollView>
+      
+      <View style={styles.pagination}>
+        {promos.map((_, index) => (
+          <View
+            key={index}
+            style={[
+              styles.paginationDot,
+              index === activeSlide && styles.paginationDotActive
+            ]}
+          />
+        ))}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  pageContainer: {
+  container: {
+    height: 200,
+    marginVertical: 16,
+  },
+  scrollView: {
     flex: 1,
-    paddingTop: 32,
   },
-  scrollContainer: {
-    paddingHorizontal: 16,
-    flexDirection: 'row',
+  slide: {
+    width: width - 32,
+    marginHorizontal: 16,
   },
-  impactContainer: {
-    marginRight: 16, // space between cards
-    width: 300, // card width
+  promoCard: {
+    flex: 1,
+    borderRadius: 16,
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
   },
-  impactCard: {
-    padding: 16,
-    borderRadius: 12,
-    elevation: 3,
+  backgroundImage: {
+    borderRadius: 16,
   },
-  impactTitle: {
-    fontSize: 22,
-    color: '#FFF',
-    fontWeight: 'bold',
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    borderRadius: 16,
   },
-  impactStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 16,
+  contentContainer: {
+    padding: 20,
   },
-  statItem: {
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FFF',
-  },
-  statLabel: {
-    fontSize: 14,
-    color: '#FFF',
-  },
-  statDivider: {
-    height: 24,
-    borderLeftWidth: 1,
-    borderColor: '#FFF',
-  },
-  arrowIndicator: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 8,
-    position: 'absolute',
-    top: '50%',
-    right: 16,
-  },
-  arrowText: {
+  title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#b8658f',
-    transform: [{ rotate: '90deg' }],
+    color: '#FFFFFF',
+    marginBottom: 8,
+  },
+  description: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    opacity: 0.9,
+    marginBottom: 16,
+  },
+  orderButton: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 25,
+  },
+  orderButtonText: {
+    color: '#333333',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  pagination: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#D1D1D1',
+    marginHorizontal: 4,
+  },
+  paginationDotActive: {
+    backgroundColor: '#893571',
+    width: 24,
   },
 });
 
-export default ImpactContainer;
+export default PromoContainer;

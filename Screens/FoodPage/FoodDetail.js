@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -7,6 +7,7 @@ import {
   StatusBar,
   ActivityIndicator,
   Text,
+  Animated,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,6 +21,8 @@ const FoodDetail = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { foodId } = route.params;
+
+  const scrollX = useRef(new Animated.Value(0)).current; // ✅ Fixed: Initialize Animated.Value
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -90,7 +93,7 @@ const FoodDetail = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <StatusBar translucent backgroundColor="transparent" />
-      <ImageCarousel images={foodData.images} />
+      <ImageCarousel images={foodData.images} scrollX={scrollX} /> {/* ✅ Fixed: Pass scrollX */}
 
       <LinearGradient
         colors={['rgba(0,0,0,0.5)', 'transparent']}

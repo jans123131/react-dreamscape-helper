@@ -1,36 +1,48 @@
 import React from 'react';
 import { Text, TouchableOpacity, StyleSheet, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation
+import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 const QuickActions = () => {
-  const navigation = useNavigation(); // Acc
-  // ess navigation object
+  const navigation = useNavigation();
   const { t } = useTranslation();
+
+  const actions = [
+    {
+      icon: "food-apple",
+      text: t('QuickActions.Donate'),
+      route: 'DonateScreen',
+    },
+    {
+      icon: "map-marker",
+      text: t('QuickActions.FindNGOs'),
+      route: 'NgoFindScreen',
+    },
+    {
+      icon: "history",
+      text: t('QuickActions.History'),
+      route: 'MyHistoryScreen',
+    },
+  ];
+
   return (
     <View style={styles.quickActions}>
-      <TouchableOpacity
-        style={styles.actionButton}
-        onPress={() => navigation.navigate('DonateScreen')} // Navigate to DonateScreen
-      >
-        <MaterialCommunityIcons name="food-apple" size={24} color="#893571" />
-        <Text style={styles.actionText}>{t('QuickActions.Donate')}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.actionButton}
-        onPress={() => navigation.navigate('NgoFindScreen')} // Navigate to NgoScreen
-      >
-        <MaterialCommunityIcons name="map-marker" size={24} color="#893571" />
-        <Text style={styles.actionText}>{t('QuickActions.FindNGOs')}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.actionButton}
-        onPress={() => navigation.navigate('MyHistoryScreen')} // Navigate to MyHistoryScreen
-      >
-        <MaterialCommunityIcons name="history" size={24} color="#893571" />
-        <Text style={styles.actionText}>{t('QuickActions.History')}</Text>
-      </TouchableOpacity>
+      {actions.map((action, index) => (
+        <View key={index} style={styles.actionWrapper}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => navigation.navigate(action.route)}
+          >
+            <MaterialCommunityIcons 
+              name={action.icon} 
+              size={28} 
+              color="#893571" 
+            />
+            <Text style={styles.actionText}>{action.text}</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
     </View>
   );
 };
@@ -40,22 +52,34 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 16,
-    paddingHorizontal: 8,
+    paddingHorizontal: 16,
+  },
+  actionWrapper: {
+    flex: 1,
+    marginHorizontal: 6,
   },
   actionButton: {
-    flex: 1,
-    height: 80,
+    height: 100,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
-    marginHorizontal: 5,
-    borderRadius: 8,
-    padding: 10,
+    borderRadius: 20,
+    padding: 15,
+    elevation: 5, // Shadow for Android
+    shadowColor: '#000', // Shadow for iOS
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
   actionText: {
     fontSize: 14,
     color: '#333',
-    marginTop: 4,
+    marginTop: 8,
+    textAlign: 'center',
+    fontWeight: '500',
   },
 });
 

@@ -9,6 +9,7 @@ import {
   Alert,
   Platform,
   KeyboardAvoidingView,
+  Dimensions,
 } from 'react-native';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -30,7 +31,7 @@ const Step1 = ({ navigation }) => {
     const [containerType, setContainerType] = useState('grams');
     const [activeInput, setActiveInput] = useState(null);
     const [loading, setLoading] = useState(false);
-  const { t } = useTranslation();
+    const { t } = useTranslation();
 
     useEffect(() => {
         requestPermissions();
@@ -150,12 +151,17 @@ const Step1 = ({ navigation }) => {
             style={{ flex: 1 }}
         >
             <ScrollView style={styles.container}>
-                <Text style={styles.sectionTitle}>{t('Step1.AddPhotos')}</Text> 
+                <Text style={styles.sectionTitle}>{t('Step1.AddPhotos')}</Text>
                 <Text style={styles.sectionSubtitle}>
-                {t('Step1.UploadUpTo')}
-                </Text> 
+                    {t('Step1.UploadUpTo')}
+                </Text>
                 
-                <View style={styles.imageGrid}>
+                <ScrollView 
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.imageCarousel}
+                    contentContainerStyle={styles.imageCarouselContent}
+                >
                     {images.map((image, index) => (
                         <View key={index} style={styles.imageBox}>
                             <Image source={{ uri: image }} style={styles.uploadedImage} resizeMode="cover" />
@@ -170,10 +176,10 @@ const Step1 = ({ navigation }) => {
                     {images.length < MAX_IMAGES && (
                         <TouchableOpacity style={[styles.imageBox, styles.addImageBox]} onPress={pickImage}>
                             <MaterialIcons name="add-photo-alternate" size={32} color="#893571" />
-                            <Text style={styles.uploadText}>{t('Step1.AddPhoto')}</Text>     
+                            <Text style={styles.uploadText}>{t('Step1.AddPhoto')}</Text>
                         </TouchableOpacity>
                     )}
-                </View>
+                </ScrollView>
 
                 <View style={styles.inputSection}>
                     <View style={[styles.inputContainer, activeInput === 'title' && styles.inputContainerActive]}>

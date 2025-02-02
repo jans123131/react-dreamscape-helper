@@ -4,21 +4,14 @@ import {
     PixelRatio,
 } from 'react-native';
 
-// Function to get window dimensions dynamically
 const getWindowDimensions = () => Dimensions.get('window');
-
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = getWindowDimensions();
-console.log('Window Dimensions:', SCREEN_WIDTH, SCREEN_HEIGHT); // Debug log
-
-// Fallback in case SCREEN_WIDTH is 0 or undefined
 const scale = SCREEN_WIDTH > 0 ? SCREEN_WIDTH / 375 : 1;
 
 const normalize = (size) => {
     const newSize = size * scale;
     return Math.round(PixelRatio.roundToNearestPixel(newSize));
 };
-
-
 
 const styles = StyleSheet.create({
     safeArea: {
@@ -62,28 +55,31 @@ const styles = StyleSheet.create({
         color: '#666666',
         marginBottom: normalize(16),
     },
-    imageGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: normalize(10),
+
+    imageCarousel: {
         marginVertical: normalize(16),
     },
+    imageCarouselContent: {
+        paddingHorizontal: normalize(16),
+        gap: normalize(12),
+    },
     imageBox: {
-        width: (SCREEN_WIDTH - normalize(50)) / 3,
-        height: (SCREEN_WIDTH - normalize(50)) / 3,
-        borderRadius: normalize(8),
+        width: normalize(150),
+        height: normalize(150),
+        borderRadius: normalize(12),
         overflow: 'hidden',
         position: 'relative',
+        marginRight: normalize(12),
     },
     uploadedImage: {
         width: '100%',
         height: '100%',
-        borderRadius: normalize(8),
+        borderRadius: normalize(12),
     },
     removeIconContainer: {
         position: 'absolute',
-        top: normalize(4),
-        right: normalize(4),
+        top: normalize(8),
+        right: normalize(8),
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         borderRadius: normalize(12),
         padding: normalize(2),
@@ -100,7 +96,9 @@ const styles = StyleSheet.create({
         fontSize: normalize(12),
         color: '#893571',
         marginTop: normalize(4),
+        textAlign: 'center',
     },
+
     inputSection: {
         marginTop: normalize(16),
         gap: normalize(12),
@@ -172,4 +170,4 @@ const styles = StyleSheet.create({
     },
 });
 
-  export default styles;
+export default styles;

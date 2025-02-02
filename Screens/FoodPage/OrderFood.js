@@ -9,11 +9,13 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
+import OrderConfirmationAnimation from './components/OrderConfirmationAnimation';
 
 const OrderFood = ({ navigation, route }) => {
   const { t } = useTranslation();
   const { foodData } = route.params;
   const [quantity, setQuantity] = useState(1);
+  const [showAnimation, setShowAnimation] = useState(false);
   const maxQuantity = parseInt(foodData.actualquantity_food) || 1;
 
   const handleIncrement = () => {
@@ -28,10 +30,23 @@ const OrderFood = ({ navigation, route }) => {
     }
   };
 
+  const handleConfirmRequest = () => {
+    setShowAnimation(true);
+  };
+
+  const handleAnimationComplete = () => {
+    setShowAnimation(false);
+    navigation.navigate('HomeScreen');
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar translucent backgroundColor="transparent" />
       
+      {showAnimation && (
+        <OrderConfirmationAnimation onComplete={handleAnimationComplete} />
+      )}
+
       <TouchableOpacity
         style={styles.backButton}
         onPress={() => navigation.goBack()}
@@ -40,7 +55,7 @@ const OrderFood = ({ navigation, route }) => {
       </TouchableOpacity>
 
       <ScrollView style={styles.contentContainer} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Order Details</Text>
+        <Text style={styles.title}>{t('OrderDetails.title')}</Text>
         
         <View style={styles.foodInfoCard}>
           <Text style={styles.foodName}>{foodData.title}</Text>
@@ -48,7 +63,7 @@ const OrderFood = ({ navigation, route }) => {
           
           <View style={styles.detailRow}>
             <Icon name="time-outline" size={20} color="#893571" />
-            <Text style={styles.detailText}>Available until: {foodData.expiryDate}</Text>
+            <Text style={styles.detailText}>{t('OrderDetails.available_until')}: {foodData.expiryDate}</Text>
           </View>
           
           <View style={styles.detailRow}>
@@ -60,9 +75,9 @@ const OrderFood = ({ navigation, route }) => {
         </View>
 
         <View style={styles.quantitySection}>
-          <Text style={styles.sectionTitle}>Select Quantity</Text>
+          <Text style={styles.sectionTitle}>{t('OrderDetails.select_quantity')}</Text>
           <Text style={styles.availableText}>
-            Available: {foodData.actualquantity_food} {foodData.quantitytype_food}
+            {t('OrderDetails.available')}: {foodData.actualquantity_food} {foodData.quantitytype_food}
           </Text>
           
           <View style={styles.quantityControls}>
@@ -87,19 +102,22 @@ const OrderFood = ({ navigation, route }) => {
         </View>
 
         <View style={styles.notesSection}>
-          <Text style={styles.sectionTitle}>Important Notes</Text>
+          <Text style={styles.sectionTitle}>{t('OrderDetails.important_notes')}</Text>
           <View style={styles.noteCard}>
             <Icon name="information-circle-outline" size={24} color="#893571" />
             <Text style={styles.noteText}>
-              Please make sure you can pick up the food at the specified location and time.
+              {t('OrderDetails.pickup_note')}
             </Text>
           </View>
         </View>
       </ScrollView>
 
       <View style={styles.bottomContainer}>
-        <TouchableOpacity style={styles.confirmButton}>
-          <Text style={styles.confirmButtonText}>Confirm Request</Text>
+        <TouchableOpacity 
+          style={styles.confirmButton}
+          onPress={handleConfirmRequest}
+        >
+          <Text style={styles.confirmButtonText}>{t('OrderDetails.confirm_request')}</Text>
           <Icon name="arrow-forward-outline" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
