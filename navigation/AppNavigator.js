@@ -21,6 +21,7 @@ import NGODetail from '../Screens/NgoPage/NGODetail';
 import StoreSceen from '../Screens/Store/StoreScreen';
 import AdressPickerScreen from '../Screens/AdressPickerScreen/AdressPickerScreen';
 import OrderFood from '../Screens/FoodPage/OrderFood';
+import StatsScreen from '../Screens/StatsScreen/StatsScreen';
 
 const Stack = createStackNavigator();
 
@@ -89,7 +90,7 @@ export default function AppNavigator() {
         component={DonateScreen}
         options={{ headerShown: false }} // Hide header for this screen
       />
-<Stack.Screen
+      <Stack.Screen
         name="NgoFindScreen"
         component={NgoFindScreen}
         options={{ headerShown: false }} // Hide header for this screen
@@ -99,17 +100,17 @@ export default function AppNavigator() {
         component={FoodDetail}
         options={{ headerShown: false }} // Hide header for this screen
       />
-<Stack.Screen
+      <Stack.Screen
         name="NGODetail"
         component={NGODetail}
         options={{ headerShown: false }} // Hide header for this screen
       />
-<Stack.Screen
+      <Stack.Screen
         name="StoreScreen"
         component={StoreSceen}
         options={{ headerShown: false }} // Hide header for this screen
       />
-<Stack.Screen
+      <Stack.Screen
         name="AdressPickerScreen"
         component={AdressPickerScreen}
         options={{ headerShown: false }} // Hide header for this screen
@@ -117,6 +118,11 @@ export default function AppNavigator() {
       <Stack.Screen
         name="OrderFood"
         component={OrderFood}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="StatsScreen"
+        component={StatsScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
