@@ -3,6 +3,7 @@ import { StyleSheet, View, TouchableOpacity, Text, Platform, Dimensions } from '
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
 
@@ -27,17 +28,21 @@ const FooterNavigator = () => {
           navigation.navigate(screen);
         }}
       >
-        <View style={styles.iconContainer}>
+        <View style={[styles.iconContainer, isActive && !isCenter && styles.activeIconContainer]}>
           {isCenter ? (
-            <View style={styles.centerButtonInner}>
-              <Icon name={icon} size={30} color="white" />
-            </View>
+            <LinearGradient
+              colors={['#893571', '#b8658f']}
+              style={styles.centerButtonInner}
+            >
+              <Icon name={icon} size={28} color="white" />
+            </LinearGradient>
           ) : (
             <>
               <Icon
                 name={icon}
                 size={24}
                 color={isActive ? '#893571' : '#8E8E93'}
+                style={styles.icon}
               />
               <Text style={[styles.tabLabel, isActive && styles.activeTabLabel]}>
                 {label}
@@ -51,13 +56,37 @@ const FooterNavigator = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.footerContainer}>
-        <TabButton label={t('Footer.Home')} icon="home-outline" screen="HomeScreen" />
-        <TabButton label={t('Footer.Community')} icon="people-outline" screen="CommunityScreen" />
-        <TabButton label="" icon="map-outline" screen="MapScreen" isCenter={true} />
-        <TabButton label={t('Footer.Store')} icon="storefront" screen="StoreScreen" />
-        <TabButton label={t('Footer.Profile')} icon="person-outline" screen="SettingsScreen" />
-      </View>
+      <LinearGradient
+        colors={['rgba(255,255,255,0.9)', 'rgba(255,255,255,1)']}
+        style={styles.footerContainer}
+      >
+        <TabButton 
+          label={t('Footer.Home')} 
+          icon="home" 
+          screen="HomeScreen" 
+        />
+        <TabButton 
+          label={t('Footer.Community')} 
+          icon="people" 
+          screen="CommunityScreen" 
+        />
+        <TabButton 
+          label="" 
+          icon="stats-chart" 
+          screen="StatsScreen" 
+          isCenter={true} 
+        />
+        <TabButton 
+          label={t('Footer.Store')} 
+          icon="gift" 
+          screen="StoreScreen" 
+        />
+        <TabButton 
+          label={t('Footer.Profile')} 
+          icon="person" 
+          screen="SettingsScreen" 
+        />
+      </LinearGradient>
     </View>
   );
 };
@@ -94,10 +123,9 @@ const styles = StyleSheet.create({
     marginTop: -18,
   },
   centerButtonInner: {
-    backgroundColor: '#893571',
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#893571',
@@ -109,10 +137,17 @@ const styles = StyleSheet.create({
   iconContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 8,
+    borderRadius: 20,
+  },
+  activeIconContainer: {
+    backgroundColor: 'rgba(137, 53, 113, 0.1)',
+  },
+  icon: {
+    marginBottom: 4,
   },
   tabLabel: {
     fontSize: 12,
-    marginTop: 4,
     color: '#8E8E93',
     fontWeight: '500',
   },
