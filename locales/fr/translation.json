@@ -212,13 +212,9 @@
         "Congratulations": "Félicitations ! Votre commande de nourriture a été passée.",
         "WaitForConfirmation": "Veuillez attendre la confirmation du donneur."
     },
-    "OrderDetails": {
-        "title": "Détails de la commande",
-        "available_until": "Disponible jusqu'au",
-        "select_quantity": "Sélectionner la quantité",
-        "available": "Disponible",
-        "important_notes": "Notes importantes",
-        "pickup_note": "Assurez-vous de pouvoir récupérer la nourriture à l'endroit et à l'heure spécifiés.",
-        "confirm_request": "Confirmer la demande"
+    "Notifications": {
+        "title": "Notifications",
+        "summary": "Vous avez {{count}} notifications",
+        "empty": "Pas encore de notifications"
     }
 }

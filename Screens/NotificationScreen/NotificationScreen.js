@@ -9,100 +9,114 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 
 const notifications = [
   {
     id: '1',
-    message: 'Meal ordered successfully.',
-    description: 'Your order #12345 has been confirmed',
-    icon: 'fastfood',
-    color: '#2ECC71',
+    message: 'Donation Accepted',
+    description: 'John Smith will pick up your donation today at 2 PM',
+    icon: 'check-circle',
+    type: 'success',
     time: '10 mins ago',
   },
   {
     id: '2',
-    message: 'Meal canceled.',
-    description: 'Order #12344 has been canceled',
+    message: 'Donation Request Declined',
+    description: 'Your food donation request has been declined due to quality concerns',
     icon: 'cancel',
-    color: '#FF5733',
+    type: 'error',
     time: '20 mins ago',
   },
   {
     id: '3',
-    message: 'Product approved!',
-    description: 'Your listing has been verified and published',
-    icon: 'check-circle',
-    color: '#2ECC71',
+    message: 'New Donations Available',
+    description: '20 new food items have been added in your area',
+    icon: 'local-dining',
+    type: 'info',
     time: '1 hour ago',
   },
   {
     id: '4',
-    message: 'Order is out for delivery.',
-    description: 'Your order #12343 is on the way',
+    message: 'Delivery Update',
+    description: 'Your donation is on the way to the recipient',
     icon: 'local-shipping',
-    color: '#FF8C00',
+    type: 'info',
     time: '2 hours ago',
   },
 ];
 
+const getNotificationStyle = (type) => {
+  switch (type) {
+    case 'success':
+      return {
+        backgroundColor: 'rgba(137, 53, 113, 0.05)',
+        iconColor: '#893571',
+      };
+    case 'error':
+      return {
+        backgroundColor: 'rgba(239, 68, 68, 0.05)',
+        iconColor: '#EF4444',
+      };
+    default:
+      return {
+        backgroundColor: 'rgba(59, 130, 246, 0.05)',
+        iconColor: '#3B82F6',
+      };
+  }
+};
+
 const NotificationScreen = ({ navigation }) => {
+  const { t } = useTranslation();
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
-      <View style={styles.header}>
+      <LinearGradient
+        colors={['#893571', '#b8658f']}
+        style={styles.header}
+      >
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
           <MaterialIcons name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Notifications</Text>
-      
-      </View>
+        <Text style={styles.headerText}>{t('Notifications.title')}</Text>
+      </LinearGradient>
 
-      {/* Notification Count */}
       <View style={styles.notificationSummary}>
         <Text style={styles.summaryText}>
-          You have {notifications.length} notifications
+          {t('Notifications.summary', { count: notifications.length })}
         </Text>
       </View>
 
-      {/* Notifications List */}
       <ScrollView 
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        {notifications.map((notification) => (
-          <TouchableOpacity 
-            key={notification.id} 
-            style={[
-              styles.notificationCard,
-              notification.color === '#2ECC71' && styles.successCard,
-              notification.color === '#FF5733' && styles.cancelCard,
-              notification.color === '#FF8C00' && styles.warningCard,
-            ]}
-          >
-            <View style={[styles.iconContainer, { backgroundColor: `${notification.color}20` }]}>
-              <MaterialIcons
-                name={notification.icon}
-                size={24}
-                color={notification.color}
-                style={styles.notificationIcon}
-              />
-            </View>
-            <View style={styles.notificationContent}>
-              <Text style={styles.messageText}>{notification.message}</Text>
-              <Text style={styles.descriptionText}>{notification.description}</Text>
-              <Text style={styles.timeText}>{notification.time}</Text>
-            </View>
-            <MaterialIcons 
-              name="chevron-right" 
-              size={24} 
-              color="#CCCCCC"
-              style={styles.chevronIcon} 
-            />
-          </TouchableOpacity>
-        ))}
+        {notifications.map((notification) => {
+          const style = getNotificationStyle(notification.type);
+          return (
+            <TouchableOpacity 
+              key={notification.id} 
+              style={[styles.notificationCard, { backgroundColor: style.backgroundColor }]}
+            >
+              <View style={[styles.iconContainer, { backgroundColor: `${style.iconColor}10` }]}>
+                <MaterialIcons
+                  name={notification.icon}
+                  size={24}
+                  color={style.iconColor}
+                />
+              </View>
+              <View style={styles.notificationContent}>
+                <Text style={styles.messageText}>{notification.message}</Text>
+                <Text style={styles.descriptionText}>{notification.description}</Text>
+                <Text style={styles.timeText}>{notification.time}</Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
     </SafeAreaView>
   );
@@ -111,40 +125,30 @@ const NotificationScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#EDE7F6',
+    backgroundColor: '#F8F9FA',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 10,
-    backgroundColor: '#893571',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    padding: 16,
+    paddingTop: StatusBar.currentHeight + 16,
   },
   backButton: {
     padding: 8,
     borderRadius: 8,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
-  settingsButton: {
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-  },
   headerText: {
-    fontSize: 22,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '600',
     color: '#FFFFFF',
+    marginLeft: 16,
   },
   notificationSummary: {
     padding: 16,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
+    borderBottomColor: '#F0F0F0',
   },
   summaryText: {
     fontSize: 14,
@@ -157,25 +161,15 @@ const styles = StyleSheet.create({
   notificationCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     padding: 16,
     borderRadius: 12,
-    marginBottom: 14,
+    marginBottom: 12,
+    backgroundColor: '#FFFFFF',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
     shadowRadius: 4,
-    elevation: 4,
-    borderLeftWidth: 4,
-  },
-  successCard: {
-    borderLeftColor: '#2ECC71',
-  },
-  cancelCard: {
-    borderLeftColor: '#FF5733',
-  },
-  warningCard: {
-    borderLeftColor: '#FF8C00',
+    elevation: 2,
   },
   iconContainer: {
     padding: 10,
@@ -195,14 +189,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666666',
     marginBottom: 6,
+    lineHeight: 20,
   },
   timeText: {
     fontSize: 12,
     color: '#999999',
     fontWeight: '500',
-  },
-  chevronIcon: {
-    marginLeft: 8,
   },
 });
 
