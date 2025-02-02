@@ -225,5 +225,13 @@
     "title": "Notifications",
     "summary": "You have {{count}} notifications",
     "empty": "No notifications yet"
+  },
+  "HistoryScreen": {
+    "YourHistory": "Your History",
+    "TrackYourImpact": "Track your impact in the community",
+    "RecentActivity": "Recent Activity",
+    "FoodsDonated": "Foods Donated",
+    "PeopleHelped": "People Helped",
+    "TimeSpent": "Time Spent"
   }
 }

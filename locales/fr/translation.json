@@ -216,5 +216,13 @@
         "title": "Notifications",
         "summary": "Vous avez {{count}} notifications",
         "empty": "Pas encore de notifications"
+    },
+    "HistoryScreen": {
+        "YourHistory": "Votre Historique",
+        "TrackYourImpact": "Suivez votre impact dans la communauté",
+        "RecentActivity": "Activité Récente",
+        "FoodsDonated": "Aliments Donnés",
+        "PeopleHelped": "Personnes Aidées",
+        "TimeSpent": "Temps Passé"
     }
 }

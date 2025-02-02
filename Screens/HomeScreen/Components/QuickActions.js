@@ -22,7 +22,7 @@ const QuickActions = () => {
     {
       icon: "history",
       text: t('QuickActions.History'),
-      route: 'MyHistoryScreen',
+      route: 'HistoryScreen',
     },
   ];
 
