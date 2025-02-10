@@ -53,6 +53,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             cursor: default;
+            display: flex;
         }
 
         .owned-banner {
@@ -63,17 +64,22 @@
             transform: scale(1.02);
         }
 
+        .banner-image-section {
+            flex: 1;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
         .button-overlay {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            width: 300px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            align-items: center;
-            width: 80%;
-            max-width: 400px;
+            justify-content: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.95);
         }
 
         .button-overlay a {
@@ -114,6 +120,21 @@
             color: white;
             cursor: not-allowed;
             opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .small-banner {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .banner-image-section {
+                height: 200px;
+            }
+
+            .button-overlay {
+                width: 100%;
+            }
         }
 
         @media (max-width: 576px) {
@@ -268,20 +289,22 @@
                     banner.classList.add("small-banner");
                     if (isOwned) {
                         banner.classList.add("owned-banner");
+                        banner.style.backgroundImage = `url('${saison.photo_saison}')`;
                     }
-                    banner.style.backgroundImage = `url('${saison.photo_saison}')`;
 
-                    const link = document.createElement("a");
-                    
                     if (isOwned) {
+                        const link = document.createElement("a");
                         link.href = saison.havechapters_saisons === 1
                             ? `banners.html?id_saison=${saison.id_saison}`
                             : `sousaisons.html?id_saison=${saison.id_saison}`;
                         link.appendChild(banner);
+                        container.appendChild(link);
                     } else {
-                        link.href = "#";
-                        link.classList.add("disabled-banner");
-                        
+                        const imageSection = document.createElement("div");
+                        imageSection.classList.add("banner-image-section");
+                        imageSection.style.backgroundImage = `url('${saison.photo_saison}')`;
+                        banner.appendChild(imageSection);
+
                         const buttonContainer = document.createElement("div");
                         buttonContainer.classList.add("button-overlay");
 
@@ -300,7 +323,7 @@
                             actionButton.classList.add("pending-btn");
                             actionButton.style.pointerEvents = "none";
                         } else {
-                            actionButton.innerText = "Acheter maintenant";
+                            actionButton.innerText = "Achetez maintenant";
                             actionButton.classList.add("buy-now-btn");
                             
                             actionButton.addEventListener("click", function (event) {
@@ -337,9 +360,8 @@
 
                         buttonContainer.appendChild(actionButton);
                         banner.appendChild(buttonContainer);
+                        container.appendChild(banner);
                     }
-
-                    container.appendChild(isOwned ? link : banner);
                 });
 
             } catch (error) {
