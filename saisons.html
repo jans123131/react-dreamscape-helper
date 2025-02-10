@@ -126,11 +126,12 @@
             padding: 15px 0;
             text-align: center;
         }
-         .pending-btn {
-        background-color: #fff;
-        color: #2596be;
-        cursor: not-allowed;
-    }
+
+        .pending-btn {
+            background-color: #fff;
+            color: #2596be;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
@@ -198,126 +199,126 @@
     </footer>
 
     <script>
-document.addEventListener("DOMContentLoaded", async function () {
-const user = JSON.parse(localStorage.getItem("user"));
-if (!user || !user.id) {
-console.error("User data or id_client not found in localStorage.");
-return;
-}
+        document.addEventListener("DOMContentLoaded", async function () {
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (!user || !user.id) {
+                console.error("User data or id_client not found in localStorage.");
+                return;
+            }
 
-const id_client = user.id;
-const container = document.querySelector(".small-banners-container");
+            const id_client = user.id;
+            const container = document.querySelector(".small-banners-container");
 
-try {
-// Fetch all seasons
-const allSeasonsResponse = await fetch("https://plateform.draminesaid.com/app/get_saisons.php");
-const allSeasonsData = await allSeasonsResponse.json();
-const allSeasons = allSeasonsData.success ? allSeasonsData.saisons : [];
+            try {
+                // Fetch all seasons
+                const allSeasonsResponse = await fetch("https://plateform.draminesaid.com/app/get_saisons.php");
+                const allSeasonsData = await allSeasonsResponse.json();
+                const allSeasons = allSeasonsData.success ? allSeasonsData.saisons : [];
 
-// Fetch user seasons using the new API
-const userSeasonsResponse = await fetch("https://plateform.draminesaid.com/app/check_user_permissions.php", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ id_client: id_client })
-});
+                // Fetch user seasons using the new API
+                const userSeasonsResponse = await fetch("https://plateform.draminesaid.com/app/check_user_permissions.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id_client: id_client })
+                });
 
-const userSeasonsData = await userSeasonsResponse.json();
-const ownedSeasonIds = new Set(userSeasonsData.seasons.map(season => season.id_saison));
+                const userSeasonsData = await userSeasonsResponse.json();
+                const ownedSeasonIds = new Set(userSeasonsData.seasons.map(season => season.id_saison));
 
-// Fetch pending requests for the user
-const requestResponse = await fetch(`https://plateform.draminesaid.com/app/request_users.php?id_user=${id_client}`);
-const requestData = await requestResponse.json();
-const pendingSeasons = new Set(requestData.success ? requestData.requests.map(request => request.id_saison) : []);
+                // Fetch pending requests for the user
+                const requestResponse = await fetch(`https://plateform.draminesaid.com/app/request_users.php?id_user=${id_client}`);
+                const requestData = await requestResponse.json();
+                const pendingSeasons = new Set(requestData.success ? requestData.requests.map(request => request.id_saison) : []);
 
-// Clear the container
-container.innerHTML = "";
-allSeasons.reverse().forEach(saison => {
-const isOwned = ownedSeasonIds.has(saison.id_saison);
-const isPending = pendingSeasons.has(saison.id_saison);
+                // Clear the container
+                container.innerHTML = "";
+                allSeasons.reverse().forEach(saison => {
+                    const isOwned = ownedSeasonIds.has(saison.id_saison);
+                    const isPending = pendingSeasons.has(saison.id_saison);
 
-const banner = document.createElement("div");
-banner.classList.add("small-banner");
-banner.style.backgroundImage = `url('${saison.photo_saison}')`;
+                    const banner = document.createElement("div");
+                    banner.classList.add("small-banner");
+                    banner.style.backgroundImage = `url('${saison.photo_saison}')`;
 
-const link = document.createElement("a");
+                    const link = document.createElement("a");
 
-if (isOwned) {
-link.href = saison.havechapters_saisons === 1
-? `banners.html?id_saison=${saison.id_saison}`
-: `sousaisons.html?id_saison=${saison.id_saison}`;
-} else {
-link.href = "#";
-link.classList.add("disabled-banner");
-}
+                    if (isOwned) {
+                        link.href = saison.havechapters_saisons === 1
+                            ? `banners.html?id_saison=${saison.id_saison}`
+                            : `sousaisons.html?id_saison=${saison.id_saison}`;
+                    } else {
+                        link.href = "#";
+                        link.classList.add("disabled-banner");
+                    }
 
-link.appendChild(banner);
+                    link.appendChild(banner);
 
-if (!isOwned) {
-const buttonContainer = document.createElement("div");
-buttonContainer.classList.add("button-overlay");
+                    if (!isOwned) {
+                        const buttonContainer = document.createElement("div");
+                        buttonContainer.classList.add("button-overlay");
 
-const aboutButton = document.createElement("a");
-aboutButton.href = "#";
-aboutButton.innerText = "À propos de la formation";
-aboutButton.classList.add("about-btn");
-buttonContainer.appendChild(aboutButton);
+                        const aboutButton = document.createElement("a");
+                        aboutButton.href = saison.about_link;
+                        aboutButton.target = "_blank";
+                        aboutButton.innerText = "À propos de la formation";
+                        aboutButton.classList.add("about-btn");
+                        buttonContainer.appendChild(aboutButton);
 
-const actionButton = document.createElement("a");
-actionButton.href = "#";
+                        const actionButton = document.createElement("a");
+                        actionButton.href = "#";
 
-if (isPending) {
-actionButton.innerText = "En attente de validation";
-actionButton.classList.add("pending-btn");
-actionButton.style.pointerEvents = "none"; // Make it non-clickable
-} else {
-actionButton.innerText = "Acheter maintenant";
-actionButton.classList.add("buy-now-btn");
+                        if (isPending) {
+                            actionButton.innerText = "En attente de validation";
+                            actionButton.classList.add("pending-btn");
+                            actionButton.style.pointerEvents = "none";
+                        } else {
+                            actionButton.innerText = "Acheter maintenant";
+                            actionButton.classList.add("buy-now-btn");
 
-actionButton.addEventListener("click", function (event) {
-event.preventDefault();
-const id_saison = saison.id_saison;
+                            actionButton.addEventListener("click", function (event) {
+                                event.preventDefault();
+                                const id_saison = saison.id_saison;
 
-// Show confirmation modal
-const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
-confirmationModal.show();
+                                // Show confirmation modal
+                                const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+                                confirmationModal.show();
 
-document.getElementById('confirmPurchase').onclick = async function () {
-// Send POST request on confirmation
-try {
-const response = await fetch("https://plateform.draminesaid.com/app/request_users.php", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({
-id_user: id_client,
-id_saison: id_saison
-})
-});
-const data = await response.json();
-console.log(data);
-confirmationModal.hide();
+                                document.getElementById('confirmPurchase').onclick = async function () {
+                                    try {
+                                        const response = await fetch("https://plateform.draminesaid.com/app/request_users.php", {
+                                            method: "POST",
+                                            headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify({
+                                                id_user: id_client,
+                                                id_saison: id_saison
+                                            })
+                                        });
+                                        const data = await response.json();
+                                        console.log(data);
+                                        confirmationModal.hide();
 
-// Show Toast Notification for Success
-const toast = new bootstrap.Toast(document.getElementById('toastSuccess'));
-toast.show();
-} catch (error) {
-console.error("Error:", error);
-}
-};
-});
-}
+                                        // Show Toast Notification for Success
+                                        const toast = new bootstrap.Toast(document.getElementById('toastSuccess'));
+                                        toast.show();
+                                    } catch (error) {
+                                        console.error("Error:", error);
+                                    }
+                                };
+                            });
+                        }
 
-buttonContainer.appendChild(actionButton);
-banner.appendChild(buttonContainer);
-}
+                        buttonContainer.appendChild(actionButton);
+                        banner.appendChild(buttonContainer);
+                    }
 
-container.appendChild(link);
-});
+                    container.appendChild(link);
+                });
 
-} catch (error) {
-console.error("Error fetching data:", error);
-}
-});
-</script>
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        });
+    </script>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
