@@ -37,7 +37,7 @@ const VetementsCuisine = () => {
       {/* About Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <h2 className="text-3xl font-bold mb-6">
               La qualité au service de votre métier
             </h2>
