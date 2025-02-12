@@ -10,6 +10,14 @@ import Personalization from './pages/Personalization';
 import DesignValidation from './pages/DesignValidation';
 import DesignSummary from './pages/DesignSummary';
 import Favorites from './pages/Favorites';
+import VetementsCuisine from './pages/categories/VetementsCuisine';
+import VetementsBoulanger from './pages/categories/VetementsBoulanger';
+import VetementsBoucher from './pages/categories/VetementsBoucher';
+import VetementsHotellerie from './pages/categories/VetementsHotellerie';
+import VetementsMedicaux from './pages/categories/VetementsMedicaux';
+import VetementsEsthetique from './pages/categories/VetementsEsthetique';
+import VetementsTravail from './pages/categories/VetementsTravail';
+import Chaussures from './pages/categories/Chaussures';
 
 function App() {
   return (
@@ -25,6 +33,14 @@ function App() {
           <Route path="/design-validation" element={<DesignValidation />} />
           <Route path="/design-summary" element={<DesignSummary />} />
           <Route path="/favorites" element={<Favorites />} />
+          <Route path="/vetements-cuisine" element={<VetementsCuisine />} />
+          <Route path="/vetements-boulanger" element={<VetementsBoulanger />} />
+          <Route path="/vetements-boucher" element={<VetementsBoucher />} />
+          <Route path="/vetements-hotellerie" element={<VetementsHotellerie />} />
+          <Route path="/vetements-medicaux" element={<VetementsMedicaux />} />
+          <Route path="/vetements-esthetique" element={<VetementsEsthetique />} />
+          <Route path="/vetements-travail" element={<VetementsTravail />} />
+          <Route path="/chaussures" element={<Chaussures />} />
         </Routes>
       </PageWrapper>
     </Router>
