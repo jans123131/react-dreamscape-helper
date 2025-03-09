@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, LogOut, Server, Info, Plus, Eye, EyeOff, Copy, Trash } from 'lucide-react';
+import { Save, LogOut, Server, Info, Plus, Eye, EyeOff, Copy, Trash, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal';
-import { getFromLocalStorage, saveToLocalStorage, clearAllAppData } from '../utils/localStorage';
+import { PasswordsService, UsersService, AuthService } from '../services';
 
 interface PasswordEntry {
   id: string;
@@ -15,14 +15,13 @@ interface PasswordEntry {
 const Parametres = () => {
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState({
-    email: 'john.doe@example.com',
+    email: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
-    name: 'John Doe',
-    phone: '+33 6 12 34 56 78'
+    name: '',
+    phone: ''
   });
-
   const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
   const [showPasswordId, setShowPasswordId] = useState<string | null>(null);
   const [isNewPasswordModalOpen, setIsNewPasswordModalOpen] = useState(false);
@@ -32,61 +31,219 @@ const Parametres = () => {
     password: ''
   });
   const [showResetDataModal, setShowResetDataModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Load passwords from localStorage on component mount
   useEffect(() => {
-    const storedPasswords = getFromLocalStorage<PasswordEntry[]>('passwords', []);
-    setPasswords(storedPasswords);
+    const loadUserData = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        const user = AuthService.getCurrentUser();
+        if (user) {
+          // Load user info
+          const userData = await UsersService.getUser(user.id);
+          setUserInfo({
+            email: userData.email || '',
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: '',
+            name: userData.full_name || '',
+            phone: userData.phone || ''
+          });
+          
+          // Load passwords
+          const passwordsData = await PasswordsService.getAllPasswords(user.id);
+          setPasswords(passwordsData.map((pwd: any) => ({
+            id: pwd.id,
+            website: pwd.site_name,
+            email: pwd.username,
+            password: pwd.password
+          })));
+        }
+      } catch (err) {
+        console.error('Error loading user data:', err);
+        setError('Failed to load user data. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadUserData();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would update the user info in a database
-    console.log('Updating user info:', userInfo);
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const user = AuthService.getCurrentUser();
+      if (user) {
+        // Update user info
+        const userData = {
+          id: user.id,
+          email: userInfo.email,
+          full_name: userInfo.name,
+          phone: userInfo.phone
+        };
+        
+        // If password change is requested
+        if (userInfo.currentPassword && userInfo.newPassword && userInfo.confirmPassword) {
+          if (userInfo.newPassword !== userInfo.confirmPassword) {
+            setError('Les mots de passe ne correspondent pas.');
+            setIsLoading(false);
+            return;
+          }
+          
+          // Add password update fields
+          Object.assign(userData, {
+            current_password: userInfo.currentPassword,
+            new_password: userInfo.newPassword
+          });
+        }
+        
+        await UsersService.updateUser(userData);
+        setSuccessMessage('Profil mis à jour avec succès.');
+        
+        // Clear password fields
+        setUserInfo({
+          ...userInfo,
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccessMessage(null), 3000);
+      }
+    } catch (err) {
+      console.error('Error updating user:', err);
+      setError('Failed to update profile. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
+    AuthService.logout();
     navigate('/login');
   };
 
-  const handleAddPassword = () => {
-    const newEntry: PasswordEntry = {
-      id: Date.now().toString(),
-      ...newPasswordEntry
-    };
+  const handleAddPassword = async () => {
+    setIsLoading(true);
+    setError(null);
     
-    const updatedPasswords = [...passwords, newEntry];
-    setPasswords(updatedPasswords);
-    saveToLocalStorage('passwords', updatedPasswords);
-    
-    setIsNewPasswordModalOpen(false);
-    setNewPasswordEntry({ website: '', email: '', password: '' });
+    try {
+      const user = AuthService.getCurrentUser();
+      if (user) {
+        const passwordData = {
+          user_id: user.id,
+          site_name: newPasswordEntry.website,
+          site_url: '',
+          username: newPasswordEntry.email,
+          password: newPasswordEntry.password,
+          notes: ''
+        };
+        
+        await PasswordsService.createPassword(passwordData);
+        
+        // Reload passwords
+        const passwordsData = await PasswordsService.getAllPasswords(user.id);
+        setPasswords(passwordsData.map((pwd: any) => ({
+          id: pwd.id,
+          website: pwd.site_name,
+          email: pwd.username,
+          password: pwd.password
+        })));
+        
+        setIsNewPasswordModalOpen(false);
+        setNewPasswordEntry({ website: '', email: '', password: '' });
+        setSuccessMessage('Mot de passe ajouté avec succès.');
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccessMessage(null), 3000);
+      }
+    } catch (err) {
+      console.error('Error adding password:', err);
+      setError('Failed to add password. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCopyPassword = (password: string) => {
     navigator.clipboard.writeText(password);
+    setSuccessMessage('Mot de passe copié dans le presse-papier.');
+    setTimeout(() => setSuccessMessage(null), 3000);
   };
 
-  const handleDeletePassword = (id: string) => {
-    const updatedPasswords = passwords.filter(p => p.id !== id);
-    setPasswords(updatedPasswords);
-    saveToLocalStorage('passwords', updatedPasswords);
+  const handleDeletePassword = async (id: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      await PasswordsService.deletePassword(id);
+      
+      // Update local state
+      setPasswords(passwords.filter(p => p.id !== id));
+      setSuccessMessage('Mot de passe supprimé avec succès.');
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      console.error('Error deleting password:', err);
+      setError('Failed to delete password. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleResetData = () => {
-    clearAllAppData();
     setShowResetDataModal(false);
     window.location.reload();
   };
 
   return (
     <div className="space-y-6">
+      {successMessage && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 z-50"
+        >
+          <Check className="h-5 w-5" />
+          <span>{successMessage}</span>
+        </motion.div>
+      )}
+
+      {error && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          className="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 z-50"
+        >
+          <AlertCircle className="h-5 w-5" />
+          <span>{error}</span>
+          <button 
+            onClick={() => setError(null)}
+            className="ml-2 text-white hover:text-gray-200"
+          >
+            ×
+          </button>
+        </motion.div>
+      )}
+
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-white">Paramètres</h1>
         <button 
           onClick={handleLogout}
           className="btn-secondary flex items-center gap-2 text-red-400 hover:text-red-300"
+          disabled={isLoading}
         >
           <LogOut className="h-5 w-5" />
           <span className="hidden sm:inline">Déconnexion</span>
@@ -279,7 +436,6 @@ const Parametres = () => {
         </form>
       </motion.div>
 
-      {/* New Password Modal */}
       <Modal
         isOpen={isNewPasswordModalOpen}
         onClose={() => setIsNewPasswordModalOpen(false)}
@@ -340,7 +496,6 @@ const Parametres = () => {
         </div>
       </Modal>
 
-      {/* Reset Data Confirmation Modal */}
       <Modal
         isOpen={showResetDataModal}
         onClose={() => setShowResetDataModal(false)}

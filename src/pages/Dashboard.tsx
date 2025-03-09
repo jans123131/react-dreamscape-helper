@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar as CalendarIcon, Users, DollarSign, CheckSquare, Plus, Trash, Check } from 'lucide-react';
+import { Calendar as CalendarIcon, Users, DollarSign, CheckSquare, Plus, Trash, Check, AlertCircle } from 'lucide-react';
 import Calendar from '../components/Calendar/Calendar';
-import { getFromLocalStorage, saveToLocalStorage } from '../utils/localStorage';
 import Modal from '../components/Modal';
 import { useNavigate } from 'react-router-dom';
+import { TasksService, EventsService, ArtistsService } from '../services';
 
 const StatCard = ({ icon: Icon, title, value, prefix = '' }: any) => (
   <motion.div
@@ -98,119 +99,157 @@ const Dashboard = () => {
     dateEchéance: new Date().toISOString().split('T')[0],
     assignéÀ: ''
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadData = () => {
-    const artistes = getFromLocalStorage<any[]>('artistes', []);
-    const evenements = getFromLocalStorage<any[]>('evenements', []);
-    const tasks = getFromLocalStorage<any[]>('tasks', []);
-    const transactions = getFromLocalStorage<any[]>('transactions', []);
-
-    setStats([
-      { 
-        icon: CalendarIcon, 
-        title: 'Événements à venir', 
-        value: evenements.filter(e => new Date(e.date) > new Date()).length.toString()
-      },
-      { 
-        icon: Users, 
-        title: 'Artistes actifs', 
-        value: artistes.length.toString()
-      },
-      { 
-        icon: DollarSign, 
-        title: 'Budget mensuel', 
-        value: transactions.length > 0 ? 
-          (transactions.reduce((sum, t) => sum + t.montant, 0) / 1000).toFixed(1) + 'K' : 
-          '0', 
-        prefix: '€'
-      },
-      { 
-        icon: CheckSquare, 
-        title: 'Tâches en cours', 
-        value: tasks.filter(t => t.statut === 'en_cours').length.toString()
-      },
-    ]);
-
-    const formattedEvents = evenements
-      .filter(e => new Date(e.date) > new Date())
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .slice(0, 2)
-      .map(e => {
-        const date = new Date(e.date);
-        return {
-          day: date.getDate().toString(),
-          month: date.toLocaleDateString('fr-FR', { month: 'long' }),
-          title: e.titre,
-          location: e.lieu,
-          artists: e.artistes
-        };
-      });
-    setUpcomingEvents(formattedEvents);
-
-    const formattedTasks = tasks
-      .filter(t => t.priorite === 'haute' && t.statut !== 'terminé')
-      .slice(0, 3)
-      .map(t => ({
-        id: t.id,
-        titre: t.titre,
-        deadline: new Date(t.dateEchéance).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
-        status: t.statut.replace('_', ' ').toUpperCase(),
-        urgent: t.priorite === 'haute',
-        statut: t.statut
+  const loadData = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      // Load events
+      const eventsData = await EventsService.getAllEvents(user.id);
+      
+      // Load artists
+      const artistsData = await ArtistsService.getAllArtists(user.id);
+      
+      // Load tasks
+      const tasksData = await TasksService.getAllTasks(user.id);
+      
+      // Calculate statistics
+      const now = new Date();
+      const upcomingEventsCount = eventsData.filter((e: any) => new Date(e.date) > now).length;
+      const tasksInProgressCount = tasksData.filter((t: any) => t.statut === 'en_cours').length;
+      
+      setStats([
+        { icon: CalendarIcon, title: 'Événements à venir', value: upcomingEventsCount.toString() },
+        { icon: Users, title: 'Artistes actifs', value: artistsData.length.toString() },
+        { icon: DollarSign, title: 'Budget mensuel', value: '0', prefix: '€' },
+        { icon: CheckSquare, title: 'Tâches en cours', value: tasksInProgressCount.toString() },
+      ]);
+      
+      // Format upcoming events
+      const formattedEvents = eventsData
+        .filter((e: any) => new Date(e.date) > now)
+        .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        .slice(0, 2)
+        .map((e: any) => {
+          const date = new Date(e.date);
+          return {
+            day: date.getDate().toString(),
+            month: date.toLocaleDateString('fr-FR', { month: 'long' }),
+            title: e.title,
+            location: e.location,
+            artists: e.artists || []
+          };
+        });
+      setUpcomingEvents(formattedEvents);
+      
+      // Format priority tasks
+      const formattedTasks = tasksData
+        .filter((t: any) => t.priorite === 'haute' && t.statut !== 'terminé')
+        .slice(0, 3)
+        .map((t: any) => ({
+          id: t.id,
+          titre: t.titre,
+          deadline: new Date(t.dateEchéance).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
+          status: t.statut.replace('_', ' ').toUpperCase(),
+          urgent: t.priorite === 'haute',
+          statut: t.statut
+        }));
+      setPriorityTasks(formattedTasks);
+      
+      // Format calendar events
+      const calendarEvents = eventsData.map((evt: any) => ({
+        id: evt.id,
+        title: evt.title,
+        date: new Date(evt.date),
+        type: 'event'
       }));
-    setPriorityTasks(formattedTasks);
-
-    const calendarEvents = evenements.map(evt => ({
-      id: evt.id,
-      title: evt.titre,
-      date: new Date(evt.date),
-      type: 'event'
-    }));
-    setEvents(calendarEvents);
+      setEvents(calendarEvents);
+    } catch (err) {
+      console.error('Error loading dashboard data:', err);
+      setError('Failed to load dashboard data. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     loadData();
   }, []);
 
-  const handleAddTask = () => {
-    const tasks = getFromLocalStorage<any[]>('tasks', []);
-    const task = {
-      id: Date.now().toString(),
-      ...newTask,
-      dateEchéance: selectedDate ? selectedDate.toISOString().split('T')[0] : newTask.dateEchéance,
-      statut: 'à_faire'
-    };
+  const handleAddTask = async () => {
+    setIsLoading(true);
+    setError(null);
     
-    saveToLocalStorage('tasks', [...tasks, task]);
-    setIsNewTaskModalOpen(false);
-    setNewTask({
-      titre: '',
-      description: '',
-      priorite: 'haute',
-      dateEchéance: new Date().toISOString().split('T')[0],
-      assignéÀ: ''
-    });
-    setSelectedDate(null);
-    loadData();
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const task = {
+        ...newTask,
+        dateEchéance: selectedDate ? selectedDate.toISOString().split('T')[0] : newTask.dateEchéance,
+        statut: 'à_faire',
+        user_id: user.id
+      };
+      
+      await TasksService.createTask(task);
+      await loadData();
+      
+      setIsNewTaskModalOpen(false);
+      setNewTask({
+        titre: '',
+        description: '',
+        priorite: 'haute',
+        dateEchéance: new Date().toISOString().split('T')[0],
+        assignéÀ: ''
+      });
+      setSelectedDate(null);
+    } catch (err) {
+      console.error('Error adding task:', err);
+      setError('Failed to add task. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleCompleteTask = (taskId: string) => {
-    const tasks = getFromLocalStorage<any[]>('tasks', []);
-    const updatedTasks = tasks.map(task => 
-      task.id === taskId
-        ? { ...task, statut: task.statut === 'terminé' ? 'à_faire' : 'terminé' }
-        : task
-    );
-    saveToLocalStorage('tasks', updatedTasks);
-    loadData();
+  const handleCompleteTask = async (taskId: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const taskToUpdate = priorityTasks.find(task => task.id === taskId);
+      if (!taskToUpdate) return;
+      
+      const updatedTask = { 
+        ...taskToUpdate, 
+        statut: taskToUpdate.statut === 'terminé' ? 'à_faire' : 'terminé' 
+      };
+      
+      await TasksService.updateTask(updatedTask);
+      await loadData();
+    } catch (err) {
+      console.error('Error updating task:', err);
+      setError('Failed to update task. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDeleteTask = (taskId: string) => {
-    const tasks = getFromLocalStorage<any[]>('tasks', []);
-    const updatedTasks = tasks.filter(task => task.id !== taskId);
-    saveToLocalStorage('tasks', updatedTasks);
-    loadData();
+  const handleDeleteTask = async (taskId: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      await TasksService.deleteTask(taskId);
+      await loadData();
+    } catch (err) {
+      console.error('Error deleting task:', err);
+      setError('Failed to delete task. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCalendarAddEvent = (date: Date) => {
@@ -228,12 +267,32 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
+      {/* Error notification */}
+      {error && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          className="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 z-50"
+        >
+          <AlertCircle className="h-5 w-5" />
+          <span>{error}</span>
+          <button 
+            onClick={() => setError(null)}
+            className="ml-2 text-white hover:text-gray-200"
+          >
+            ×
+          </button>
+        </motion.div>
+      )}
+
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-white">Tableau de bord</h1>
         <div className="flex gap-2">
           <button 
             className="btn-secondary flex items-center gap-2"
             onClick={() => setIsNewTaskModalOpen(true)}
+            disabled={isLoading}
           >
             <Plus className="h-5 w-5" />
             Nouvelle tâche
@@ -241,6 +300,7 @@ const Dashboard = () => {
           <button 
             className="btn-primary flex items-center gap-2"
             onClick={() => navigate('/evenements')}
+            disabled={isLoading}
           >
             <Plus className="h-5 w-5" />
             Nouvel événement

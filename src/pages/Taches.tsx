@@ -1,11 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Plus, CheckCircle2, Circle, Clock, AlertCircle, Save, Check, X, Trash } from 'lucide-react';
-import { Tache } from '../types';
-import Modal from '../components/Modal';
-import { getFromLocalStorage, saveToLocalStorage } from '../utils/localStorage';
 
-const TaskCard = ({ task, onToggleStatus, onDelete }: { task: Tache; onToggleStatus: (id: string) => void; onDelete: (id: string) => void }) => {
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Plus, CheckCircle2, Circle, Clock, AlertCircle, Save, Check, Trash } from 'lucide-react';
+import Modal from '../components/Modal';
+import { TasksService } from '../services';
+
+interface Task {
+  id: string;
+  titre: string;
+  description: string;
+  priorite: 'basse' | 'moyenne' | 'haute';
+  statut: 'à_faire' | 'en_cours' | 'terminé';
+  assignéÀ: string;
+  dateEchéance: string;
+}
+
+const TaskCard = ({ task, onToggleStatus, onDelete }: { task: Task; onToggleStatus: (id: string) => void; onDelete: (id: string) => void }) => {
   const priorityColors = {
     basse: 'bg-blue-500',
     moyenne: 'bg-yellow-500',
@@ -18,7 +28,8 @@ const TaskCard = ({ task, onToggleStatus, onDelete }: { task: Tache; onToggleSta
     'terminé': CheckCircle2
   };
 
-  const StatusIcon = statusIcons[task.statut];
+  // Get the status icon component
+  const StatusIcon = statusIcons[task.statut] || Circle;
 
   return (
     <div className="card hover:border-gold-500/50 transition-colors group">
@@ -72,84 +83,107 @@ const TaskCard = ({ task, onToggleStatus, onDelete }: { task: Tache; onToggleSta
 
 const Taches = () => {
   const [filter, setFilter] = useState<'all' | 'à_faire' | 'en_cours' | 'terminé'>('all');
-  const [tasks, setTasks] = useState<Tache[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
-  const [newTask, setNewTask] = useState<Partial<Tache>>({
+  const [newTask, setNewTask] = useState<Partial<Task>>({
     titre: '',
     description: '',
-    priorite: 'normale',
+    priorite: 'moyenne',
     statut: 'à_faire',
     assignéÀ: '',
     dateEchéance: new Date().toISOString().split('T')[0]
   });
   const [saveNotification, setSaveNotification] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadTasks = () => {
-    const savedTasks = getFromLocalStorage<Tache[]>('tasks', []);
-    setTasks(savedTasks);
+  const loadTasks = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const fetchedTasks = await TasksService.getAllTasks(user.id);
+      setTasks(fetchedTasks);
+    } catch (err) {
+      console.error('Error loading tasks:', err);
+      setError('Failed to load tasks. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     loadTasks();
   }, []);
 
-  useEffect(() => {
-    if (tasks.length > 0) {
-      saveToLocalStorage('tasks', tasks);
-      
-      setSaveNotification(true);
-      const timer = setTimeout(() => {
-        setSaveNotification(false);
-      }, 2000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [tasks]);
-
-  const handleAddTask = () => {
-    const task: Tache = {
-      id: Date.now().toString(),
-      titre: newTask.titre || '',
-      description: newTask.description || '',
-      priorite: newTask.priorite as 'basse' | 'moyenne' | 'haute',
-      statut: newTask.statut as 'à_faire' | 'en_cours' | 'terminé',
-      assignéÀ: newTask.assignéÀ || '',
-      dateEchéance: newTask.dateEchéance || new Date().toISOString().split('T')[0]
+  const handleAddTask = async () => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const task = {
+      ...newTask,
+      user_id: user.id
     };
-
-    setTasks([...tasks, task]);
-    setIsNewTaskModalOpen(false);
-    setNewTask({
-      titre: '',
-      description: '',
-      priorite: 'normale',
-      statut: 'à_faire',
-      assignéÀ: '',
-      dateEchéance: new Date().toISOString().split('T')[0]
-    });
+    
+    setIsLoading(true);
+    try {
+      await TasksService.createTask(task);
+      await loadTasks();
+      setSaveNotification(true);
+      setTimeout(() => setSaveNotification(false), 2000);
+      
+      setIsNewTaskModalOpen(false);
+      setNewTask({
+        titre: '',
+        description: '',
+        priorite: 'moyenne',
+        statut: 'à_faire',
+        assignéÀ: '',
+        dateEchéance: new Date().toISOString().split('T')[0]
+      });
+    } catch (err) {
+      console.error('Error adding task:', err);
+      setError('Failed to add task. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const toggleTaskStatus = (taskId: string) => {
-    setTasks(tasks.map(task => {
-      if (task.id === taskId) {
-        let newStatus: 'à_faire' | 'en_cours' | 'terminé';
-        
-        if (task.statut === 'à_faire') {
-          newStatus = 'en_cours';
-        } else if (task.statut === 'en_cours') {
-          newStatus = 'terminé';
-        } else {
-          newStatus = 'à_faire';
-        }
-        
-        return { ...task, statut: newStatus };
-      }
-      return task;
-    }));
+  const toggleTaskStatus = async (taskId: string) => {
+    const taskToUpdate = tasks.find(task => task.id === taskId);
+    if (!taskToUpdate) return;
+    
+    let newStatus: 'à_faire' | 'en_cours' | 'terminé';
+    
+    if (taskToUpdate.statut === 'à_faire') {
+      newStatus = 'en_cours';
+    } else if (taskToUpdate.statut === 'en_cours') {
+      newStatus = 'terminé';
+    } else {
+      newStatus = 'à_faire';
+    }
+    
+    const updatedTask = { ...taskToUpdate, statut: newStatus };
+    
+    try {
+      await TasksService.updateTask(updatedTask);
+      await loadTasks();
+      setSaveNotification(true);
+      setTimeout(() => setSaveNotification(false), 2000);
+    } catch (err) {
+      console.error('Error updating task status:', err);
+      setError('Failed to update task. Please try again.');
+    }
   };
 
-  const handleDeleteTask = (taskId: string) => {
-    setTasks(tasks.filter(task => task.id !== taskId));
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      await TasksService.deleteTask(taskId);
+      await loadTasks();
+      setSaveNotification(true);
+      setTimeout(() => setSaveNotification(false), 2000);
+    } catch (err) {
+      console.error('Error deleting task:', err);
+      setError('Failed to delete task. Please try again.');
+    }
   };
 
   const filteredTasks = filter === 'all' 
@@ -171,11 +205,31 @@ const Taches = () => {
         </motion.div>
       )}
 
+      {/* Error notification */}
+      {error && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          className="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 z-50"
+        >
+          <AlertCircle className="h-5 w-5" />
+          <span>{error}</span>
+          <button 
+            onClick={() => setError(null)}
+            className="ml-2 text-white hover:text-gray-200"
+          >
+            ×
+          </button>
+        </motion.div>
+      )}
+
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-white">Tâches</h1>
         <button 
           className="btn-primary flex items-center gap-2"
           onClick={() => setIsNewTaskModalOpen(true)}
+          disabled={isLoading}
         >
           <Plus className="h-5 w-5" />
           Nouvelle tâche
@@ -214,7 +268,12 @@ const Taches = () => {
         animate={{ opacity: 1 }}
         className="grid gap-4"
       >
-        {filteredTasks.length === 0 ? (
+        {isLoading ? (
+          <div className="card flex flex-col items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-400"></div>
+            <p className="text-gray-400 mt-4">Chargement des tâches...</p>
+          </div>
+        ) : filteredTasks.length === 0 ? (
           <div className="card flex flex-col items-center justify-center py-8">
             <AlertCircle className="h-12 w-12 text-gray-400 mb-4" />
             <p className="text-gray-400">Aucune tâche trouvée</p>

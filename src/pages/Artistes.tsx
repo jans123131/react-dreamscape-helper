@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Plus, Music, Instagram, Facebook, Youtube, Upload, X, Mail, Phone, MapPin } from 'lucide-react';
+import { Search, Plus, Music, Instagram, Facebook, Youtube, Upload, X, Mail, Phone, MapPin, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal';
-import { getFromLocalStorage, saveToLocalStorage } from '../utils/localStorage';
+import { ArtistsService } from '../services';
 
 interface Artiste {
   id: string;
@@ -107,10 +108,26 @@ const Artistes = () => {
       youtube: ''
     }
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadArtists = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const artists = await ArtistsService.getAllArtists(user.id);
+      setArtistesList(artists);
+    } catch (err) {
+      console.error('Error loading artists:', err);
+      setError('Failed to load artists. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const storedArtistes = getFromLocalStorage<Artiste[]>('artistes', []);
-    setArtistesList(storedArtistes);
+    loadArtists();
   }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,43 +141,43 @@ const Artistes = () => {
     }
   };
 
-  const handleAddArtiste = () => {
-    const newArtisteData: Artiste = {
-      id: Date.now().toString(),
-      nom: newArtiste.nom || '',
-      genre: newArtiste.genre || '',
-      photo: previewImage || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-      bio: newArtiste.bio || '',
-      social: {
-        instagram: newArtiste.social?.instagram || '',
-        facebook: newArtiste.social?.facebook || '',
-        youtube: newArtiste.social?.youtube || ''
-      },
-      evenementsPassés: 0,
-      email: newArtiste.email || '',
-      telephone: newArtiste.telephone || '',
-      adresse: newArtiste.adresse || ''
-    };
-
-    const updatedArtistes = [newArtisteData, ...artistesList];
-    setArtistesList(updatedArtistes);
-    saveToLocalStorage('artistes', updatedArtistes);
+  const handleAddArtiste = async () => {
+    setIsLoading(true);
+    setError(null);
     
-    setIsModalOpen(false);
-    setNewArtiste({
-      nom: '',
-      genre: '',
-      bio: '',
-      email: '',
-      telephone: '',
-      adresse: '',
-      social: {
-        instagram: '',
-        facebook: '',
-        youtube: ''
-      }
-    });
-    setPreviewImage(null);
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const newArtisteData = {
+        ...newArtiste,
+        photo: previewImage || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+        user_id: user.id,
+        evenementsPassés: 0
+      };
+      
+      await ArtistsService.createArtist(newArtisteData);
+      await loadArtists();
+      
+      setIsModalOpen(false);
+      setNewArtiste({
+        nom: '',
+        genre: '',
+        bio: '',
+        email: '',
+        telephone: '',
+        adresse: '',
+        social: {
+          instagram: '',
+          facebook: '',
+          youtube: ''
+        }
+      });
+      setPreviewImage(null);
+    } catch (err) {
+      console.error('Error adding artist:', err);
+      setError('Failed to add artist. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const filteredArtistes = artistesList.filter(artiste => 
@@ -171,11 +188,31 @@ const Artistes = () => {
 
   return (
     <div className="space-y-6">
+      {/* Error notification */}
+      {error && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          className="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 z-50"
+        >
+          <AlertCircle className="h-5 w-5" />
+          <span>{error}</span>
+          <button 
+            onClick={() => setError(null)}
+            className="ml-2 text-white hover:text-gray-200"
+          >
+            ×
+          </button>
+        </motion.div>
+      )}
+
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-white">Artistes</h1>
         <button 
           className="btn-primary flex items-center gap-2"
           onClick={() => setIsModalOpen(true)}
+          disabled={isLoading}
         >
           <Plus className="h-5 w-5" />
           Ajouter un artiste
@@ -198,9 +235,21 @@ const Artistes = () => {
         animate={{ opacity: 1 }}
         className="grid gap-6"
       >
-        {filteredArtistes.map(artiste => (
-          <ArtisteCard key={artiste.id} artiste={artiste} />
-        ))}
+        {isLoading ? (
+          <div className="card flex flex-col items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-400"></div>
+            <p className="text-gray-400 mt-4">Chargement des artistes...</p>
+          </div>
+        ) : filteredArtistes.length === 0 ? (
+          <div className="card flex flex-col items-center justify-center py-8">
+            <AlertCircle className="h-12 w-12 text-gray-400 mb-4" />
+            <p className="text-gray-400">Aucun artiste trouvé</p>
+          </div>
+        ) : (
+          filteredArtistes.map(artiste => (
+            <ArtisteCard key={artiste.id} artiste={artiste} />
+          ))
+        )}
       </motion.div>
 
       {/* Add Artist Modal */}

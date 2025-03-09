@@ -1,48 +1,34 @@
-import api from './api';
 
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
+import { createData } from '../utils/api';
 
-export interface AuthResponse {
-  id: string;
-  email: string;
-  full_name: string;
-  role: string;
-}
+const ENDPOINT = '/auth';
 
-class AuthService {
-  async login(credentials: LoginCredentials): Promise<AuthResponse | null> {
+export const AuthService = {
+  login: async (credentials: { email: string; password: string }) => {
     try {
-      const response = await api.post('/auth/login.php', credentials);
-      
-      if (response.data) {
-        localStorage.setItem('user', JSON.stringify(response.data));
+      const response = await createData(`${ENDPOINT}/login.php`, credentials);
+      if (response.success) {
         localStorage.setItem('isAuthenticated', 'true');
-        return response.data;
+        localStorage.setItem('user', JSON.stringify(response.user));
       }
-      
-      return null;
+      return response;
     } catch (error) {
       console.error('Login error:', error);
-      return null;
+      throw error;
     }
-  }
+  },
 
-  logout(): void {
-    localStorage.removeItem('user');
+  logout: () => {
     localStorage.removeItem('isAuthenticated');
-  }
+    localStorage.removeItem('user');
+  },
 
-  getCurrentUser(): AuthResponse | null {
-    const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
-  }
+  getCurrentUser: () => {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  },
 
-  isAuthenticated(): boolean {
+  isAuthenticated: () => {
     return localStorage.getItem('isAuthenticated') === 'true';
   }
-}
-
-export const authService = new AuthService();
+};

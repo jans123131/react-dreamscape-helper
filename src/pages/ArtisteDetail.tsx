@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
   ArrowLeft,
   Music,
@@ -19,7 +19,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import EventCalendar from '../components/Calendar/Calendar';
-import { getFromLocalStorage } from '../utils/localStorage';
+import { ArtistsService, EventsService, FilesService } from '../services';
 
 interface Document {
   id: string;
@@ -67,31 +67,65 @@ const ArtisteDetail = () => {
   const [artiste, setArtiste] = useState<Artiste | null>(null);
   const [projets, setProjets] = useState<Projet[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [events, setEvents] = useState<any[]>([]);
 
   useEffect(() => {
-    // Load artiste data from localStorage
-    const artistes = getFromLocalStorage<Artiste[]>('artistes', []);
-    const foundArtiste = artistes.find(a => a.id === id);
+    const loadArtist = async () => {
+      if (!id) return;
+      
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        const artistData = await ArtistsService.getArtist(id);
+        if (artistData) {
+          setArtiste(artistData);
+          
+          // Load related events
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          const eventsData = await EventsService.getAllEvents(user.id);
+          const artistEvents = eventsData.filter((event: any) => 
+            event.artists && event.artists.includes(artistData.nom)
+          );
+          
+          // Format events for calendar
+          const formattedEvents = artistEvents.map((event: any) => ({
+            id: event.id,
+            title: event.title,
+            date: new Date(event.date),
+            type: 'event'
+          }));
+          
+          setEvents(formattedEvents);
+          
+          // Load related documents
+          const filesData = await FilesService.getAllFiles(user.id);
+          const artistFiles = filesData.filter((file: any) => 
+            file.related_id === id && file.related_type === 'artist'
+          );
+          
+          setDocuments(artistFiles.map((file: any) => ({
+            id: file.id,
+            nom: file.name,
+            type: file.type,
+            date: file.created_at,
+            taille: `${Math.round(file.size / 1024)} KB`
+          })));
+        } else {
+          navigate('/artistes');
+        }
+      } catch (err) {
+        console.error('Error loading artist details:', err);
+        setError('Failed to load artist details. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
     
-    if (foundArtiste) {
-      setArtiste(foundArtiste);
-    } else {
-      // Redirect if artiste not found
-      navigate('/artistes');
-    }
-
-    // Mock data for projects and documents
-    // In a real app, these would also come from localStorage or an API
-    setProjets([]);
-    setDocuments([]);
+    loadArtist();
   }, [id, navigate]);
-
-  const events = projets.map(projet => ({
-    id: projet.id,
-    title: projet.nom,
-    date: new Date(projet.date),
-    type: 'event'
-  }));
 
   const getStatusColor = (statut: string) => {
     switch (statut) {
@@ -121,11 +155,45 @@ const ArtisteDetail = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold-400 mb-4 mx-auto"></div>
+          <p className="text-gray-400">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-red-500 mb-4 mx-auto" />
+          <p className="text-red-500">{error}</p>
+          <button 
+            onClick={() => navigate('/artistes')}
+            className="mt-4 btn-secondary"
+          >
+            Retour aux artistes
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!artiste) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <p className="text-gray-400">Chargement...</p>
+          <p className="text-gray-400">Aucun artiste trouvé</p>
+          <button 
+            onClick={() => navigate('/artistes')}
+            className="mt-4 btn-secondary"
+          >
+            Retour aux artistes
+          </button>
         </div>
       </div>
     );

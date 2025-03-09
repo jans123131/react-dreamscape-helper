@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+
+import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Login from './pages/Login';
@@ -11,15 +12,15 @@ import Finances from './pages/Finances';
 import NouveauDevis from './pages/NouveauDevis';
 import Parametres from './pages/Parametres';
 import FileManager from './pages/FileManager';
-import { initializeLocalStorage } from './utils/localStorage';
 
 function App() {
   // For demo purposes, we'll use a simple authentication check
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-
-  // Initialize localStorage with empty data structures on app start
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
   useEffect(() => {
-    initializeLocalStorage();
+    // Check if the user is authenticated by looking at localStorage
+    const authStatus = localStorage.getItem('isAuthenticated') === 'true';
+    setIsAuthenticated(authStatus);
   }, []);
 
   return (
