@@ -1,3 +1,4 @@
+
 <?php
 require_once '../config/database.php';
 
@@ -19,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
                 
                 if (password_verify($data->password, $row['password'])) {
+                    // Login successful
                     http_response_code(200);
                     echo json_encode(array(
                         "id" => $row['id'],
@@ -27,10 +29,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         "role" => $row['role']
                     ));
                 } else {
+                    // Password incorrect
                     http_response_code(401);
                     echo json_encode(array("message" => "Invalid credentials."));
                 }
             } else {
+                // Email not found
                 http_response_code(401);
                 echo json_encode(array("message" => "Invalid credentials."));
             }
