@@ -10,7 +10,8 @@ export const FilesService = {
   },
 
   uploadFile: async (fileData: FormData) => {
-    return createData(`${ENDPOINT}/create.php`, fileData);
+    // Use specific FormData content-type handling
+    return createData(`${ENDPOINT}/create.php`, fileData, true);
   },
 
   deleteFile: async (id: string) => {

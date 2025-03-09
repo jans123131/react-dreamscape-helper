@@ -24,9 +24,15 @@ export const fetchData = async (endpoint: string, params = {}) => {
 };
 
 // Generic POST function
-export const createData = async (endpoint: string, data = {}) => {
+export const createData = async (endpoint: string, data = {}, isFormData = false) => {
   try {
-    const response = await api.post(endpoint, data);
+    const config = isFormData ? {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    } : {};
+    
+    const response = await api.post(endpoint, data, config);
     return response.data;
   } catch (error) {
     console.error(`Error creating data at ${endpoint}:`, error);
