@@ -1,3 +1,4 @@
+
 // Configuration de l'API
 const API_PORT = process.env.API_PORT || 3000;
 const API_HOST = process.env.API_HOST || 'localhost';
@@ -22,132 +23,143 @@ const API_CONFIG = {
     {
       name: 'User',
       fields: [
-        { name: 'id', type: 'number', isPrimary: true },
-        { name: 'name', type: 'string' },
+        { name: 'user_id', type: 'number', isPrimary: true },
+        { name: 'nom', type: 'string' },
+        { name: 'prenom', type: 'string' },
         { name: 'email', type: 'string' },
-        { name: 'password', type: 'string', isPrivate: true },
+        { name: 'password_hash', type: 'string', isPrivate: true },
         { name: 'role', type: 'string' },
-        { name: 'createdAt', type: 'date' },
-        { name: 'updatedAt', type: 'date' }
+        { name: 'status', type: 'string' },
+        { name: 'profile_image', type: 'string', isOptional: true },
+        { name: 'phone', type: 'string', isOptional: true },
+        { name: 'created_at', type: 'date' },
+        { name: 'updated_at', type: 'date' }
       ],
       relations: [
-        { type: 'hasMany', entity: 'Review', via: 'userId' },
-        { type: 'hasMany', entity: 'Message', via: 'senderId' },
-        { type: 'hasMany', entity: 'Message', via: 'receiverId' },
-        { type: 'hasMany', entity: 'Reservation', via: 'userId' },
-        { type: 'hasMany', entity: 'Session', via: 'userId1' },
-        { type: 'hasMany', entity: 'Session', via: 'userId2' }
+        { type: 'hasMany', entity: 'Review', via: 'user_id' },
+        { type: 'hasMany', entity: 'Messagerie', via: 'id_expediteur' },
+        { type: 'hasMany', entity: 'Messagerie', via: 'id_destinataire' },
+        { type: 'hasMany', entity: 'Reservation', via: 'user_id' }
       ]
     },
     {
       name: 'Place',
       fields: [
-        { name: 'id', type: 'number', isPrimary: true },
-        { name: 'name', type: 'string' },
-        { name: 'type', type: 'string' },
+        { name: 'place_id', type: 'number', isPrimary: true },
+        { name: 'nom_place', type: 'string' },
         { name: 'description', type: 'text' },
-        { name: 'location', type: 'object', fields: ['latitude', 'longitude'] },
-        { name: 'images', type: 'array' },
-        { name: 'openingHours', type: 'object' },
-        { name: 'entranceFee', type: 'object' },
-        { name: 'createdAt', type: 'date' },
-        { name: 'updatedAt', type: 'date' }
+        { name: 'location', type: 'string' },
+        { name: 'longitude', type: 'number' },
+        { name: 'latitude', type: 'number' },
+        { name: 'url_img', type: 'string', isOptional: true },
+        { name: 'url_web', type: 'string', isOptional: true },
+        { name: 'category', type: 'string' },
+        { name: 'provider_id', type: 'number', isOptional: true },
+        { name: 'average_rating', type: 'number' },
+        { name: 'created_at', type: 'date' },
+        { name: 'updated_at', type: 'date' }
       ],
       relations: [
-        { type: 'hasMany', entity: 'Review', via: 'placeId' },
-        { type: 'hasMany', entity: 'Reservation', via: 'placeId' }
+        { type: 'hasMany', entity: 'Review', via: 'place_id' },
+        { type: 'hasMany', entity: 'Reservation', via: 'place_id' },
+        { type: 'belongsTo', entity: 'User', via: 'provider_id' }
       ]
     },
     {
       name: 'Event',
       fields: [
-        { name: 'id', type: 'number', isPrimary: true },
+        { name: 'event_id', type: 'number', isPrimary: true },
         { name: 'title', type: 'string' },
         { name: 'description', type: 'text' },
-        { name: 'startDate', type: 'date' },
-        { name: 'endDate', type: 'date' },
-        { name: 'location', type: 'string' },
-        { name: 'organizer', type: 'string' },
-        { name: 'ticketPrice', type: 'number' },
-        { name: 'capacity', type: 'number' },
-        { name: 'images', type: 'array' },
-        { name: 'createdAt', type: 'date' },
-        { name: 'updatedAt', type: 'date' }
+        { name: 'place_id', type: 'number', isOptional: true },
+        { name: 'start_date', type: 'date' },
+        { name: 'end_date', type: 'date' },
+        { name: 'image_url', type: 'string', isOptional: true },
+        { name: 'price', type: 'number', isOptional: true },
+        { name: 'status', type: 'string' },
+        { name: 'created_by', type: 'number' },
+        { name: 'created_at', type: 'date' },
+        { name: 'updated_at', type: 'date' }
       ],
       relations: [
-        { type: 'hasMany', entity: 'Reservation', via: 'eventId' }
+        { type: 'hasMany', entity: 'Reservation', via: 'event_id' },
+        { type: 'belongsTo', entity: 'Place', via: 'place_id' },
+        { type: 'belongsTo', entity: 'User', via: 'created_by' }
       ]
     },
     {
-      name: 'Message',
+      name: 'Messagerie',
       fields: [
         { name: 'id', type: 'number', isPrimary: true },
-        { name: 'sessionId', type: 'number', reference: 'Session.id' },
-        { name: 'senderId', type: 'number', reference: 'User.id' },
-        { name: 'content', type: 'text' },
-        { name: 'read', type: 'boolean' },
-        { name: 'createdAt', type: 'date' },
-        { name: 'updatedAt', type: 'date' }
+        { name: 'id_expediteur', type: 'number' },
+        { name: 'id_destinataire', type: 'number' },
+        { name: 'texte', type: 'text' },
+        { name: 'date_envoye', type: 'date' },
+        { name: 'is_read', type: 'boolean' },
+        { name: 'created_at', type: 'date' },
+        { name: 'updated_at', type: 'date' }
       ],
       relations: [
-        { type: 'belongsTo', entity: 'User', via: 'senderId' },
-        { type: 'belongsTo', entity: 'Session', via: 'sessionId' }
-      ]
-    },
-    {
-      name: 'Session',
-      fields: [
-        { name: 'id', type: 'number', isPrimary: true },
-        { name: 'userId1', type: 'number', reference: 'User.id' },
-        { name: 'userId2', type: 'number', reference: 'User.id' },
-        { name: 'lastMessageAt', type: 'date', isOptional: true },
-        { name: 'isActive', type: 'boolean' },
-        { name: 'createdAt', type: 'date' },
-        { name: 'updatedAt', type: 'date' }
-      ],
-      relations: [
-        { type: 'belongsTo', entity: 'User', via: 'userId1' },
-        { type: 'belongsTo', entity: 'User', via: 'userId2' },
-        { type: 'hasMany', entity: 'Message', via: 'sessionId' }
+        { type: 'belongsTo', entity: 'User', via: 'id_expediteur' },
+        { type: 'belongsTo', entity: 'User', via: 'id_destinataire' }
       ]
     },
     {
       name: 'Review',
       fields: [
-        { name: 'id', type: 'number', isPrimary: true },
-        { name: 'userId', type: 'number', reference: 'User.id' },
-        { name: 'placeId', type: 'number', reference: 'Place.id' },
+        { name: 'review_id', type: 'number', isPrimary: true },
+        { name: 'place_id', type: 'number' },
+        { name: 'user_id', type: 'number' },
         { name: 'rating', type: 'number' },
         { name: 'comment', type: 'text' },
-        { name: 'createdAt', type: 'date' },
-        { name: 'updatedAt', type: 'date' }
+        { name: 'status', type: 'string' },
+        { name: 'created_at', type: 'date' },
+        { name: 'updated_at', type: 'date' }
       ],
       relations: [
-        { type: 'belongsTo', entity: 'User', via: 'userId' },
-        { type: 'belongsTo', entity: 'Place', via: 'placeId' }
+        { type: 'belongsTo', entity: 'User', via: 'user_id' },
+        { type: 'belongsTo', entity: 'Place', via: 'place_id' }
       ]
     },
     {
       name: 'Reservation',
       fields: [
-        { name: 'id', type: 'number', isPrimary: true },
-        { name: 'userId', type: 'number', reference: 'User.id' },
-        { name: 'eventId', type: 'number', reference: 'Event.id', isOptional: true },
-        { name: 'placeId', type: 'number', reference: 'Place.id', isOptional: true },
-        { name: 'numberOfTickets', type: 'number' },
-        { name: 'numberOfPersons', type: 'number' },
-        { name: 'totalPrice', type: 'number' },
+        { name: 'reservation_id', type: 'number', isPrimary: true },
+        { name: 'user_id', type: 'number' },
+        { name: 'place_id', type: 'number' },
+        { name: 'event_id', type: 'number', isOptional: true },
+        { name: 'reservation_date', type: 'date' },
+        { name: 'start_time', type: 'time' },
+        { name: 'end_time', type: 'time', isOptional: true },
+        { name: 'num_guests', type: 'number' },
         { name: 'status', type: 'string' },
-        { name: 'paymentMethod', type: 'string' },
-        { name: 'paymentId', type: 'string' },
-        { name: 'visitDate', type: 'date' },
-        { name: 'createdAt', type: 'date' },
-        { name: 'updatedAt', type: 'date' }
+        { name: 'notes', type: 'text', isOptional: true },
+        { name: 'created_at', type: 'date' },
+        { name: 'updated_at', type: 'date' }
       ],
       relations: [
-        { type: 'belongsTo', entity: 'User', via: 'userId' },
-        { type: 'belongsTo', entity: 'Event', via: 'eventId' },
-        { type: 'belongsTo', entity: 'Place', via: 'placeId' }
+        { type: 'belongsTo', entity: 'User', via: 'user_id' },
+        { type: 'belongsTo', entity: 'Event', via: 'event_id' },
+        { type: 'belongsTo', entity: 'Place', via: 'place_id' }
+      ]
+    },
+    {
+      name: 'Promotion',
+      fields: [
+        { name: 'promotion_id', type: 'number', isPrimary: true },
+        { name: 'place_id', type: 'number' },
+        { name: 'title', type: 'string' },
+        { name: 'description', type: 'text' },
+        { name: 'discount_percent', type: 'number' },
+        { name: 'start_date', type: 'date' },
+        { name: 'end_date', type: 'date' },
+        { name: 'created_by', type: 'number' },
+        { name: 'created_at', type: 'date' },
+        { name: 'updated_at', type: 'date' }
+      ],
+      relations: [
+        { type: 'belongsTo', entity: 'Place', via: 'place_id' },
+        { type: 'belongsTo', entity: 'User', via: 'created_by' }
       ]
     }
   ]
