@@ -6,9 +6,9 @@ const { generateDocTemplate } = require('../utils/apiDocTemplate');
 const { API_CONFIG } = require('../config/apiConfig');
 const { generateClassDiagram } = require('../utils/classDiagramGenerator');
 
-// Define your API routes here - these will be used to generate the documentation
+// Définir vos routes API ici - celles-ci seront utilisées pour générer la documentation
 const apiRoutes = [
-  // Authentication routes
+  // Routes d'authentification
   {
     method: 'post',
     path: '/users/login',
@@ -437,6 +437,169 @@ const apiRoutes = [
       message: 'Event deleted successfully'
     }
   },
+  // Routes pour les sessions de messages
+  {
+    method: 'get',
+    path: '/sessions',
+    description: 'Récupère la liste de toutes les sessions de messages d\'un utilisateur.',
+    response: {
+      status: 200,
+      data: [
+        {
+          id: 1,
+          userId1: 1,
+          userId2: 2,
+          lastMessageAt: '2023-08-15T14:35:00Z',
+          isActive: true,
+          createdAt: '2023-08-15T14:30:00Z',
+          user: {
+            id: 2,
+            name: 'Jane Smith',
+            email: 'jane@example.com'
+          },
+          lastMessage: {
+            content: 'Bien sûr, comment puis-je vous aider?',
+            senderId: 2,
+            createdAt: '2023-08-15T14:35:00Z'
+          }
+        },
+        {
+          id: 2,
+          userId1: 1,
+          userId2: 3,
+          lastMessageAt: '2023-08-26T16:40:00Z',
+          isActive: true,
+          createdAt: '2023-08-26T16:40:00Z',
+          user: {
+            id: 3,
+            name: 'New User',
+            email: 'newuser@example.com'
+          },
+          lastMessage: {
+            content: 'Je voudrais plus d\'informations sur l\'événement du 15 septembre.',
+            senderId: 1,
+            createdAt: '2023-08-26T16:40:00Z'
+          }
+        }
+      ]
+    }
+  },
+  {
+    method: 'get',
+    path: '/sessions/:id',
+    description: 'Récupère les détails d\'une session de messages spécifique.',
+    params: [
+      {
+        name: 'id',
+        type: 'number',
+        required: true,
+        description: 'L\'identifiant unique de la session'
+      }
+    ],
+    response: {
+      status: 200,
+      data: {
+        id: 1,
+        userId1: 1,
+        userId2: 2,
+        lastMessageAt: '2023-08-15T14:35:00Z',
+        isActive: true,
+        createdAt: '2023-08-15T14:30:00Z',
+        user1: {
+          id: 1,
+          name: 'John Doe',
+          email: 'john@example.com'
+        },
+        user2: {
+          id: 2,
+          name: 'Jane Smith',
+          email: 'jane@example.com'
+        },
+        messages: [
+          {
+            id: 1,
+            sessionId: 1,
+            senderId: 1,
+            content: 'Bonjour, j\'ai une question sur Bulla Regia.',
+            createdAt: '2023-08-15T14:30:00Z',
+            read: true
+          },
+          {
+            id: 2,
+            sessionId: 1,
+            senderId: 2,
+            content: 'Bien sûr, comment puis-je vous aider?',
+            createdAt: '2023-08-15T14:35:00Z',
+            read: false
+          }
+        ]
+      }
+    }
+  },
+  {
+    method: 'post',
+    path: '/sessions',
+    description: 'Crée une nouvelle session de messages entre deux utilisateurs.',
+    requestBody: {
+      userId1: 1,
+      userId2: 3
+    },
+    response: {
+      status: 201,
+      data: {
+        id: 3,
+        userId1: 1,
+        userId2: 3,
+        lastMessageAt: null,
+        isActive: true,
+        createdAt: '2023-08-27T09:45:00Z'
+      }
+    }
+  },
+  {
+    method: 'put',
+    path: '/sessions/:id',
+    description: 'Met à jour les informations d\'une session de messages.',
+    params: [
+      {
+        name: 'id',
+        type: 'number',
+        required: true,
+        description: 'L\'identifiant unique de la session'
+      }
+    ],
+    requestBody: {
+      isActive: false
+    },
+    response: {
+      status: 200,
+      data: {
+        id: 1,
+        userId1: 1,
+        userId2: 2,
+        lastMessageAt: '2023-08-15T14:35:00Z',
+        isActive: false,
+        updatedAt: '2023-08-27T14:10:00Z'
+      }
+    }
+  },
+  {
+    method: 'delete',
+    path: '/sessions/:id',
+    description: 'Supprime une session de messages de la base de données.',
+    params: [
+      {
+        name: 'id',
+        type: 'number',
+        required: true,
+        description: 'L\'identifiant unique de la session'
+      }
+    ],
+    response: {
+      status: 204,
+      message: 'Session deleted successfully'
+    }
+  },
   {
     method: 'get',
     path: '/messages',
@@ -446,16 +609,16 @@ const apiRoutes = [
       data: [
         {
           id: 1,
+          sessionId: 1,
           senderId: 1,
-          receiverId: 2,
           content: 'Bonjour, j\'ai une question sur Bulla Regia.',
           createdAt: '2023-08-15T14:30:00Z',
           read: true
         },
         {
           id: 2,
+          sessionId: 1,
           senderId: 2,
-          receiverId: 1,
           content: 'Bien sûr, comment puis-je vous aider?',
           createdAt: '2023-08-15T14:35:00Z',
           read: false
@@ -479,8 +642,8 @@ const apiRoutes = [
       status: 200,
       data: {
         id: 1,
+        sessionId: 1,
         senderId: 1,
-        receiverId: 2,
         content: 'Bonjour, j\'ai une question sur Bulla Regia.',
         createdAt: '2023-08-15T14:30:00Z',
         read: true
@@ -492,16 +655,16 @@ const apiRoutes = [
     path: '/messages',
     description: 'Envoie un nouveau message à un utilisateur.',
     requestBody: {
+      sessionId: 1,
       senderId: 1,
-      receiverId: 2,
       content: 'Je voudrais plus d\'informations sur l\'événement du 15 septembre.'
     },
     response: {
       status: 201,
       data: {
         id: 3,
+        sessionId: 1,
         senderId: 1,
-        receiverId: 2,
         content: 'Je voudrais plus d\'informations sur l\'événement du 15 septembre.',
         createdAt: '2023-08-26T16:40:00Z',
         read: false
@@ -527,8 +690,8 @@ const apiRoutes = [
       status: 200,
       data: {
         id: 2,
+        sessionId: 1,
         senderId: 2,
-        receiverId: 1,
         content: 'Bien sûr, comment puis-je vous aider?',
         createdAt: '2023-08-15T14:35:00Z',
         read: true,
@@ -801,46 +964,46 @@ const apiRoutes = [
   }
 ];
 
-// Create the API documentation generator
+// Créer le générateur de documentation API
 const docGenerator = new ApiDocGenerator(apiRoutes);
 
-// Generate the documentation with our custom template
+// Générer la documentation avec notre modèle personnalisé
 function generateApiDocs() {
-  // Create docs directory if it doesn't exist
+  // Créer le répertoire docs s'il n'existe pas
   const docsDir = path.join(process.cwd(), 'docs');
   if (!fs.existsSync(docsDir)) {
     fs.mkdirSync(docsDir, { recursive: true });
   }
 
-  // Generate HTML documentation with entity information
+  // Générer la documentation HTML avec les informations sur les entités
   const htmlContent = generateDocTemplate(apiRoutes, API_CONFIG.entities);
   fs.writeFileSync(path.join(docsDir, 'api-documentation.html'), htmlContent);
 
-  // Generate class diagram HTML file
+  // Générer le fichier HTML du diagramme de classes
   const classDiagramHtml = generateClassDiagram(API_CONFIG.entities);
   fs.writeFileSync(path.join(docsDir, 'diagram_de_class.html'), classDiagramHtml);
 
-  // Generate additional documentation formats if needed
+  // Générer des formats de documentation supplémentaires si nécessaire
   docGenerator.generateDocs();
 
-  console.log('API documentation generated successfully!');
+  console.log('Documentation API générée avec succès!');
   console.log(`- HTML: ${path.join(docsDir, 'api-documentation.html')}`);
-  console.log(`- Class Diagram: ${path.join(docsDir, 'diagram_de_class.html')}`);
+  console.log(`- Diagramme de Classes: ${path.join(docsDir, 'diagram_de_class.html')}`);
   console.log(`- PDF: ${path.join(docsDir, 'api-documentation.pdf')}`);
 }
 
-// If this script is run directly (not imported)
+// Si ce script est exécuté directement (non importé)
 if (require.main === module) {
   generateApiDocs();
-  console.log('API Documentation generation completed!');
-  console.log('\nTo view the documentation:');
-  console.log('1. Start the server with: npm run start');
-  console.log('2. Open http://localhost:3000/docs/api-documentation.html in your browser');
-  console.log('3. Click on "Diagramme de Classes" to view the class diagram');
-  console.log('\nTo test APIs directly:');
-  console.log('- Use the interactive test interface in the documentation');
-  console.log('- Click "Send Request" to test an endpoint');
-  console.log('- Copy the cURL command or open in Postman for more advanced testing');
+  console.log('Génération de la documentation API terminée!');
+  console.log('\nPour voir la documentation:');
+  console.log('1. Démarrez le serveur avec: npm run start');
+  console.log('2. Ouvrez http://localhost:3000/docs/api-documentation.html dans votre navigateur');
+  console.log('3. Cliquez sur "Diagramme de Classes" pour voir le diagramme de classes');
+  console.log('\nPour tester les API directement:');
+  console.log('- Utilisez l\'interface de test interactif dans la documentation');
+  console.log('- Cliquez sur "Envoyer la Requête" pour tester un endpoint');
+  console.log('- Copiez la commande cURL ou ouvrez dans Postman pour des tests plus avancés');
 }
 
 module.exports = { generateApiDocs };

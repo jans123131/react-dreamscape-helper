@@ -1,24 +1,24 @@
 
-// API Configuration
+// Configuration de l'API
 const API_PORT = process.env.API_PORT || 3000;
 const API_HOST = process.env.API_HOST || 'localhost';
 
-// Create the base API URL
+// Créer l'URL de base de l'API
 const API_URL = `http://${API_HOST}:${API_PORT}/api`; 
 
-// Extended configuration for documentation and other purposes
+// Configuration étendue pour la documentation et autres
 const API_CONFIG = {
   host: API_HOST,
   port: API_PORT,
   baseUrl: `/api`,
   version: '1.0',
-  // Include environment specific settings
+  // Paramètres spécifiques à l'environnement
   isProduction: process.env.NODE_ENV === 'production',
   cors: {
     enabled: true,
     origins: ['http://localhost:8080', 'https://jendoubalife.com']
   },
-  // Database entities for documentation
+  // Entités de base de données pour la documentation
   entities: [
     {
       name: 'User',
@@ -35,7 +35,9 @@ const API_CONFIG = {
         { type: 'hasMany', entity: 'Review', via: 'userId' },
         { type: 'hasMany', entity: 'Message', via: 'senderId' },
         { type: 'hasMany', entity: 'Message', via: 'receiverId' },
-        { type: 'hasMany', entity: 'Reservation', via: 'userId' }
+        { type: 'hasMany', entity: 'Reservation', via: 'userId' },
+        { type: 'hasMany', entity: 'Session', via: 'userId1' },
+        { type: 'hasMany', entity: 'Session', via: 'userId2' }
       ]
     },
     {
@@ -81,8 +83,8 @@ const API_CONFIG = {
       name: 'Message',
       fields: [
         { name: 'id', type: 'number', isPrimary: true },
+        { name: 'sessionId', type: 'number', reference: 'Session.id' },
         { name: 'senderId', type: 'number', reference: 'User.id' },
-        { name: 'receiverId', type: 'number', reference: 'User.id' },
         { name: 'content', type: 'text' },
         { name: 'read', type: 'boolean' },
         { name: 'createdAt', type: 'date' },
@@ -90,7 +92,24 @@ const API_CONFIG = {
       ],
       relations: [
         { type: 'belongsTo', entity: 'User', via: 'senderId' },
-        { type: 'belongsTo', entity: 'User', via: 'receiverId' }
+        { type: 'belongsTo', entity: 'Session', via: 'sessionId' }
+      ]
+    },
+    {
+      name: 'Session',
+      fields: [
+        { name: 'id', type: 'number', isPrimary: true },
+        { name: 'userId1', type: 'number', reference: 'User.id' },
+        { name: 'userId2', type: 'number', reference: 'User.id' },
+        { name: 'lastMessageAt', type: 'date' },
+        { name: 'isActive', type: 'boolean' },
+        { name: 'createdAt', type: 'date' },
+        { name: 'updatedAt', type: 'date' }
+      ],
+      relations: [
+        { type: 'belongsTo', entity: 'User', via: 'userId1' },
+        { type: 'belongsTo', entity: 'User', via: 'userId2' },
+        { type: 'hasMany', entity: 'Message', via: 'sessionId' }
       ]
     },
     {
@@ -135,11 +154,11 @@ const API_CONFIG = {
   ]
 };
 
-// For Expo Go on physical devices, you might need to use your machine's local IP
+// Pour Expo Go sur des appareils physiques, vous pourriez avoir besoin d'utiliser l'IP locale de votre machine
 // const API_URL = 'http://192.168.1.100:3000/api';
 
-// For documentation purposes
-console.log(`API initialized with URL: ${API_URL}`);
+// Pour la documentation
+console.log(`API initialisée avec l'URL: ${API_URL}`);
 
 module.exports = {
   API_URL,

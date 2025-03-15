@@ -7,18 +7,18 @@ const { showHelp } = require('./scripts/helpCommand');
 const { API_CONFIG } = require('./config/apiConfig');
 const path = require('path');
 
-// Create Express app
+// Créer l'application Express
 const app = express();
 const port = API_CONFIG.port || 3000;
 
-// Command line arguments handling
+// Traitement des arguments de ligne de commande
 const args = process.argv.slice(2);
 if (args.includes('help')) {
   showHelp();
   process.exit(0);
 }
 
-// API Call logging middleware
+// Middleware pour journaliser les appels API
 app.use((req, res, next) => {
   const start = Date.now();
   const originalSend = res.send;
@@ -48,29 +48,29 @@ app.use((req, res, next) => {
 app.use(cors());
 app.use(express.json());
 
-// Error handling middleware
+// Middleware de gestion des erreurs
 app.use((err, req, res, next) => {
-  console.error(chalk.red('Error:'), err.stack);
+  console.error(chalk.red('Erreur:'), err.stack);
   res.status(500).json({
     status: 500,
-    message: 'Internal Server Error',
+    message: 'Erreur Interne du Serveur',
     error: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
 });
 
-// Serve static documentation files
+// Servir les fichiers statiques de documentation
 app.use('/docs', express.static(path.join(__dirname, '../docs')));
 
-// Generate API documentation on server start
+// Générer la documentation API au démarrage du serveur
 try {
   generateApiDocs();
-  console.log(chalk.green('✓') + ' API documentation generated successfully!');
+  console.log(chalk.green('✓') + ' Documentation API générée avec succès!');
 } catch (error) {
-  console.error(chalk.red('✗') + ' Failed to generate API documentation:', error);
+  console.error(chalk.red('✗') + ' Échec de génération de la documentation API:', error);
 }
 
 /**
- * ======= AUTH ROUTES =======
+ * ======= ROUTES D'AUTHENTIFICATION =======
  */
 
 /**
@@ -144,7 +144,7 @@ app.post('/api/users/register', (req, res) => {
 });
 
 /**
- * ======= USERS ROUTES =======
+ * ======= ROUTES UTILISATEURS =======
  */
 
 /**
@@ -280,7 +280,7 @@ app.delete('/api/users/:id', (req, res) => {
 });
 
 /**
- * ======= PLACES ROUTES =======
+ * ======= ROUTES LIEUX =======
  */
 
 /**
@@ -458,7 +458,7 @@ app.delete('/api/places/:id', (req, res) => {
 });
 
 /**
- * ======= EVENTS ROUTES =======
+ * ======= ROUTES ÉVÉNEMENTS =======
  */
 
 /**
@@ -611,7 +611,193 @@ app.delete('/api/events/:id', (req, res) => {
 });
 
 /**
- * ======= MESSAGES ROUTES =======
+ * ======= ROUTES SESSIONS =======
+ */
+
+/**
+ * Route: GET /api/sessions
+ * Description: Récupère la liste des sessions de messages d'un utilisateur
+ * 
+ * Cette route permet d'obtenir un tableau contenant toutes les sessions
+ * de messages d'un utilisateur, incluant les informations sur l'autre 
+ * utilisateur et le dernier message échangé.
+ * 
+ * @returns {Object} Objet contenant un status et un tableau de sessions
+ */
+app.get('/api/sessions', (req, res) => {
+  // Logique pour récupérer les sessions de la base de données
+  res.json({
+    status: 200,
+    data: [
+      {
+        id: 1,
+        userId1: 1,
+        userId2: 2,
+        lastMessageAt: '2023-08-15T14:35:00Z',
+        isActive: true,
+        createdAt: '2023-08-15T14:30:00Z',
+        user: {
+          id: 2,
+          name: 'Jane Smith',
+          email: 'jane@example.com'
+        },
+        lastMessage: {
+          content: 'Bien sûr, comment puis-je vous aider?',
+          senderId: 2,
+          createdAt: '2023-08-15T14:35:00Z'
+        }
+      },
+      {
+        id: 2,
+        userId1: 1,
+        userId2: 3,
+        lastMessageAt: '2023-08-26T16:40:00Z',
+        isActive: true,
+        createdAt: '2023-08-26T16:40:00Z',
+        user: {
+          id: 3,
+          name: 'New User',
+          email: 'newuser@example.com'
+        },
+        lastMessage: {
+          content: 'Je voudrais plus d\'informations sur l\'événement du 15 septembre.',
+          senderId: 1,
+          createdAt: '2023-08-26T16:40:00Z'
+        }
+      }
+    ]
+  });
+});
+
+/**
+ * Route: GET /api/sessions/:id
+ * Description: Récupère les détails d'une session de messages spécifique
+ * 
+ * Cette route permet d'obtenir des informations détaillées sur une session
+ * spécifique, incluant les utilisateurs impliqués et l'historique des messages.
+ * 
+ * @param {Number} id - L'identifiant unique de la session
+ * @returns {Object} Objet contenant un status et les données détaillées de la session
+ */
+app.get('/api/sessions/:id', (req, res) => {
+  const sessionId = parseInt(req.params.id);
+  
+  res.json({
+    status: 200,
+    data: {
+      id: sessionId,
+      userId1: 1,
+      userId2: 2,
+      lastMessageAt: '2023-08-15T14:35:00Z',
+      isActive: true,
+      createdAt: '2023-08-15T14:30:00Z',
+      user1: {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com'
+      },
+      user2: {
+        id: 2,
+        name: 'Jane Smith',
+        email: 'jane@example.com'
+      },
+      messages: [
+        {
+          id: 1,
+          sessionId: sessionId,
+          senderId: 1,
+          content: 'Bonjour, j\'ai une question sur Bulla Regia.',
+          createdAt: '2023-08-15T14:30:00Z',
+          read: true
+        },
+        {
+          id: 2,
+          sessionId: sessionId,
+          senderId: 2,
+          content: 'Bien sûr, comment puis-je vous aider?',
+          createdAt: '2023-08-15T14:35:00Z',
+          read: false
+        }
+      ]
+    }
+  });
+});
+
+/**
+ * Route: POST /api/sessions
+ * Description: Crée une nouvelle session de messages
+ * 
+ * Cette route permet de créer une nouvelle session de messages entre
+ * deux utilisateurs dans la base de données.
+ * 
+ * @body {Number} userId1 - L'identifiant du premier utilisateur
+ * @body {Number} userId2 - L'identifiant du deuxième utilisateur
+ * @returns {Object} Objet contenant un status et les données de la nouvelle session créée
+ */
+app.post('/api/sessions', (req, res) => {
+  const { userId1, userId2 } = req.body;
+  
+  res.status(201).json({
+    status: 201,
+    data: {
+      id: 3,
+      userId1: userId1 || 1,
+      userId2: userId2 || 3,
+      lastMessageAt: null,
+      isActive: true,
+      createdAt: new Date().toISOString()
+    }
+  });
+});
+
+/**
+ * Route: PUT /api/sessions/:id
+ * Description: Met à jour une session de messages
+ * 
+ * Cette route permet de modifier le statut d'une session de messages existante.
+ * 
+ * @param {Number} id - L'identifiant unique de la session
+ * @body {Boolean} [isActive] - Le nouvel état d'activation de la session (optionnel)
+ * @returns {Object} Objet contenant un status et les données mises à jour de la session
+ */
+app.put('/api/sessions/:id', (req, res) => {
+  const sessionId = parseInt(req.params.id);
+  const { isActive } = req.body;
+  
+  res.json({
+    status: 200,
+    data: {
+      id: sessionId,
+      userId1: 1,
+      userId2: 2,
+      lastMessageAt: '2023-08-15T14:35:00Z',
+      isActive: isActive !== undefined ? isActive : false,
+      updatedAt: new Date().toISOString()
+    }
+  });
+});
+
+/**
+ * Route: DELETE /api/sessions/:id
+ * Description: Supprime une session de messages
+ * 
+ * Cette route permet de supprimer définitivement une session de messages
+ * de la base de données en fonction de son identifiant unique.
+ * 
+ * @param {Number} id - L'identifiant unique de la session
+ * @returns {Object} Objet contenant un status et un message de confirmation
+ */
+app.delete('/api/sessions/:id', (req, res) => {
+  const sessionId = parseInt(req.params.id);
+  
+  res.status(204).json({
+    status: 204,
+    message: 'Session deleted successfully'
+  });
+});
+
+/**
+ * ======= ROUTES MESSAGES =======
  */
 
 /**
@@ -630,16 +816,16 @@ app.get('/api/messages', (req, res) => {
     data: [
       {
         id: 1,
+        sessionId: 1,
         senderId: 1,
-        receiverId: 2,
         content: 'Bonjour, j\'ai une question sur Bulla Regia.',
         createdAt: '2023-08-15T14:30:00Z',
         read: true
       },
       {
         id: 2,
+        sessionId: 1,
         senderId: 2,
-        receiverId: 1,
         content: 'Bien sûr, comment puis-je vous aider?',
         createdAt: '2023-08-15T14:35:00Z',
         read: false
@@ -665,8 +851,8 @@ app.get('/api/messages/:id', (req, res) => {
     status: 200,
     data: {
       id: messageId,
+      sessionId: 1,
       senderId: 1,
-      receiverId: 2,
       content: 'Bonjour, j\'ai une question sur Bulla Regia.',
       createdAt: '2023-08-15T14:30:00Z',
       read: true
@@ -678,24 +864,24 @@ app.get('/api/messages/:id', (req, res) => {
  * Route: POST /api/messages
  * Description: Envoie un nouveau message
  * 
- * Cette route permet d'envoyer un nouveau message à un utilisateur dans
- * la plateforme JenCity. Les données requises incluent l'expéditeur,
- * le destinataire et le contenu du message.
+ * Cette route permet d'envoyer un nouveau message dans une session existante.
+ * Les données requises incluent l'identifiant de la session, l'expéditeur,
+ * et le contenu du message.
  * 
+ * @body {Number} sessionId - L'identifiant de la session
  * @body {Number} senderId - L'identifiant de l'expéditeur
- * @body {Number} receiverId - L'identifiant du destinataire
  * @body {String} content - Le contenu du message
  * @returns {Object} Objet contenant un status et les données du message envoyé
  */
 app.post('/api/messages', (req, res) => {
-  const { senderId, receiverId, content } = req.body;
+  const { sessionId, senderId, content } = req.body;
   
   res.status(201).json({
     status: 201,
     data: {
       id: 3,
+      sessionId: sessionId || 1,
       senderId: senderId || 1,
-      receiverId: receiverId || 2,
       content: content || 'Je voudrais plus d\'informations sur l\'événement du 15 septembre.',
       createdAt: new Date().toISOString(),
       read: false
@@ -722,8 +908,8 @@ app.put('/api/messages/:id', (req, res) => {
     status: 200,
     data: {
       id: messageId,
+      sessionId: 1,
       senderId: 2,
-      receiverId: 1,
       content: 'Bien sûr, comment puis-je vous aider?',
       createdAt: '2023-08-15T14:35:00Z',
       read: read !== undefined ? read : true,
@@ -752,7 +938,7 @@ app.delete('/api/messages/:id', (req, res) => {
 });
 
 /**
- * ======= REVIEWS ROUTES =======
+ * ======= ROUTES AVIS =======
  */
 
 /**
@@ -895,7 +1081,7 @@ app.delete('/api/reviews/:id', (req, res) => {
 });
 
 /**
- * ======= RESERVATIONS ROUTES =======
+ * ======= ROUTES RÉSERVATIONS =======
  */
 
 /**
@@ -1050,7 +1236,7 @@ app.delete('/api/reservations/:id', (req, res) => {
   });
 });
 
-// Start the server
+// Démarrer le serveur
 app.listen(port, () => {
   console.log('\n' + chalk.magenta('███████╗ ███████╗ ███╗   ██╗  ██████╗ ██╗████████╗██╗   ██╗'));
   console.log(chalk.magenta('██╔════╝ ██╔════╝ ████╗  ██║ ██╔════╝ ██║╚══██╔══╝╚██╗ ██╔╝'));
@@ -1059,19 +1245,19 @@ app.listen(port, () => {
   console.log(chalk.magenta('███████║ ███████╗ ██║ ╚████║ ╚██████╗ ██║   ██║      ██║   '));
   console.log(chalk.magenta('╚══════╝ ╚══════╝ ╚═╝  ╚═══╝  ╚═════╝ ╚═╝   ╚═╝      ╚═╝   \n'));
   
-  console.log(chalk.green('✓') + chalk.bold(' JenCity API Server is running!'));
+  console.log(chalk.green('✓') + chalk.bold(' Serveur API JenCity est en cours d\'exécution!'));
   console.log(chalk.cyan('•') + ' Local:            ' + chalk.underline(`http://localhost:${port}`));
-  console.log(chalk.cyan('•') + ' API Base URL:     ' + chalk.underline(`http://localhost:${port}/api`));
+  console.log(chalk.cyan('•') + ' URL de base API:  ' + chalk.underline(`http://localhost:${port}/api`));
   console.log(chalk.cyan('•') + ' Documentation:    ' + chalk.underline(`http://localhost:${port}/docs/api-documentation.html`));
-  console.log(chalk.cyan('•') + ' Class Diagram:    ' + chalk.underline(`http://localhost:${port}/docs/diagram_de_class.html`));
-  console.log('\nAPI Routes:');
+  console.log(chalk.cyan('•') + ' Diagramme de Classes: ' + chalk.underline(`http://localhost:${port}/docs/diagram_de_class.html`));
+  console.log('\nRoutes API:');
   
-  // Log available routes
+  // Journaliser les routes disponibles
   const routes = [];
   app._router.stack.forEach(middleware => {
-    if(middleware.route) { // routes registered directly on the app
+    if(middleware.route) { // routes enregistrées directement sur l'app
       routes.push(middleware.route);
-    } else if(middleware.name === 'router') { // router middleware
+    } else if(middleware.name === 'router') { // middleware de routeur
       middleware.handle.stack.forEach(handler => {
         if(handler.route) {
           routes.push(handler.route);
@@ -1096,6 +1282,6 @@ app.listen(port, () => {
     console.log(`  ${chalk[methodColor](methods.padEnd(7))} ${route.path}`);
   });
   
-  console.log('\n' + chalk.gray('Use Ctrl+C to stop the server'));
-  console.log(chalk.gray(`For help, run: ${chalk.white('node src/server.js help')}`));
+  console.log('\n' + chalk.gray('Utilisez Ctrl+C pour arrêter le serveur'));
+  console.log(chalk.gray(`Pour obtenir de l'aide, exécutez: ${chalk.white('node src/server.js help')}`));
 });
