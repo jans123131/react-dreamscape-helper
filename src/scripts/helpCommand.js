@@ -28,6 +28,10 @@ const showHelp = () => {
   console.log(chalk.green('npm run i18n:extract') + ' - Extrait les chaînes de traduction du code');
   console.log(chalk.green('npm run i18n:compile') + ' - Compile les fichiers de traduction');
   
+  console.log(chalk.yellow('\nSessions et Messages:'));
+  console.log(chalk.green('npm run sessions:list') + ' - Affiche la liste des sessions actives');
+  console.log(chalk.green('npm run messages:count') + ' - Affiche le nombre de messages par session');
+  
   console.log(chalk.yellow('\nDéploiement:'));
   console.log(chalk.green('npm run deploy') + ' - Déploie l\'application sur l\'environnement de production');
   console.log(chalk.green('npm run deploy:staging') + ' - Déploie l\'application sur l\'environnement de staging');

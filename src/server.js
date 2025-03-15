@@ -1239,11 +1239,11 @@ app.delete('/api/reservations/:id', (req, res) => {
 // Démarrer le serveur
 app.listen(port, () => {
   console.log('\n' + chalk.magenta('███████╗ ███████╗ ███╗   ██╗  ██████╗ ██╗████████╗██╗   ██╗'));
-  console.log(chalk.magenta('██╔════╝ ██╔════╝ ████╗  ██║ ██╔════╝ ██║╚══██╔══╝╚██╗ ██╔╝'));
-  console.log(chalk.magenta('███████╗ █████╗   ██╔██╗ ██║ ██║      ██║   ██║    ╚████╔╝ '));
-  console.log(chalk.magenta('╚════██║ ██╔══╝   ██║╚██╗██║ ██║      ██║   ██║     ╚██╔╝  '));
-  console.log(chalk.magenta('███████║ ███████╗ ██║ ╚████║ ╚██████╗ ██║   ██║      ██║   '));
-  console.log(chalk.magenta('╚══════╝ ╚══════╝ ╚═╝  ╚═══╝  ╚═════╝ ╚═╝   ╚═╝      ╚═╝   \n'));
+  console.log(chalk.magenta('     ██║ ██╔════╝ ████╗  ██║ ██╔════╝ ██║   ██╔══╝╚██╗ ██╔╝'));
+  console.log(chalk.magenta('     ██║ █████╗   ██╔██╗ ██║ ██║      ██║   ██║    ╚████╔╝ '));
+  console.log(chalk.magenta('██   ██║ ██╔══╝   ██║╚██╗██║ ██║      ██║   ██║     ╚██╔╝  '));
+  console.log(chalk.magenta('╚█████╔╝ ███████╗ ██║ ╚████║ ╚██████╗ ██║   ██║      ██║   '));
+  console.log(chalk.magenta(' ╚════╝  ╚══════╝ ╚═╝  ╚═══╝  ╚═════╝ ╚═╝   ╚═╝      ╚═╝   \n'));
   
   console.log(chalk.green('✓') + chalk.bold(' Serveur API JenCity est en cours d\'exécution!'));
   console.log(chalk.cyan('•') + ' Local:            ' + chalk.underline(`http://localhost:${port}`));
