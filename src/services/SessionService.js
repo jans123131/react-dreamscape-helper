@@ -181,6 +181,43 @@ class SessionService {
   }
 
   /**
+   * Vérifie si une session existe entre deux utilisateurs et en crée une si nécessaire
+   * @param {Number} userId1 - L'ID du premier utilisateur
+   * @param {Number} userId2 - L'ID du deuxième utilisateur
+   * @returns {Promise<Object>} La session existante ou nouvelle
+   */
+  async findOrCreateSession(userId1, userId2) {
+    // Dans une implémentation réelle, vous chercheriez dans la base de données
+    // Pour cette démonstration, nous simulons une recherche
+    
+    // Ordonner les IDs utilisateurs pour assurer la cohérence
+    const [smallerId, largerId] = userId1 < userId2 
+      ? [userId1, userId2] 
+      : [userId2, userId1];
+    
+    // Simuler une recherche dans les données existantes
+    const existingSessions = await this.getAllSessions();
+    const existingSession = existingSessions.find(session => 
+      (session.userId1 === smallerId && session.userId2 === largerId) ||
+      (session.userId1 === largerId && session.userId2 === smallerId)
+    );
+    
+    if (existingSession) {
+      console.log(`Session existante trouvée: ${existingSession.id}`);
+      return existingSession;
+    }
+    
+    // Créer une nouvelle session si aucune n'existe
+    console.log(`Création d'une nouvelle session entre ${userId1} et ${userId2}`);
+    const newSession = await this.createSession({
+      userId1: smallerId,
+      userId2: largerId
+    });
+    
+    return newSession;
+  }
+
+  /**
    * Ajoute un message à une session
    * @param {Number} sessionId - L'ID de la session
    * @param {Object} messageData - Les données du message
