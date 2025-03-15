@@ -56,6 +56,32 @@ class SessionService {
   }
 
   /**
+   * Récupère toutes les sessions
+   * @returns {Promise<Array>} Liste de toutes les sessions
+   */
+  async getAllSessions() {
+    // Dans une implémentation réelle, vous récupéreriez les données depuis la base de données
+    return [
+      {
+        id: 1,
+        userId1: 1,
+        userId2: 2,
+        lastMessageAt: '2023-08-15T14:35:00Z',
+        isActive: true,
+        createdAt: '2023-08-15T14:30:00Z'
+      },
+      {
+        id: 2,
+        userId1: 1,
+        userId2: 3,
+        lastMessageAt: '2023-08-26T16:40:00Z',
+        isActive: true,
+        createdAt: '2023-08-26T16:40:00Z'
+      }
+    ];
+  }
+
+  /**
    * Récupère une session par son ID
    * @param {Number} sessionId - L'ID de la session
    * @returns {Promise<Object>} Session avec les données des utilisateurs et messages
@@ -177,6 +203,33 @@ class SessionService {
     await this.updateSession(sessionId, { lastMessageAt: message.createdAt });
 
     return message;
+  }
+
+  /**
+   * Récupère tous les messages d'une session
+   * @param {Number} sessionId - L'ID de la session
+   * @returns {Promise<Array>} Liste des messages de la session
+   */
+  async getSessionMessages(sessionId) {
+    // Dans une implémentation réelle, vous récupéreriez depuis la base de données
+    return [
+      {
+        id: 1,
+        sessionId: sessionId,
+        senderId: 1,
+        content: 'Bonjour, j\'ai une question sur Bulla Regia.',
+        createdAt: '2023-08-15T14:30:00Z',
+        read: true
+      },
+      {
+        id: 2,
+        sessionId: sessionId,
+        senderId: 2,
+        content: 'Bien sûr, comment puis-je vous aider?',
+        createdAt: '2023-08-15T14:35:00Z',
+        read: false
+      }
+    ];
   }
 }
 

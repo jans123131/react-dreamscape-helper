@@ -101,7 +101,7 @@ const API_CONFIG = {
         { name: 'id', type: 'number', isPrimary: true },
         { name: 'userId1', type: 'number', reference: 'User.id' },
         { name: 'userId2', type: 'number', reference: 'User.id' },
-        { name: 'lastMessageAt', type: 'date' },
+        { name: 'lastMessageAt', type: 'date', isOptional: true },
         { name: 'isActive', type: 'boolean' },
         { name: 'createdAt', type: 'date' },
         { name: 'updatedAt', type: 'date' }

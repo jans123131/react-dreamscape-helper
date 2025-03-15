@@ -4,7 +4,7 @@
  * Permet de créer, lire, mettre à jour et supprimer des sessions
  */
 
-const { API_CONFIG } = require('../config/apiConfig');
+const SessionService = require('../services/SessionService');
 
 class SessionController {
   /**
@@ -12,50 +12,30 @@ class SessionController {
    * @param {Object} req - La requête HTTP
    * @param {Object} res - La réponse HTTP
    */
-  getAllSessions(req, res) {
-    // Ici, vous implémenteriez la logique pour récupérer les sessions depuis la base de données
-    // Pour cette démonstration, nous renvoyons des données fictives
-    res.json({
-      status: 200,
-      data: [
-        {
-          id: 1,
-          userId1: 1, 
-          userId2: 2,
-          lastMessageAt: '2023-08-15T14:35:00Z',
-          isActive: true,
-          createdAt: '2023-08-15T14:30:00Z',
-          user: {
-            id: 2,
-            name: 'Jane Smith',
-            email: 'jane@example.com'
-          },
-          lastMessage: {
-            content: 'Bien sûr, comment puis-je vous aider?',
-            senderId: 2,
-            createdAt: '2023-08-15T14:35:00Z'
-          }
-        },
-        {
-          id: 2,
-          userId1: 1,
-          userId2: 3,
-          lastMessageAt: '2023-08-26T16:40:00Z',
-          isActive: true,
-          createdAt: '2023-08-26T16:40:00Z',
-          user: {
-            id: 3,
-            name: 'New User',
-            email: 'newuser@example.com'
-          },
-          lastMessage: {
-            content: 'Je voudrais plus d\'informations sur l\'événement du 15 septembre.',
-            senderId: 1,
-            createdAt: '2023-08-26T16:40:00Z'
-          }
-        }
-      ]
-    });
+  async getAllSessions(req, res) {
+    try {
+      // Vérifier si un userId est spécifié dans la requête
+      const userId = req.query.userId;
+      let sessions;
+
+      if (userId) {
+        // Si un userId est fourni, récupérer les sessions de cet utilisateur
+        sessions = await SessionService.getUserSessions(parseInt(userId));
+      } else {
+        // Sinon, récupérer toutes les sessions
+        sessions = await SessionService.getAllSessions();
+      }
+
+      res.json({
+        status: 200,
+        data: sessions
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 500,
+        message: `Erreur lors de la récupération des sessions: ${error.message}`
+      });
+    }
   }
 
   /**
@@ -63,49 +43,36 @@ class SessionController {
    * @param {Object} req - La requête HTTP
    * @param {Object} res - La réponse HTTP
    */
-  getSessionById(req, res) {
-    const sessionId = parseInt(req.params.id);
-    
-    // Ici, vous implémenteriez la logique pour récupérer une session spécifique
-    res.json({
-      status: 200,
-      data: {
-        id: sessionId,
-        userId1: 1,
-        userId2: 2,
-        lastMessageAt: '2023-08-15T14:35:00Z',
-        isActive: true,
-        createdAt: '2023-08-15T14:30:00Z',
-        user1: {
-          id: 1,
-          name: 'John Doe',
-          email: 'john@example.com'
-        },
-        user2: {
-          id: 2,
-          name: 'Jane Smith',
-          email: 'jane@example.com'
-        },
-        messages: [
-          {
-            id: 1,
-            sessionId: sessionId,
-            senderId: 1,
-            content: 'Bonjour, j\'ai une question sur Bulla Regia.',
-            createdAt: '2023-08-15T14:30:00Z',
-            read: true
-          },
-          {
-            id: 2,
-            sessionId: sessionId,
-            senderId: 2,
-            content: 'Bien sûr, comment puis-je vous aider?',
-            createdAt: '2023-08-15T14:35:00Z',
-            read: false
-          }
-        ]
+  async getSessionById(req, res) {
+    try {
+      const sessionId = parseInt(req.params.id);
+      
+      if (isNaN(sessionId)) {
+        return res.status(400).json({
+          status: 400,
+          message: "L'ID de la session doit être un nombre valide"
+        });
       }
-    });
+      
+      const session = await SessionService.getSessionById(sessionId);
+      
+      if (!session) {
+        return res.status(404).json({
+          status: 404,
+          message: "Session non trouvée"
+        });
+      }
+      
+      res.json({
+        status: 200,
+        data: session
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 500,
+        message: `Erreur lors de la récupération de la session: ${error.message}`
+      });
+    }
   }
 
   /**
@@ -113,29 +80,34 @@ class SessionController {
    * @param {Object} req - La requête HTTP
    * @param {Object} res - La réponse HTTP
    */
-  createSession(req, res) {
-    const { userId1, userId2 } = req.body;
-    
-    // Validation des entrées
-    if (!userId1 || !userId2) {
-      return res.status(400).json({
+  async createSession(req, res) {
+    try {
+      const { userId1, userId2 } = req.body;
+      
+      // Validation des entrées
+      if (!userId1 || !userId2) {
+        return res.status(400).json({
+          status: 400,
+          message: 'Les identifiants des deux utilisateurs sont requis'
+        });
+      }
+      
+      // Création de la session
+      const newSession = await SessionService.createSession({
+        userId1: parseInt(userId1),
+        userId2: parseInt(userId2)
+      });
+      
+      res.status(201).json({
+        status: 201,
+        data: newSession
+      });
+    } catch (error) {
+      res.status(400).json({
         status: 400,
-        message: 'Les identifiants des deux utilisateurs sont requis'
+        message: `Erreur lors de la création de la session: ${error.message}`
       });
     }
-    
-    // Ici, vous implémenteriez la logique pour créer une nouvelle session
-    res.status(201).json({
-      status: 201,
-      data: {
-        id: 3, // ID généré automatiquement en production
-        userId1,
-        userId2,
-        lastMessageAt: null,
-        isActive: true,
-        createdAt: new Date().toISOString()
-      }
-    });
   }
 
   /**
@@ -143,22 +115,32 @@ class SessionController {
    * @param {Object} req - La requête HTTP
    * @param {Object} res - La réponse HTTP
    */
-  updateSession(req, res) {
-    const sessionId = parseInt(req.params.id);
-    const { isActive } = req.body;
-    
-    // Ici, vous implémenteriez la logique pour mettre à jour une session
-    res.json({
-      status: 200,
-      data: {
-        id: sessionId,
-        userId1: 1,
-        userId2: 2,
-        lastMessageAt: '2023-08-15T14:35:00Z',
-        isActive: isActive !== undefined ? isActive : false,
-        updatedAt: new Date().toISOString()
+  async updateSession(req, res) {
+    try {
+      const sessionId = parseInt(req.params.id);
+      
+      if (isNaN(sessionId)) {
+        return res.status(400).json({
+          status: 400,
+          message: "L'ID de la session doit être un nombre valide"
+        });
       }
-    });
+      
+      const updateData = req.body;
+      
+      // Mise à jour de la session
+      const updatedSession = await SessionService.updateSession(sessionId, updateData);
+      
+      res.json({
+        status: 200,
+        data: updatedSession
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 500,
+        message: `Erreur lors de la mise à jour de la session: ${error.message}`
+      });
+    }
   }
 
   /**
@@ -166,14 +148,29 @@ class SessionController {
    * @param {Object} req - La requête HTTP
    * @param {Object} res - La réponse HTTP
    */
-  deleteSession(req, res) {
-    const sessionId = parseInt(req.params.id);
-    
-    // Ici, vous implémenteriez la logique pour supprimer une session
-    res.status(204).json({
-      status: 204,
-      message: 'Session supprimée avec succès'
-    });
+  async deleteSession(req, res) {
+    try {
+      const sessionId = parseInt(req.params.id);
+      
+      if (isNaN(sessionId)) {
+        return res.status(400).json({
+          status: 400,
+          message: "L'ID de la session doit être un nombre valide"
+        });
+      }
+      
+      await SessionService.deleteSession(sessionId);
+      
+      res.status(204).json({
+        status: 204,
+        message: 'Session supprimée avec succès'
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 500,
+        message: `Erreur lors de la suppression de la session: ${error.message}`
+      });
+    }
   }
   
   /**
@@ -181,31 +178,29 @@ class SessionController {
    * @param {Object} req - La requête HTTP
    * @param {Object} res - La réponse HTTP
    */
-  getSessionMessages(req, res) {
-    const sessionId = parseInt(req.params.id);
-    
-    // Ici, vous implémenteriez la logique pour récupérer les messages d'une session
-    res.json({
-      status: 200,
-      data: [
-        {
-          id: 1,
-          sessionId: sessionId,
-          senderId: 1,
-          content: 'Bonjour, j\'ai une question sur Bulla Regia.',
-          createdAt: '2023-08-15T14:30:00Z',
-          read: true
-        },
-        {
-          id: 2,
-          sessionId: sessionId,
-          senderId: 2,
-          content: 'Bien sûr, comment puis-je vous aider?',
-          createdAt: '2023-08-15T14:35:00Z',
-          read: false
-        }
-      ]
-    });
+  async getSessionMessages(req, res) {
+    try {
+      const sessionId = parseInt(req.params.id);
+      
+      if (isNaN(sessionId)) {
+        return res.status(400).json({
+          status: 400,
+          message: "L'ID de la session doit être un nombre valide"
+        });
+      }
+      
+      const messages = await SessionService.getSessionMessages(sessionId);
+      
+      res.json({
+        status: 200,
+        data: messages
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 500,
+        message: `Erreur lors de la récupération des messages: ${error.message}`
+      });
+    }
   }
 }
 
