@@ -1,3 +1,4 @@
+
 import type { Product, ProductCategory } from '../types/product';
 
 export const PRODUCT_CATEGORIES: Record<ProductCategory, string> = {
@@ -12,6 +13,7 @@ export const PRODUCT_CATEGORIES: Record<ProductCategory, string> = {
 };
 
 export const PRODUCTS: Product[] = [
+  // Dattes - Paquets
   {
     id: '1',
     title: 'Paquet Dattes 1kg',
@@ -456,14 +458,13 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: '7',
-    title: 'Dattes Standard Dénoyautées 5kg',
-    description: 'Conditionnement professionnel de 5kg de dattes dénoyautées, spécialement conçu pour les restaurants, les pâtisseries et les professionnels de l\'alimentation. Ces dattes Deglet Nour de qualité standard sont soigneusement dénoyautées et préparées pour une utilisation efficace en restauration. Idéales pour la préparation de desserts traditionnels, pâtisseries ou créations culinaires innovantes.',
+    title: 'Dattes Standard Dénoyautées 5kg/10kg',
+    description: 'Conditionnement professionnel de dattes dénoyautées disponible en formats 5kg ou 10kg, spécialement conçu pour les restaurants, les pâtisseries et les professionnels de l\'alimentation. Ces dattes Deglet Nour de qualité standard sont soigneusement dénoyautées et préparées pour une utilisation efficace en restauration. Idéales pour la préparation de desserts traditionnels, pâtisseries ou créations culinaires innovantes à grande échelle.',
     image: '/produits/DattesStandard.png',
     isOrganic: false,
     isFairTrade: true,
     category: 'dattes-transformees',
     certifications: ['Fair Trade'],
-    weight: '5kg',
     calories: {
       value: 306,
       unit: 'kcal/1279kJ',
@@ -474,78 +475,6 @@ export const PRODUCTS: Product[] = [
       'Sans conservateurs artificiels',
       'Préparées selon les normes d\'hygiène professionnelles',
       'Conditionnement spécial pour usage professionnel'
-    ],
-    nutritionFacts: [
-      { 
-        name: 'Énergie / Energie', 
-        value: '306', 
-        unit: 'kcal/1279kJ',
-        dailyValue: '15.3%' 
-      },
-      { 
-        name: 'Glucides / Carbohydrates', 
-        value: '70', 
-        unit: 'g',
-        dailyValue: '26.9%' 
-      },
-      { 
-        name: 'dont Sucres / Of which sugars', 
-        value: '70', 
-        unit: 'g',
-        dailyValue: '77.8%' 
-      },
-      { 
-        name: 'Fibres / Fiber', 
-        value: '6.25', 
-        unit: 'g',
-        dailyValue: '25%' 
-      },
-      { 
-        name: 'Protéines / Protein', 
-        value: '2.2', 
-        unit: 'g',
-        dailyValue: '4.4%' 
-      },
-      { 
-        name: 'Matières grasses / Fat', 
-        value: '0.2', 
-        unit: 'g',
-        dailyValue: '0.3%' 
-      },
-      { 
-        name: 'dont Acides gras saturés / Saturated fatty acids', 
-        value: '0.2', 
-        unit: 'g',
-        dailyValue: '1%' 
-      },
-      { 
-        name: 'Sel / Salt', 
-        value: '0', 
-        unit: 'g',
-        dailyValue: '—' 
-      }
-    ]
-  },
-  {
-    id: '8',
-    title: 'Dattes Standard Dénoyautées 10kg',
-    description: 'Notre conditionnement industriel de 10kg de dattes dénoyautées est la solution économique idéale pour les professionnels de l\'agroalimentaire et de la restauration collective. Ces dattes Deglet Nour de qualité standard maintiennent un bon équilibre entre qualité et prix, parfaites pour une utilisation à grande échelle. Emballées de façon pratique pour faciliter le stockage et l\'utilisation quotidienne en contexte professionnel.',
-    image: '/produits/DattesStandard.png',
-    isOrganic: false,
-    isFairTrade: true,
-    category: 'dattes-transformees',
-    certifications: ['Fair Trade'],
-    weight: '10kg',
-    calories: {
-      value: 306,
-      unit: 'kcal/1279kJ',
-      per: '100g'
-    },
-    ingredients: [
-      'Dattes Deglet Nour de Tunisie dénoyautées qualité standard',
-      'Sans conservateurs artificiels',
-      'Triées mécaniquement pour garantir une qualité constante',
-      'Emballage économique adapté au secteur professionnel'
     ],
     nutritionFacts: [
       { 

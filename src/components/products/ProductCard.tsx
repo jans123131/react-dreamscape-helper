@@ -31,7 +31,7 @@ const ProductCard = ({ product, onSelect }: ProductCardProps) => {
 
   // Determine if the product should show a badge
   const shouldShowBadge = () => {
-    return ['figues-sechees', 'sucre-dattes', 'cafe-dattes', 'sirop-dattes'].includes(product.category);
+    return ['figues-sechees', 'sucre-dattes', 'cafe-dattes', 'sirop-dattes'].includes(product.category as string);
   };
 
   // Animation variants for the badge - updated to appear from top with slower animation
