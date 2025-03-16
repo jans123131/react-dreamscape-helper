@@ -17,15 +17,21 @@ const ProductCard = ({ product, onSelect }: ProductCardProps) => {
 
   // Function to determine which badge image to show based on the product category
   const getBadgeImage = () => {
-    if (product.category.includes('figues')) {
+    if (product.category === 'figues-sechees') {
       return "https://i.ibb.co/CKznp9Q1/Design-sans-titre-1-removebg-preview.png";
-    } else if (product.category.includes('sucre') || product.category.includes('poudre')) {
+    } else if (product.category === 'sucre-dattes') {
       return "https://i.ibb.co/Hpp4ChmZ/image-removebg-preview-2.png";
-    } else if (product.category.includes('dattes')) {
+    } else if (product.category === 'cafe-dattes') {
       return "https://i.ibb.co/Y7kRk7qX/image-removebg-preview-1.png";
+    } else if (product.category === 'sirop-dattes') {
+      return "https://i.ibb.co/tqq9M0K/sirop-badge.png";
     }
-    // Default badge for other products
-    return "https://i.ibb.co/Y7kRk7qX/image-removebg-preview-1.png";
+    return "";
+  };
+
+  // Determine if the product should show a badge
+  const shouldShowBadge = () => {
+    return ['figues-sechees', 'sucre-dattes', 'cafe-dattes', 'sirop-dattes'].includes(product.category);
   };
 
   // Animation variants for the badge - updated to appear from top with slower animation
@@ -79,22 +85,24 @@ const ProductCard = ({ product, onSelect }: ProductCardProps) => {
           />
           
           {/* Circular badge positioned at the bottom right of the image with cool animation */}
-         {/*  <motion.div
-            className="absolute -bottom-6 -right-[-80px] z-10"
-            initial="hidden"
-            animate="visible"
-            whileHover="hover"
-            variants={badgeVariants}
-          >
-            <div className="w-[160px] h-15 ml-[6%]">
-              <OptimizedImage 
-                src={getBadgeImage()} 
-                alt="Product Type" 
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-            </div>
-          </motion.div> */}
+          {shouldShowBadge() && (
+            <motion.div
+              className="absolute -bottom-6 -right-[-80px] z-10"
+              initial="hidden"
+              animate="visible"
+              whileHover="hover"
+              variants={badgeVariants}
+            >
+              <div className="w-[160px] h-15 ml-[6%]">
+                <OptimizedImage 
+                  src={getBadgeImage()} 
+                  alt="Product Type" 
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            </motion.div>
+          )}
         </div>
         
         <div className="pt-6 pb-4 px-2">
