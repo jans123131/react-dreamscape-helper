@@ -23,7 +23,7 @@ const AboutSection = () => {
             <p className="text-gray-600">
               {t('about.history_text_2')}
             </p>
-            <div className="grid grid-cols-2 gap-4 pt-4">
+            <div className="grid grid-cols-2 gap-2 pt-4"> {/* Reduced gap from 4 to 2 */}
               <div className="text-center">
                 <div className="text-3xl font-bold text-[#64381b]">500+</div>
                 <div className="text-sm text-gray-600">Revendeur</div>
