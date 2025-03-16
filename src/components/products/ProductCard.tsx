@@ -18,13 +18,13 @@ const ProductCard = ({ product, onSelect }: ProductCardProps) => {
   // Function to determine which badge image to show based on the product category
   const getBadgeImage = () => {
     if (product.category === 'figues-sechees') {
-      return "https://i.ibb.co/CKznp9Q1/Design-sans-titre-1-removebg-preview.png";
+      return "https://dl.imgdrop.io/file/aed8b140-8472-4813-922b-7ce35ef93c9e/2025/03/16/image-removebg-preview-4361740e9a4627e06.png";
     } else if (product.category === 'sucre-dattes') {
-      return "https://i.ibb.co/Hpp4ChmZ/image-removebg-preview-2.png";
+      return "https://i.ibb.co/VWBygGWg/image-removebg-preview-1.png";
     } else if (product.category === 'cafe-dattes') {
-      return "https://i.ibb.co/Y7kRk7qX/image-removebg-preview-1.png";
+      return "https://i.ibb.co/rKVRCBvQ/4-removebg-preview.png";
     } else if (product.category === 'sirop-dattes') {
-      return "https://i.ibb.co/tqq9M0K/sirop-badge.png";
+      return "https://dl.imgdrop.io/file/aed8b140-8472-4813-922b-7ce35ef93c9e/2025/03/16/image-removebg-preview-311d2146b0eba64e1.png";
     }
     return "";
   };
