@@ -11,7 +11,8 @@ const {
   getMessageById,
   createMessage,
   updateMessage,
-  deleteMessage
+  deleteMessage,
+  getMessagesBySession
 } = require("../controllers/messageController");
 const { protect } = require("../middleware/auth");
 const {
@@ -33,6 +34,15 @@ router.use(protect);
  * @returns Array of messages
  */
 router.get("/", getAllMessages);
+
+/**
+ * @route   GET /api/messages/session/:sessionId
+ * @desc    Get all messages for a specific session
+ * @access  Private - Requires authentication and session participation
+ * @param   sessionId - Session ID
+ * @returns Array of messages for the session
+ */
+router.get("/session/:sessionId", getMessagesBySession);
 
 /**
  * @route   GET /api/messages/:id

@@ -1,3 +1,4 @@
+
 -- Create database if not exists with proper character set
 CREATE DATABASE IF NOT EXISTS myapp_database1 
 CHARACTER SET utf8mb4 
@@ -60,7 +61,23 @@ CREATE TABLE IF NOT EXISTS events (
     INDEX idx_location (location(191))
 ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- Messages Table (new)
+-- Sessions Table (new)
+CREATE TABLE IF NOT EXISTS sessions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    userId1 INT NOT NULL,
+    userId2 INT NOT NULL,
+    lastMessageAt TIMESTAMP NULL,
+    isActive BOOLEAN DEFAULT TRUE,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId1) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (userId2) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user1 (userId1),
+    INDEX idx_user2 (userId2),
+    INDEX idx_last_message (lastMessageAt)
+) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- Messages Table (updated with foreign key)
 CREATE TABLE IF NOT EXISTS messages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     sessionId INT NOT NULL,
@@ -70,6 +87,7 @@ CREATE TABLE IF NOT EXISTS messages (
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (senderId) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (sessionId) REFERENCES sessions(id) ON DELETE CASCADE,
     INDEX idx_sessionId (sessionId),
     INDEX idx_senderId (senderId)
 ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -176,3 +194,14 @@ BEGIN
         WHERE place_id = OLD.place_id AND status = 'approved'
     ) WHERE id = OLD.place_id;
 END;
+
+-- Trigger to update lastMessageAt in session when a new message is created
+DELIMITER //
+CREATE TRIGGER update_session_last_message AFTER INSERT ON messages
+FOR EACH ROW
+BEGIN
+    UPDATE sessions 
+    SET lastMessageAt = NEW.createdAt
+    WHERE id = NEW.sessionId;
+END //
+DELIMITER ;

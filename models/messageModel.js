@@ -70,6 +70,15 @@ class Message {
     return result.affectedRows > 0;
   }
 
+  // Mark all messages in a session as read for a user
+  static async markSessionMessagesAsRead(sessionId, userId) {
+    const [result] = await db.query(
+      "UPDATE messages SET read = TRUE WHERE sessionId = ? AND senderId != ? AND read = FALSE",
+      [sessionId, userId]
+    );
+    return result.affectedRows;
+  }
+
   // Delete a message
   static async delete(id) {
     const [result] = await db.query(
