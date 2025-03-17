@@ -1,4 +1,3 @@
-
 -- Create database if not exists with proper character set
 CREATE DATABASE IF NOT EXISTS myapp_database1 
 CHARACTER SET utf8mb4 
@@ -59,6 +58,20 @@ CREATE TABLE IF NOT EXISTS events (
     INDEX idx_startDate (startDate),
     INDEX idx_endDate (endDate),
     INDEX idx_location (location(191))
+) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- Messages Table (new)
+CREATE TABLE IF NOT EXISTS messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sessionId INT NOT NULL,
+    senderId INT NOT NULL,
+    content TEXT NOT NULL,
+    read BOOLEAN DEFAULT FALSE,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (senderId) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_sessionId (sessionId),
+    INDEX idx_senderId (senderId)
 ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- The rest of the schema stays the same for other tables
