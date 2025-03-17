@@ -1,3 +1,4 @@
+
 -- Create database if not exists with proper character set
 CREATE DATABASE IF NOT EXISTS myapp_database1 
 CHARACTER SET utf8mb4 
@@ -41,6 +42,25 @@ CREATE TABLE IF NOT EXISTS places (
     INDEX idx_type (type)
 ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- Events Table (updated schema)
+CREATE TABLE IF NOT EXISTS events (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    startDate DATETIME NOT NULL,
+    endDate DATETIME NOT NULL,
+    location VARCHAR(255),
+    organizer VARCHAR(255),
+    ticketPrice DECIMAL(10,2),
+    capacity INT,
+    images JSON COMMENT 'JSON array of image URLs',
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_startDate (startDate),
+    INDEX idx_endDate (endDate),
+    INDEX idx_location (location(191))
+) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- The rest of the schema stays the same for other tables
 -- Reviews Table
 CREATE TABLE IF NOT EXISTS reviews (
@@ -56,26 +76,6 @@ CREATE TABLE IF NOT EXISTS reviews (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_place_id (place_id),
     INDEX idx_user_id (user_id),
-    INDEX idx_status (status)
-) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- Events Table
-CREATE TABLE IF NOT EXISTS events (
-    event_id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    place_id INT,
-    start_date DATETIME NOT NULL,
-    end_date DATETIME NOT NULL,
-    image_url VARCHAR(512),
-    price DECIMAL(10,2),
-    status ENUM('upcoming', 'ongoing', 'past', 'cancelled') DEFAULT 'upcoming',
-    created_by INT NOT NULL COMMENT 'Admin or provider who created',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (place_id) REFERENCES places(id) ON DELETE SET NULL,
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_dates (start_date, end_date),
     INDEX idx_status (status)
 ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS reservations (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (place_id) REFERENCES places(id) ON DELETE CASCADE,
-    FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE SET NULL,
+    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE SET NULL,
     INDEX idx_user_id (user_id),
     INDEX idx_place_id (place_id),
     INDEX idx_date (reservation_date),

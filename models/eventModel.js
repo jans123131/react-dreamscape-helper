@@ -2,97 +2,96 @@
 const db = require("../config/db");
 
 class Event {
-  // Récupérer tous les événements avec filtres optionnels
+  // Get all events with optional filters
   static async getAll(filters = {}) {
     let query = "SELECT * FROM events WHERE 1=1";
     const params = [];
 
-    // Filtre par lieu
-    if (filters.place_id) {
-      query += " AND place_id = ?";
-      params.push(filters.place_id);
+    // Filter by location
+    if (filters.location) {
+      query += " AND location LIKE ?";
+      params.push(`%${filters.location}%`);
     }
 
-    // Filtre par statut
-    if (filters.status) {
-      query += " AND status = ?";
-      params.push(filters.status);
+    // Filter by organizer
+    if (filters.organizer) {
+      query += " AND organizer = ?";
+      params.push(filters.organizer);
     }
 
-    // Filtre par créateur
-    if (filters.created_by) {
-      query += " AND created_by = ?";
-      params.push(filters.created_by);
+    // Filter by date range
+    if (filters.startDate) {
+      query += " AND startDate >= ?";
+      params.push(filters.startDate);
     }
 
-    // Filtre par plage de dates
-    if (filters.start_date) {
-      query += " AND start_date >= ?";
-      params.push(filters.start_date);
+    if (filters.endDate) {
+      query += " AND endDate <= ?";
+      params.push(filters.endDate);
     }
 
-    if (filters.end_date) {
-      query += " AND end_date <= ?";
-      params.push(filters.end_date);
-    }
-
-    // Tri par date de début
-    query += " ORDER BY start_date ASC";
+    // Sort by start date
+    query += " ORDER BY startDate ASC";
 
     const [rows] = await db.query(query, params);
     return rows;
   }
 
-  // Récupérer un événement par son ID
+  // Get an event by its ID
   static async getById(id) {
-    const [rows] = await db.query("SELECT * FROM events WHERE event_id = ?", [id]);
+    const [rows] = await db.query("SELECT * FROM events WHERE id = ?", [id]);
     return rows[0];
   }
 
-  // Créer un nouvel événement
+  // Create a new event
   static async create(eventData) {
     const [result] = await db.query(
       `INSERT INTO events 
-      (title, description, place_id, start_date, end_date, image_url, price, status, created_by)
+      (title, description, startDate, endDate, location, organizer, ticketPrice, capacity, images)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         eventData.title,
         eventData.description,
-        eventData.place_id,
-        eventData.start_date,
-        eventData.end_date,
-        eventData.image_url,
-        eventData.price,
-        eventData.status || 'upcoming',
-        eventData.created_by,
+        eventData.startDate,
+        eventData.endDate,
+        eventData.location,
+        eventData.organizer || null,
+        eventData.ticketPrice || null,
+        eventData.capacity || null,
+        JSON.stringify(eventData.images || []),
       ]
     );
     return result.insertId;
   }
 
-  // Mettre à jour un événement existant
+  // Update an existing event
   static async update(id, updates) {
+    // If images is provided, ensure it's stored as JSON
+    if (updates.images) {
+      updates.images = JSON.stringify(updates.images);
+    }
+
     const fields = Object.keys(updates).join(" = ?, ") + " = ?";
     const values = Object.values(updates);
 
-    await db.query(`UPDATE events SET ${fields} WHERE event_id = ?`, [
+    await db.query(`UPDATE events SET ${fields} WHERE id = ?`, [
       ...values,
       id,
     ]);
   }
 
-  // Supprimer un événement
+  // Delete an event
   static async delete(id) {
-    await db.query("DELETE FROM events WHERE event_id = ?", [id]);
+    await db.query("DELETE FROM events WHERE id = ?", [id]);
   }
 
-  // Récupérer les événements à venir
+  // Get upcoming events
   static async getUpcomingEvents(limit = 10) {
     const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
     const [rows] = await db.query(
       `SELECT * FROM events 
-      WHERE start_date > ? AND status = 'upcoming' 
-      ORDER BY start_date ASC LIMIT ?`,
+      WHERE startDate > ? 
+      ORDER BY startDate ASC LIMIT ?`,
       [now, limit]
     );
     return rows;

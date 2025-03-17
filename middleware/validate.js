@@ -1,3 +1,4 @@
+
 const { body, validationResult, param, query } = require("express-validator");
 
 exports.registerValidation = [
@@ -88,22 +89,22 @@ exports.reservationValidation = [
 
 exports.eventValidation = [
   body("title").notEmpty().withMessage("Title is required"),
-  body("place_id").optional().isInt().withMessage("Invalid place ID"),
-  body("start_date").isISO8601().withMessage("Valid start date is required"),
-  body("end_date")
+  body("description").optional().isString().withMessage("Description must be a string"),
+  body("startDate").isISO8601().withMessage("Valid start date is required"),
+  body("endDate")
     .isISO8601()
     .withMessage("Valid end date is required")
     .custom((value, { req }) => {
-      if (new Date(value) <= new Date(req.body.start_date)) {
+      if (new Date(value) <= new Date(req.body.startDate)) {
         throw new Error("End date must be after start date");
       }
       return true;
     }),
-  body("price").optional().isFloat({ min: 0 }).withMessage("Price must be positive"),
-  body("status")
-    .optional()
-    .isIn(["upcoming", "ongoing", "past", "cancelled"])
-    .withMessage("Invalid status"),
+  body("location").optional().isString().withMessage("Location must be a string"),
+  body("organizer").optional().isString().withMessage("Organizer must be a string"),
+  body("ticketPrice").optional().isFloat({ min: 0 }).withMessage("Ticket price must be positive"),
+  body("capacity").optional().isInt({ min: 1 }).withMessage("Capacity must be at least 1"),
+  body("images").optional().isArray().withMessage("Images must be an array"),
 ];
 
 exports.promotionValidation = [

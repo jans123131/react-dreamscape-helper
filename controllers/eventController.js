@@ -1,139 +1,146 @@
 
 const Event = require("../models/eventModel");
-const Place = require("../models/placeModel");
 const { validationResult } = require("express-validator");
 
-// Récupérer tous les événements
+// Get all events
 exports.getAllEvents = async (req, res) => {
   try {
     const events = await Event.getAll(req.query);
-    res.json(events);
+    res.status(200).json({
+      status: 200,
+      data: events
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      status: 500,
+      message: error.message 
+    });
   }
 };
 
-// Récupérer un événement par son ID
+// Get event by ID
 exports.getEventById = async (req, res) => {
   try {
     const event = await Event.getById(req.params.id);
     if (!event) {
-      return res.status(404).json({ message: "Événement non trouvé" });
+      return res.status(404).json({ 
+        status: 404,
+        message: "Event not found" 
+      });
     }
-    res.json(event);
+    res.status(200).json({
+      status: 200,
+      data: event
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      status: 500,
+      message: error.message 
+    });
   }
 };
 
-// Créer un événement
+// Create a new event
 exports.createEvent = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(400).json({ 
+      status: 400,
+      errors: errors.array() 
+    });
   }
 
   try {
-    // Ajouter l'identifiant de l'utilisateur qui crée l'événement
-    const eventData = {
-      ...req.body,
-      created_by: req.user.id
-    };
-
-    // Vérifier si le lieu existe
-    if (eventData.place_id) {
-      const place = await Place.getById(eventData.place_id);
-      if (!place) {
-        return res.status(404).json({ message: "Lieu non trouvé" });
-      }
-      
-      // Si l'utilisateur est un fournisseur, vérifier s'il est propriétaire du lieu
-      if (req.user.role === 'provider' && place.provider_id !== req.user.id) {
-        return res.status(403).json({ message: "Non autorisé à créer des événements pour ce lieu" });
-      }
-    }
-
-    const eventId = await Event.create(eventData);
-    
+    const eventId = await Event.create(req.body);
     const event = await Event.getById(eventId);
+    
     res.status(201).json({
-      message: "Événement créé avec succès",
-      event
+      status: 201,
+      message: "Event created successfully",
+      data: event
     });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ 
+      status: 400,
+      message: error.message 
+    });
   }
 };
 
-// Mettre à jour un événement
+// Update an event
 exports.updateEvent = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(400).json({ 
+      status: 400,
+      errors: errors.array() 
+    });
   }
 
   try {
-    // Vérifier si l'événement existe
+    // Check if the event exists
     const event = await Event.getById(req.params.id);
     if (!event) {
-      return res.status(404).json({ message: "Événement non trouvé" });
-    }
-
-    // Vérifier si l'utilisateur a la permission de mettre à jour
-    if (req.user.role === 'provider') {
-      if (event.created_by !== req.user.id) {
-        return res.status(403).json({ message: "Non autorisé à mettre à jour cet événement" });
-      }
-      
-      // Si changement de lieu, vérifier si le fournisseur est propriétaire du nouveau lieu
-      if (req.body.place_id && req.body.place_id !== event.place_id) {
-        const place = await Place.getById(req.body.place_id);
-        if (!place || place.provider_id !== req.user.id) {
-          return res.status(403).json({ message: "Non autorisé à utiliser ce lieu" });
-        }
-      }
+      return res.status(404).json({ 
+        status: 404,
+        message: "Event not found" 
+      });
     }
 
     await Event.update(req.params.id, req.body);
     
     const updatedEvent = await Event.getById(req.params.id);
-    res.json({
-      message: "Événement mis à jour avec succès",
-      event: updatedEvent
+    res.status(200).json({
+      status: 200,
+      message: "Event updated successfully",
+      data: updatedEvent
     });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ 
+      status: 400,
+      message: error.message 
+    });
   }
 };
 
-// Supprimer un événement
+// Delete an event
 exports.deleteEvent = async (req, res) => {
   try {
-    // Vérifier si l'événement existe
+    // Check if the event exists
     const event = await Event.getById(req.params.id);
     if (!event) {
-      return res.status(404).json({ message: "Événement non trouvé" });
-    }
-
-    // Vérifier si l'utilisateur a la permission de supprimer
-    if (req.user.role === 'provider' && event.created_by !== req.user.id) {
-      return res.status(403).json({ message: "Non autorisé à supprimer cet événement" });
+      return res.status(404).json({ 
+        status: 404,
+        message: "Event not found" 
+      });
     }
 
     await Event.delete(req.params.id);
-    res.json({ message: "Événement supprimé avec succès" });
+    res.status(204).json({ 
+      status: 204,
+      message: "Event deleted successfully" 
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      status: 500,
+      message: error.message 
+    });
   }
 };
 
-// Récupérer les événements à venir
+// Get upcoming events
 exports.getUpcomingEvents = async (req, res) => {
   try {
     const limit = req.query.limit ? parseInt(req.query.limit) : 10;
     const events = await Event.getUpcomingEvents(limit);
-    res.json(events);
+    res.status(200).json({
+      status: 200,
+      data: events
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      status: 500,
+      message: error.message 
+    });
   }
 };

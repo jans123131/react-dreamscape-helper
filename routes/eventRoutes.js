@@ -15,10 +15,10 @@ const {
   deleteEvent,
   getUpcomingEvents
 } = require("../controllers/eventController");
-const { protect, admin, provider } = require("../middleware/auth");
+const { protect, admin } = require("../middleware/auth");
 const { eventValidation, idValidation } = require("../middleware/validate");
 
-// Public Routes (Routes publiques)
+// Public Routes
 
 /**
  * @route   GET /api/events
@@ -47,34 +47,34 @@ router.get("/upcoming", getUpcomingEvents);
  */
 router.get("/:id", idValidation, getEventById);
 
-// Protected Routes (Routes pour Admin/Fournisseur)
+// Protected Routes
 
 /**
  * @route   POST /api/events
  * @desc    Create a new event
- * @access  Private - Requires authentication (admin or provider)
+ * @access  Private - Requires authentication (admin)
  * @body    Event data
  * @returns Created event data
  */
-router.post("/", protect, eventValidation, createEvent);
+router.post("/", protect, admin, eventValidation, createEvent);
 
 /**
  * @route   PUT /api/events/:id
  * @desc    Update an event
- * @access  Private - Requires authentication (admin or event creator)
+ * @access  Private - Requires authentication (admin)
  * @param   id - Event ID
  * @body    Updated event data
  * @returns Updated event data
  */
-router.put("/:id", protect, idValidation, eventValidation, updateEvent);
+router.put("/:id", protect, admin, idValidation, eventValidation, updateEvent);
 
 /**
  * @route   DELETE /api/events/:id
  * @desc    Delete an event
- * @access  Private - Requires authentication (admin or event creator)
+ * @access  Private - Requires authentication (admin)
  * @param   id - Event ID
  * @returns Success message
  */
-router.delete("/:id", protect, idValidation, deleteEvent);
+router.delete("/:id", protect, admin, idValidation, deleteEvent);
 
 module.exports = router;
