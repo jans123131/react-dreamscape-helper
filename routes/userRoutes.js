@@ -7,20 +7,18 @@
  */
 const express = require('express');
 const router = express.Router();
-const { register, login, getMe, getAllUsers, updateUser, deleteUser, updateUserStatus } = require('../controllers/userController');
-const { protect, admin, isOwnerOrAdmin } = require('../middleware/auth');
+const { 
+  register, 
+  login, 
+  getAllUsers, 
+  getUserById, 
+  createUser, 
+  updateUser, 
+  deleteUser 
+} = require('../controllers/userController');
+const { protect, admin } = require('../middleware/auth');
 
 console.log('📌 Configuration des routes utilisateur');
-
-/**
- * @route   POST /api/users/register
- * @desc    Register a new user
- * @access  Public
- * @body    {nom, prenom, email, password, phone}
- * @returns User data without sensitive information
- */
-router.post('/register', register);
-console.log('🔹 Route POST /register configurée');
 
 /**
  * @route   POST /api/users/login
@@ -33,30 +31,49 @@ router.post('/login', login);
 console.log('🔹 Route POST /login configurée');
 
 /**
- * @route   GET /api/users/me
- * @desc    Get current user's profile
- * @access  Private - Requires authentication
- * @returns Current user's profile data
+ * @route   POST /api/users/register
+ * @desc    Register a new user
+ * @access  Public
+ * @body    {name, email, password}
+ * @returns User data without sensitive information
  */
-router.get('/me', protect, getMe);
-console.log('🔹 Route GET /me configurée (protégée)');
+router.post('/register', register);
+console.log('🔹 Route POST /register configurée');
 
 /**
  * @route   GET /api/users
- * @desc    Get all users - can be filtered by role, status, and search term
+ * @desc    Get all users with basic information
  * @access  Private - Requires authentication
- * @query   {role, status, search}
  * @returns Array of users
  */
 router.get('/', protect, getAllUsers);
 console.log('🔹 Route GET / configurée (protégée)');
 
 /**
+ * @route   GET /api/users/:id
+ * @desc    Get user by ID
+ * @access  Private - Requires authentication
+ * @returns User data
+ */
+router.get('/:id', protect, getUserById);
+console.log('🔹 Route GET /:id configurée (protégée)');
+
+/**
+ * @route   POST /api/users
+ * @desc    Create a new user (admin only)
+ * @access  Private - Requires admin role
+ * @body    {name, email, password, role}
+ * @returns Created user data
+ */
+router.post('/', protect, admin, createUser);
+console.log('🔹 Route POST / configurée (protégée/admin)');
+
+/**
  * @route   PUT /api/users/:id
- * @desc    Update user profile
+ * @desc    Update user
  * @access  Private - Requires authentication and ownership or admin role
  * @param   id - User ID
- * @body    {nom, prenom, email, phone, profile_image}
+ * @body    {name, email, password, role}
  * @returns Updated user data
  */
 router.put('/:id', protect, updateUser);
@@ -65,23 +82,12 @@ console.log('🔹 Route PUT /:id configurée (protégée)');
 /**
  * @route   DELETE /api/users/:id
  * @desc    Delete user
- * @access  Private - Requires authentication and ownership or admin role
+ * @access  Private - Requires admin role
  * @param   id - User ID
  * @returns Success message
  */
-router.delete('/:id', protect, deleteUser);
-console.log('🔹 Route DELETE /:id configurée (protégée)');
-
-/**
- * @route   PATCH /api/users/:id/status
- * @desc    Update user status (active/inactive)
- * @access  Private - Requires admin role
- * @param   id - User ID
- * @body    {status}
- * @returns Updated user data
- */
-router.patch('/:id/status', protect, updateUserStatus);
-console.log('🔹 Route PATCH /:id/status configurée (protégée)');
+router.delete('/:id', protect, admin, deleteUser);
+console.log('🔹 Route DELETE /:id configurée (protégée/admin)');
 
 console.log('✅ Configuration des routes utilisateur terminée');
 

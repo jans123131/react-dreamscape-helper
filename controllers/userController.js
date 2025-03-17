@@ -1,253 +1,261 @@
 
 const User = require('../models/userModel');
-const bcrypt = require('bcryptjs');
-const { validationResult } = require('express-validator');
 
-// @desc    Enregistrer un nouvel utilisateur avec authentification simplifiée
-// @route   POST /api/users/register
-// @access  Public
-exports.register = async (req, res) => {
-  try {
-    console.log('🔹 Démarrage de l\'enregistrement d\'un nouvel utilisateur');
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      console.log('❌ Erreurs de validation:', errors.array());
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { nom, prenom, email, password, phone } = req.body;
-    
-    // Vérifier si l'utilisateur existe déjà
-    const userExists = await User.findByEmail(email);
-    if (userExists) {
-      console.log(`❌ L'email ${email} est déjà utilisé`);
-      return res.status(400).json({ message: 'Un utilisateur avec cet email existe déjà' });
-    }
-    
-    // Créer un utilisateur avec un mot de passe simplifié
-    console.log('👤 Création d\'un nouvel utilisateur:', { nom, prenom, email });
-    const userId = await User.create({
-      nom,
-      prenom,
-      email,
-      password: password || 'mot-de-passe-simple',
-      role: 'utilisateur',
-      status: 'actif',
-      phone
-    });
-    
-    const user = await User.findById(userId);
-    
-    if (user) {
-      console.log(`✅ Utilisateur créé avec succès: ${userId}`);
-      // Retourner des informations utilisateur sans token JWT
-      res.status(201).json({
-        user_id: user.user_id,
-        nom: user.nom,
-        prenom: user.prenom,
-        email: user.email,
-        role: user.role
-      });
-    } else {
-      console.log('❌ Échec de la création de l\'utilisateur');
-      res.status(400).json({ message: 'Données utilisateur invalides' });
-    }
-  } catch (error) {
-    console.error('❌ Erreur d\'enregistrement:', error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
-  }
-};
-
-// @desc    Connexion utilisateur avec authentification simplifiée
+// @desc    Login user
 // @route   POST /api/users/login
 // @access  Public
 exports.login = async (req, res) => {
   try {
-    console.log('🔹 Tentative de connexion utilisateur');
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      console.log('❌ Erreurs de validation:', errors.array());
-      return res.status(400).json({ errors: errors.array() });
-    }
-
     const { email, password } = req.body;
-    console.log(`👤 Tentative de connexion avec l'email: ${email}`);
     
-    // Vérifier si l'utilisateur existe
+    // Check if user exists
     const user = await User.findByEmail(email);
     if (!user) {
-      console.log(`❌ Aucun utilisateur trouvé avec l'email: ${email}`);
-      return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
+      return res.status(401).json({ 
+        status: 401,
+        message: 'Invalid credentials' 
+      });
     }
     
-    // Vérifier si l'utilisateur est actif
-    if (user.status !== 'actif') {
-      console.log(`❌ Compte désactivé pour l'utilisateur: ${user.user_id}`);
-      return res.status(401).json({ message: 'Ce compte est désactivé' });
+    // Verify password
+    const isMatch = await User.verifyPassword(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ 
+        status: 401,
+        message: 'Invalid credentials' 
+      });
     }
     
-    // En mode développement, nous acceptons toujours l'authentification
-    console.log(`✅ Connexion réussie pour l'utilisateur: ${user.user_id}`);
-    res.json({
-      user_id: user.user_id,
-      nom: user.nom,
-      prenom: user.prenom,
-      email: user.email,
-      role: user.role
+    // Return user data without password
+    res.status(200).json({
+      status: 200,
+      data: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
     });
   } catch (error) {
-    console.error('❌ Erreur de connexion:', error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+    console.error('Login error:', error);
+    res.status(500).json({ 
+      status: 500,
+      message: 'Server error' 
+    });
   }
 };
 
-// @desc    Obtenir le profil de l'utilisateur actuel
-// @route   GET /api/users/me
-// @access  Privé
-exports.getMe = async (req, res) => {
+// @desc    Register a new user
+// @route   POST /api/users/register
+// @access  Public
+exports.register = async (req, res) => {
   try {
-    console.log(`🔹 Récupération du profil utilisateur: ${req.user.id}`);
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      console.log(`❌ Utilisateur non trouvé: ${req.user.id}`);
-      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    const { name, email, password } = req.body;
+    
+    // Check if user already exists
+    const existingUser = await User.findByEmail(email);
+    if (existingUser) {
+      return res.status(400).json({ 
+        status: 400,
+        message: 'User already exists with this email' 
+      });
     }
     
-    console.log(`✅ Profil récupéré pour l'utilisateur: ${user.user_id}`);
-    res.json({
-      user_id: user.user_id,
-      nom: user.nom,
-      prenom: user.prenom,
-      email: user.email,
-      role: user.role,
-      status: user.status,
-      profile_image: user.profile_image,
-      phone: user.phone
+    // Create user
+    const userId = await User.create({
+      name,
+      email,
+      password,
+      role: 'user' // Default role
+    });
+    
+    const newUser = await User.findById(userId);
+    
+    res.status(201).json({
+      status: 201,
+      data: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role
+      }
     });
   } catch (error) {
-    console.error('❌ Erreur d\'obtention de l\'utilisateur:', error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+    console.error('Registration error:', error);
+    res.status(500).json({ 
+      status: 500,
+      message: 'Server error' 
+    });
   }
 };
 
-// @desc    Obtenir tous les utilisateurs
+// @desc    Get all users
 // @route   GET /api/users
-// @access  Admin
+// @access  Private/Admin
 exports.getAllUsers = async (req, res) => {
   try {
-    console.log('🔹 Récupération de tous les utilisateurs');
-    const filters = {
-      role: req.query.role,
-      status: req.query.status,
-      search: req.query.search
-    };
+    const users = await User.getAll();
     
-    console.log('🔍 Filtres de recherche:', filters);
-    const users = await User.getAll(filters);
-    console.log(`✅ ${users.length} utilisateurs récupérés`);
-    res.json(users);
+    res.status(200).json({
+      status: 200,
+      data: users
+    });
   } catch (error) {
-    console.error('❌ Erreur d\'obtention de tous les utilisateurs:', error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+    console.error('Get all users error:', error);
+    res.status(500).json({ 
+      status: 500,
+      message: 'Server error' 
+    });
   }
 };
 
-// @desc    Mettre à jour l'utilisateur
-// @route   PUT /api/users/:id
-// @access  Privé
-exports.updateUser = async (req, res) => {
+// @desc    Get user by ID
+// @route   GET /api/users/:id
+// @access  Private
+exports.getUserById = async (req, res) => {
   try {
-    const userId = req.params.id;
-    console.log(`🔹 Mise à jour de l'utilisateur: ${userId}`);
-    const { nom, prenom, email, phone, profile_image } = req.body;
+    const user = await User.findById(req.params.id);
     
-    const user = await User.findById(userId);
     if (!user) {
-      console.log(`❌ Utilisateur non trouvé: ${userId}`);
-      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+      return res.status(404).json({ 
+        status: 404,
+        message: 'User not found' 
+      });
     }
     
-    const updates = {
-      nom: nom || user.nom,
-      prenom: prenom || user.prenom,
-      email: email || user.email,
-      phone: phone || user.phone,
-      profile_image: profile_image || user.profile_image
-    };
+    res.status(200).json({
+      status: 200,
+      data: user
+    });
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({ 
+      status: 500,
+      message: 'Server error' 
+    });
+  }
+};
+
+// @desc    Create a new user
+// @route   POST /api/users
+// @access  Private/Admin
+exports.createUser = async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
     
-    console.log('📝 Données de mise à jour:', updates);
+    // Check if user already exists
+    const existingUser = await User.findByEmail(email);
+    if (existingUser) {
+      return res.status(400).json({ 
+        status: 400,
+        message: 'User already exists with this email' 
+      });
+    }
+    
+    // Create user
+    const userId = await User.create({
+      name,
+      email,
+      password,
+      role: role || 'user'
+    });
+    
+    const newUser = await User.findById(userId);
+    
+    res.status(201).json({
+      status: 201,
+      data: newUser
+    });
+  } catch (error) {
+    console.error('Create user error:', error);
+    res.status(500).json({ 
+      status: 500,
+      message: 'Server error' 
+    });
+  }
+};
+
+// @desc    Update user
+// @route   PUT /api/users/:id
+// @access  Private
+exports.updateUser = async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+    const userId = req.params.id;
+    
+    // Check if user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ 
+        status: 404,
+        message: 'User not found' 
+      });
+    }
+    
+    // Build update object
+    const updates = {};
+    if (name) updates.name = name;
+    if (email) updates.email = email;
+    if (password) updates.password = password;
+    if (role) updates.role = role;
+    
     const success = await User.update(userId, updates);
     
     if (success) {
       const updatedUser = await User.findById(userId);
-      console.log(`✅ Utilisateur mis à jour avec succès: ${userId}`);
-      res.json(updatedUser);
+      res.status(200).json({
+        status: 200,
+        data: updatedUser
+      });
     } else {
-      console.log(`❌ Échec de la mise à jour de l'utilisateur: ${userId}`);
-      res.status(400).json({ message: 'Mise à jour échouée' });
+      res.status(400).json({ 
+        status: 400,
+        message: 'Update failed' 
+      });
     }
   } catch (error) {
-    console.error('❌ Erreur de mise à jour de l\'utilisateur:', error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+    console.error('Update user error:', error);
+    res.status(500).json({ 
+      status: 500,
+      message: 'Server error' 
+    });
   }
 };
 
-// @desc    Supprimer l'utilisateur
+// @desc    Delete user
 // @route   DELETE /api/users/:id
-// @access  Privé
+// @access  Private/Admin
 exports.deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
-    console.log(`🔹 Suppression de l'utilisateur: ${userId}`);
     
+    // Check if user exists
     const user = await User.findById(userId);
     if (!user) {
-      console.log(`❌ Utilisateur non trouvé: ${userId}`);
-      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+      return res.status(404).json({ 
+        status: 404,
+        message: 'User not found' 
+      });
     }
     
     const success = await User.delete(userId);
     
     if (success) {
-      console.log(`✅ Utilisateur supprimé avec succès: ${userId}`);
-      res.json({ message: 'Utilisateur supprimé' });
+      res.status(204).json({
+        status: 204,
+        message: 'User deleted successfully'
+      });
     } else {
-      console.log(`❌ Échec de la suppression de l'utilisateur: ${userId}`);
-      res.status(400).json({ message: 'Suppression échouée' });
+      res.status(400).json({ 
+        status: 400,
+        message: 'Delete failed' 
+      });
     }
   } catch (error) {
-    console.error('❌ Erreur de suppression de l\'utilisateur:', error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
-  }
-};
-
-// @desc    Mettre à jour le statut de l'utilisateur
-// @route   PATCH /api/users/:id/status
-// @access  Admin
-exports.updateUserStatus = async (req, res) => {
-  try {
-    const userId = req.params.id;
-    const { status } = req.body;
-    console.log(`🔹 Mise à jour du statut pour l'utilisateur ${userId} à "${status}"`);
-    
-    const user = await User.findById(userId);
-    if (!user) {
-      console.log(`❌ Utilisateur non trouvé: ${userId}`);
-      return res.status(404).json({ message: 'Utilisateur non trouvé' });
-    }
-    
-    const success = await User.updateStatus(userId, status);
-    
-    if (success) {
-      const updatedUser = await User.findById(userId);
-      console.log(`✅ Statut mis à jour avec succès pour l'utilisateur: ${userId}`);
-      res.json(updatedUser);
-    } else {
-      console.log(`❌ Échec de la mise à jour du statut pour l'utilisateur: ${userId}`);
-      res.status(400).json({ message: 'Mise à jour du statut échouée' });
-    }
-  } catch (error) {
-    console.error('❌ Erreur de mise à jour du statut de l\'utilisateur:', error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+    console.error('Delete user error:', error);
+    res.status(500).json({ 
+      status: 500,
+      message: 'Server error' 
+    });
   }
 };
