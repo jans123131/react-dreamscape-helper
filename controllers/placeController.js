@@ -1,11 +1,23 @@
-
 const Place = require("../models/placeModel");
 const { validationResult } = require("express-validator");
 
 exports.getAllPlaces = async (req, res) => {
   try {
     const places = await Place.getAll();
-    res.json(places);
+    
+    // Parse JSON strings into objects
+    const formattedPlaces = places.map(place => ({
+      id: place.id,
+      name: place.name,
+      type: place.type,
+      location: JSON.parse(place.location || '{}'),
+      description: place.description
+    }));
+    
+    res.status(200).json({
+      status: 200,
+      data: formattedPlaces
+    });
   } catch (error) {
     console.error("Error in getAllPlaces:", error);
     res.status(500).json({ message: error.message });
@@ -35,7 +47,20 @@ exports.getPlaceById = async (req, res) => {
     if (!place) {
       return res.status(404).json({ message: "Place not found" });
     }
-    res.json(place);
+    
+    // Parse JSON strings into objects
+    const formattedPlace = {
+      ...place,
+      location: JSON.parse(place.location || '{}'),
+      images: JSON.parse(place.images || '[]'),
+      openingHours: JSON.parse(place.openingHours || '{}'),
+      entranceFee: JSON.parse(place.entranceFee || '{}')
+    };
+    
+    res.status(200).json({
+      status: 200,
+      data: formattedPlace
+    });
   } catch (error) {
     console.error("Error in getPlaceById:", error);
     res.status(500).json({ message: error.message });
@@ -83,9 +108,20 @@ exports.createPlace = async (req, res) => {
     const placeId = await Place.create(placeData);
     
     const place = await Place.getById(placeId);
+    
+    // Parse JSON strings into objects
+    const formattedPlace = {
+      ...place,
+      location: JSON.parse(place.location || '{}'),
+      images: JSON.parse(place.images || '[]'),
+      openingHours: JSON.parse(place.openingHours || '{}'),
+      entranceFee: JSON.parse(place.entranceFee || '{}')
+    };
+    
     res.status(201).json({
+      status: 201,
       message: "Place created successfully",
-      place
+      data: formattedPlace
     });
   } catch (error) {
     console.error("Error in createPlace:", error);
@@ -119,9 +155,20 @@ exports.updatePlace = async (req, res) => {
     await Place.update(req.params.id, req.body);
     
     const updatedPlace = await Place.getById(req.params.id);
-    res.json({
+    
+    // Parse JSON strings into objects
+    const formattedPlace = {
+      ...updatedPlace,
+      location: JSON.parse(updatedPlace.location || '{}'),
+      images: JSON.parse(updatedPlace.images || '[]'),
+      openingHours: JSON.parse(updatedPlace.openingHours || '{}'),
+      entranceFee: JSON.parse(updatedPlace.entranceFee || '{}')
+    };
+    
+    res.status(200).json({
+      status: 200,
       message: "Place updated successfully",
-      place: updatedPlace
+      data: formattedPlace
     });
   } catch (error) {
     console.error("Error in updatePlace:", error);
@@ -143,7 +190,10 @@ exports.deletePlace = async (req, res) => {
     }
 
     await Place.delete(req.params.id);
-    res.json({ message: "Place deleted successfully" });
+    res.status(204).json({ 
+      status: 204,
+      message: "Place deleted successfully" 
+    });
   } catch (error) {
     console.error("Error in deletePlace:", error);
     res.status(500).json({ message: error.message });

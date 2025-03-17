@@ -1,4 +1,3 @@
-
 const { body, validationResult, param, query } = require("express-validator");
 
 exports.registerValidation = [
@@ -16,31 +15,44 @@ exports.loginValidation = [
 ];
 
 exports.placeValidation = [
-  body("nom_place")
+  body("name")
     .notEmpty()
     .withMessage("Place name is required")
     .isLength({ max: 255 })
     .withMessage("Name too long"),
+  body("type")
+    .notEmpty()
+    .withMessage("Type is required")
+    .isLength({ max: 50 })
+    .withMessage("Type too long"),
   body("description")
     .optional()
     .isLength({ max: 2000 })
     .withMessage("Description too long"),
   body("location")
     .optional()
-    .isLength({ max: 255 })
-    .withMessage("Location too long"),
-  body("longitude")
-    .isFloat({ min: -180, max: 180 })
-    .withMessage("Invalid longitude"),
-  body("latitude")
+    .isObject()
+    .withMessage("Location must be an object"),
+  body("location.latitude")
+    .optional()
     .isFloat({ min: -90, max: 90 })
     .withMessage("Invalid latitude"),
-  body("url_img").optional().isURL().withMessage("Invalid image URL"),
-  body("url_web").optional().isURL().withMessage("Invalid website URL"),
-  body("category")
+  body("location.longitude")
     .optional()
-    .isIn(["museums", "hotels", "restaurants", "historical", "attractions"])
-    .withMessage("Invalid category"),
+    .isFloat({ min: -180, max: 180 })
+    .withMessage("Invalid longitude"),
+  body("images")
+    .optional()
+    .isArray()
+    .withMessage("Images must be an array"),
+  body("openingHours")
+    .optional()
+    .isObject()
+    .withMessage("Opening hours must be an object"),
+  body("entranceFee")
+    .optional()
+    .isObject()
+    .withMessage("Entrance fee must be an object"),
 ];
 
 exports.idValidation = [param("id").isInt().withMessage("Invalid ID format")];

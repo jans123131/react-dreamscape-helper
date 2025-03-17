@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    role ENUM('admin', 'user') NOT NULL DEFAULT 'user',
+    role ENUM('admin', 'user', 'provider') NOT NULL DEFAULT 'user',
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_email (email(191)),
@@ -25,28 +25,23 @@ INSERT INTO users (name, email, password, role) VALUES
 ('John Doe', 'john@example.com', '$2a$10$JNe8AhPXkcLfQAOLJAQYpemUPLOLJrr0Fot1IQUcTTiQmWGn9aJQ2', 'user'),
 ('Jane Smith', 'jane@example.com', '$2a$10$JNe8AhPXkcLfQAOLJAQYpemUPLOLJrr0Fot1IQUcTTiQmWGn9aJQ2', 'user');
 
--- The rest of the schema stays the same for other tables
--- Places Table
+-- Places Table (updated schema)
 CREATE TABLE IF NOT EXISTS places (
-    place_id INT AUTO_INCREMENT PRIMARY KEY,
-    nom_place VARCHAR(255) NOT NULL,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(50) NOT NULL,
     description TEXT,
-    location VARCHAR(255) COMMENT 'Human-readable address',
-    longitude DECIMAL(9,6) NOT NULL,
-    latitude DECIMAL(9,6) NOT NULL,
-    url_img VARCHAR(512) COMMENT 'URL to image',
-    url_web VARCHAR(512) COMMENT 'Website URL',
-    category ENUM('museums', 'hotels', 'restaurants', 'historical', 'attractions') NOT NULL DEFAULT 'museums',
-    provider_id INT COMMENT 'If place is managed by a provider',
-    average_rating DECIMAL(3,2) DEFAULT 0.0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_location (location(191)),
-    INDEX idx_coordinates (latitude, longitude),
-    INDEX idx_category (category),
-    FOREIGN KEY (provider_id) REFERENCES users(id) ON DELETE SET NULL
+    location JSON COMMENT 'JSON object with latitude and longitude',
+    images JSON COMMENT 'JSON array of image URLs',
+    openingHours JSON COMMENT 'JSON object with opening hours by day',
+    entranceFee JSON COMMENT 'JSON object with different entrance fees',
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_name (name(191)),
+    INDEX idx_type (type)
 ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- The rest of the schema stays the same for other tables
 -- Reviews Table
 CREATE TABLE IF NOT EXISTS reviews (
     review_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -57,7 +52,7 @@ CREATE TABLE IF NOT EXISTS reviews (
     status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (place_id) REFERENCES places(place_id) ON DELETE CASCADE,
+    FOREIGN KEY (place_id) REFERENCES places(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_place_id (place_id),
     INDEX idx_user_id (user_id),
@@ -78,7 +73,7 @@ CREATE TABLE IF NOT EXISTS events (
     created_by INT NOT NULL COMMENT 'Admin or provider who created',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (place_id) REFERENCES places(place_id) ON DELETE SET NULL,
+    FOREIGN KEY (place_id) REFERENCES places(id) ON DELETE SET NULL,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_dates (start_date, end_date),
     INDEX idx_status (status)
@@ -99,7 +94,7 @@ CREATE TABLE IF NOT EXISTS reservations (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (place_id) REFERENCES places(place_id) ON DELETE CASCADE,
+    FOREIGN KEY (place_id) REFERENCES places(id) ON DELETE CASCADE,
     FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE SET NULL,
     INDEX idx_user_id (user_id),
     INDEX idx_place_id (place_id),
@@ -119,7 +114,7 @@ CREATE TABLE IF NOT EXISTS promotions (
     created_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (place_id) REFERENCES places(place_id) ON DELETE CASCADE,
+    FOREIGN KEY (place_id) REFERENCES places(id) ON DELETE CASCADE,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_dates (start_date, end_date)
 ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -148,7 +143,7 @@ BEGIN
     UPDATE places SET average_rating = (
         SELECT AVG(rating) FROM reviews 
         WHERE place_id = NEW.place_id AND status = 'approved'
-    ) WHERE place_id = NEW.place_id;
+    ) WHERE id = NEW.place_id;
 END;
 
 CREATE TRIGGER update_place_rating_update AFTER UPDATE ON reviews
@@ -157,7 +152,7 @@ BEGIN
     UPDATE places SET average_rating = (
         SELECT AVG(rating) FROM reviews 
         WHERE place_id = NEW.place_id AND status = 'approved'
-    ) WHERE place_id = NEW.place_id;
+    ) WHERE id = NEW.place_id;
 END;
 
 CREATE TRIGGER update_place_rating_delete AFTER DELETE ON reviews
@@ -166,5 +161,5 @@ BEGIN
     UPDATE places SET average_rating = (
         SELECT AVG(rating) FROM reviews 
         WHERE place_id = OLD.place_id AND status = 'approved'
-    ) WHERE place_id = OLD.place_id;
+    ) WHERE id = OLD.place_id;
 END;
