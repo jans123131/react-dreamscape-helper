@@ -435,5 +435,20 @@
     "date_kernel_coffee_200g": "Café de Noyaux de Dattes 200g",
     "date_powder_sugar_300g": "Poudre (Sucre) de Dattes 300g",
     "date_syrup_340ml": "Sirop de Dattes 340ml"
+  },
+  "product_details": {
+    "technical_specs": "Spécifications Techniques",
+    "technical_sheet": "Fiche Technique",
+    "description_title": "Description du Produit",
+    "ingredients_title": "Ingrédients",
+    "nutrition_title": "Informations Nutritionnelles",
+    "origin": "Origine",
+    "weight": "Poids",
+    "packaging": "Conditionnement",
+    "tunisia": "Tunisie",
+    "storage": "Conservation",
+    "storage_instruction": "Conserver dans un endroit frais et sec, à l'abri de la lumière directe",
+    "shelf_life": "Durée de Conservation",
+    "shelf_life_value": "12 mois à partir de la date de production"
   }
 }

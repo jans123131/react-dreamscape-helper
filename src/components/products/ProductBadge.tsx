@@ -63,7 +63,7 @@ const ProductBadge: React.FC<ProductBadgeProps> = ({ product, productId }) => {
   // Position the badge higher for special fig products by reducing the top percentage
   return (
     <motion.div
-      className={`absolute ${isSpecialFig ? 'top-[50%]' : 'top-[81%]'} right-[20%] z-10 w-[110px] sm:w-[130px] md:w-[150px] transform translate-x-[20%] sm:translate-x-[15%] md:translate-x-[10%]`}
+      className={`absolute ${isSpecialFig ? 'top-[40%]' : 'top-[81%]'} right-[20%] z-10 w-[110px] sm:w-[130px] md:w-[150px] transform translate-x-[20%] sm:translate-x-[15%] md:translate-x-[10%]`}
       initial="hidden"
       animate="visible"
       whileHover="hover"

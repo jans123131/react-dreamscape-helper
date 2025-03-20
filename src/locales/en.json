@@ -1,4 +1,3 @@
-
 {
   "navbar": {
     "home": "Home",
@@ -50,7 +49,31 @@
     "select_category": "Select category",
     "apply_filters": "Apply Filters",
     "product_type": "Product Type",
-    "all_categories": "All Categories"
+    "all_categories": "All Categories",
+    "back_to_products": "Back to products",
+    "description": "Description",
+    "ingredients": "Ingredients",
+    "nutritional_values": "Nutritional Values",
+    "per_portion": "per portion",
+    "dates_description_premium": "These premium dates are carefully grown in Tunisian palm groves, where the exceptional climate and terroir give our dates their unique qualities. Each fruit is hand-selected to ensure a product of impeccable quality.",
+    "figs_description_premium": "These figs are delicately dried according to traditional Tunisian methods, preserving their natural flavors and nutritional benefits. Harvested at maturity, they retain all their taste qualities.",
+    "date_coffee_description": "This date kernel coffee is a natural caffeine-free alternative to traditional coffee, offering soft and slightly caramelized notes. A Tunisian specialty with recognized digestive virtues.",
+    "date_sugar_description": "Our date sugar is obtained by careful dehydration and grinding of premium quality dates. It retains the minerals, vitamins and fibers naturally present in the fruits.",
+    "date_syrup_description": "This syrup is a natural concentrate of flavors obtained by careful extraction of the juices from selected dates. An amber nectar, slightly viscous and intensely fragrant.",
+    "dates_ingredient_note": "No additives, preservatives or colorings added. Our dates are packaged in a controlled environment to preserve their quality and freshness.",
+    "general_ingredient_note": "100% natural product, without additives or preservatives. Packaged in a controlled environment to preserve its quality and benefits.",
+    "nutrition_note": "*Nutritional values are given per 100g of product",
+    "packaging_info": "Packaging Information",
+    "packaging_designation": "Designation",
+    "packaging_packs_carton": "Packs/Carton",
+    "packaging_cartons_pallet": "Cartons/Pallet",
+    "packaging_net_weight": "Net Weight Pal",
+    "packaging_gross_weight": "Gross Weight Pal",
+    "packaging_height": "Height Pal",
+    "packaging_pal_sr": "Pal./SR",
+    "packaging_pal_container": "Pal./container 20'",
+    "technical_specs": "Technical Specifications",
+    "technical_sheet": "Technical Sheet"
   },
   "products_hero": {
     "our_selection": "Our Selection",
@@ -406,5 +429,20 @@
     "date_kernel_coffee_200g": "Date Kernel Coffee 200g",
     "date_powder_sugar_300g": "Date Powder (Sugar) 300g",
     "date_syrup_340ml": "Date Syrup 340ml"
+  },
+  "product_details": {
+    "technical_specs": "Technical Specifications",
+    "technical_sheet": "Technical Sheet",
+    "description_title": "Product Description",
+    "ingredients_title": "Ingredients",
+    "nutrition_title": "Nutritional Information",
+    "origin": "Origin",
+    "weight": "Weight",
+    "packaging": "Packaging",
+    "tunisia": "Tunisia",
+    "storage": "Storage",
+    "storage_instruction": "Store in a cool, dry place away from direct sunlight",
+    "shelf_life": "Shelf Life",
+    "shelf_life_value": "12 months from production date"
   }
 }

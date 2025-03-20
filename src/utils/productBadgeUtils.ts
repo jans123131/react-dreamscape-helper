@@ -5,6 +5,19 @@ import { Product } from '../types';
  * Determines which badge image to show based on the product category and ID
  */
 export const getBadgeImage = (product: Product): string => {
+  // Handle special fig products by title first to ensure consistent badge display
+  if (product.title === 'Figues Toujane 200g') {
+    return "/produits/figuesechesicon.png";
+  }
+  
+  if (product.title === 'Figues ZIDI 200g') {
+    return "/produits/toujanevracicon.png";
+  }
+  
+  if (product.title === 'Figues djebaa 200g') {
+    return "/produits/figuesechesicon.png";
+  }
+  
   // Handle figues-sechees subcategories
   if (product.category === 'figues-sechees-djebaa' as any) {
     return "/produits/figuesechesicon.png";
@@ -13,19 +26,6 @@ export const getBadgeImage = (product: Product): string => {
   } else if (product.category === 'figues-sechees-toujane' as any) {
     return "/produits/figuesechesicon.png";
   } else if (product.category === 'figues-sechees' as any) {
-    // Special case for specific fig products by title
-    if (product.title === 'Figues Toujane 200g') {
-      return "/produits/figuesechesicon.png";
-    }
-    
-    if (product.title === 'Figues ZIDI 200g') {
-      return "/produits/toujanevracicon.png";
-    }
-    
-    if (product.title === 'Figues djebaa 200g') {
-      return "/produits/figuesechesicon.png";
-    }
-    
     // Default case for other figue products
     return "/produits/figuesechesicon.png";
   } else if (product.category === 'sucre-dattes' as any) {
