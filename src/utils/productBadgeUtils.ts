@@ -13,18 +13,16 @@ export const getBadgeImage = (product: Product): string => {
   } else if (product.category === 'figues-sechees-toujane' as any) {
     return "/produits/figuesechesicon.png";
   } else if (product.category === 'figues-sechees' as any) {
-    // Special case for Figues Toujane
-    if (product.id === '14' && product.title === 'Figues Toujane 200g') {
+    // Special case for specific fig products by title
+    if (product.title === 'Figues Toujane 200g') {
       return "/produits/figuesechesicon.png";
     }
     
-    // Special case for Figues ZIDI 200g
-    if (product.id === '9' && product.title === 'Figues ZIDI 200g') {
+    if (product.title === 'Figues ZIDI 200g') {
       return "/produits/toujanevracicon.png";
     }
     
-    // Special case for Figues djebaa 200g
-    if (product.id === '15' && product.title === 'Figues djebaa 200g') {
+    if (product.title === 'Figues djebaa 200g') {
       return "/produits/figuesechesicon.png";
     }
     
@@ -59,22 +57,18 @@ export const shouldShowBadge = (product: Product): boolean => {
     return false;
   }
   
-  // Specific checks for figue products
+  // Check for specific figue products by title
+  if (product.title === 'Figues djebaa 200g' ||
+      product.title === 'Figues ZIDI 200g' ||
+      product.title === 'Figues Toujane 200g') {
+    return true;
+  }
+  
+  // Specific checks for figue products by ID and title
   if (product.category === 'figues-sechees' as any) {
     // No badge for Figues Séchées en Vrac
     if (product.id === '10' && product.title === 'Figues Séchées en Vrac') {
       return false;
-    }
-    
-    // Badge for all specified fig products
-    if (product.id === '15' && product.title === 'Figues djebaa 200g') {
-      return true;
-    }
-    if (product.id === '9' && product.title === 'Figues ZIDI 200g') {
-      return true;
-    }
-    if (product.id === '14' && product.title === 'Figues Toujane 200g') {
-      return true;
     }
     
     return false;

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { Product } from '../../types';
 import OptimizedImage from '../ui/OptimizedImage';
 import { getProductTranslationPath } from '../../utils/productTranslations';
+import ProductBadge from './ProductBadge';
 
 interface ProductCardProps {
   product: Product;
@@ -21,97 +22,6 @@ const ProductCard = ({ product, onSelect }: ProductCardProps) => {
 
   // Get translation info for this product
   const translationInfo = getProductTranslationPath(product.title);
-
-  // Function to determine which badge image to show based on the product category
-  const getBadgeImage = () => {
-    if (product.category === 'figues-sechees') {
-      // Special case for Figues Toujane
-      if (product.id === '14' && product.title === 'Figues Toujane 200g') {
-        return "/produits/toujanevracicon.png";
-      }
-      
-      // Special case for Figues ZIDI 200g
-      if (product.id === '9' && product.title === 'Figues ZIDI 200g') {
-        return "/produits/figuesechesicon.png";
-      }
-      
-      // Special case for Figues djebaa 200g
-      if (product.id === '15' && product.title === 'Figues djebaa 200g') {
-        return "/produits/figuesechesicon.png";
-      }
-      
-      // Figues Séchées en Vrac doesn't get a badge
-      if (product.id === '10' && product.title === 'Figues Séchées en Vrac') {
-        return "";
-      }
-      
-      // Default case for other figue products
-      return "/produits/figuesechesicon.png";
-    } else if (product.category === 'sucre-dattes') {
-      return "/produits/sucredatteicon.png";
-    } else if (product.category === 'cafe-dattes') {
-      return "/produits/caffeicon.png";
-    } else if (product.category === 'sirop-dattes') { 
-      return "/produits/dattesicon.png";   
-    }
-    
-    return "";
-  };
-
-  // Determine if the product should show a badge
-  const shouldShowBadge = () => {
-    // Specific checks for figue products
-    if (product.category === 'figues-sechees') {
-      // No badge for Figues Séchées en Vrac
-      if (product.id === '10' && product.title === 'Figues Séchées en Vrac') {
-        return false;
-      }
-      
-      // Badge for Figues djebaa 200g
-      if (product.id === '15' && product.title === 'Figues djebaa 200g') {
-        return true;
-      }
-      
-      // Badge for Figues ZIDI 200g and Figues Toujane 200g
-      return (product.id === '9' && product.title === 'Figues ZIDI 200g') || 
-             (product.id === '14' && product.title === 'Figues Toujane 200g');
-    }
-    
-    // Regular check for other categories
-    return ['sucre-dattes', 'cafe-dattes', 'sirop-dattes'].includes(product.category);
-  };
-
-  // Animation variants for the badge - updated for better positioning
-  const badgeVariants = {
-    hidden: { 
-      opacity: 0, 
-      y: -50,
-      rotate: -15,
-      scale: 0.5
-    },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      rotate: 0,
-      scale: 1,
-      transition: { 
-        type: "spring", 
-        stiffness: 100,
-        damping: 15,
-        duration: 1.2,
-        delay: Number(product.id) * 0.15 + 0.5
-      }
-    },
-    hover: {
-      scale: 1.1,
-      rotate: 5,
-      transition: { 
-        type: "spring", 
-        stiffness: 200,
-        duration: 0.8
-      }
-    }
-  };
 
   return (
     <motion.div
@@ -131,25 +41,8 @@ const ProductCard = ({ product, onSelect }: ProductCardProps) => {
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           
-          {/* Badge with improved responsive positioning that's slightly lower and more to the left */}
-          {shouldShowBadge() && (
-            <motion.div
-              className="absolute top-[81%] right-[20%] z-10 w-[110px] sm:w-[130px] md:w-[150px] transform translate-x-[20%] sm:translate-x-[15%] md:translate-x-[10%]"
-              initial="hidden"
-              animate="visible"
-              whileHover="hover"
-              variants={badgeVariants}
-            >
-              <div className="w-full h-auto">
-                <OptimizedImage 
-                  src={getBadgeImage()} 
-                  alt="Product Type" 
-                  className="w-[220px] h-full object-contain"
-                  loading="lazy"
-                />
-              </div>
-            </motion.div>
-          )}
+          {/* Use the ProductBadge component for consistent badge display */}
+          <ProductBadge product={product} productId={Number(product.id)} />
         </div>
         
         <div className="pt-6 pb-4 px-2">

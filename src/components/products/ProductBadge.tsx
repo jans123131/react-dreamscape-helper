@@ -16,7 +16,14 @@ const ProductBadge: React.FC<ProductBadgeProps> = ({ product, productId }) => {
     return null;
   }
 
+  // Check if this is one of the specific fig products that need higher positioning
+  const isSpecialFig = 
+    product.title === 'Figues djebaa 200g' || 
+    product.title === 'Figues ZIDI 200g' || 
+    product.title === 'Figues Toujane 200g';
+
   // Animation variants for the badge - positioned for better responsiveness
+  // with special positioning for the specified fig products
   const badgeVariants = {
     hidden: { 
       opacity: 0, 
@@ -53,9 +60,10 @@ const ProductBadge: React.FC<ProductBadgeProps> = ({ product, productId }) => {
     return null;
   }
 
+  // Position the badge higher for special fig products by reducing the top percentage
   return (
     <motion.div
-      className="absolute top-[81%] right-[20%] z-10 w-[110px] sm:w-[130px] md:w-[150px] transform translate-x-[20%] sm:translate-x-[15%] md:translate-x-[10%]"
+      className={`absolute ${isSpecialFig ? 'top-[60%]' : 'top-[81%]'} right-[20%] z-10 w-[110px] sm:w-[130px] md:w-[150px] transform translate-x-[20%] sm:translate-x-[15%] md:translate-x-[10%]`}
       initial="hidden"
       animate="visible"
       whileHover="hover"
