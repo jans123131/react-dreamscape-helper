@@ -16,7 +16,13 @@ const ProductBadge: React.FC<ProductBadgeProps> = ({ product, productId }) => {
     return null;
   }
 
-  // Animation variants for the badge - positioned for better responsiveness
+  // Determine if this is one of the special figue products
+  const isSpecialFigueProduct = 
+    product.title === 'Figues djebaa 200g' || 
+    product.title === 'Figues ZIDI 200g' || 
+    product.title === 'Figues Toujane 200g';
+
+  // Animation variants for the badge - with adjusted position for special products
   const badgeVariants = {
     hidden: { 
       opacity: 0, 
@@ -53,9 +59,14 @@ const ProductBadge: React.FC<ProductBadgeProps> = ({ product, productId }) => {
     return null;
   }
 
+  // Position badges higher for special figue products (65% from top instead of 81%)
+  const positionClass = isSpecialFigueProduct
+    ? "absolute top-[65%] right-[20%] z-10 w-[110px] sm:w-[130px] md:w-[150px] transform translate-x-[20%] sm:translate-x-[15%] md:translate-x-[10%]"
+    : "absolute top-[81%] right-[20%] z-10 w-[110px] sm:w-[130px] md:w-[150px] transform translate-x-[20%] sm:translate-x-[15%] md:translate-x-[10%]";
+
   return (
     <motion.div
-      className="absolute top-[81%] right-[20%] z-10 w-[110px] sm:w-[130px] md:w-[150px] transform translate-x-[20%] sm:translate-x-[15%] md:translate-x-[10%]"
+      className={positionClass}
       initial="hidden"
       animate="visible"
       whileHover="hover"
