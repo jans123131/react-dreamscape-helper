@@ -43,6 +43,13 @@ export const getBadgeImage = (product: Product): string => {
  * Determines if a product should show a badge
  */
 export const shouldShowBadge = (product: Product): boolean => {
+  // Check for specific figue products by title first (this ensures they show on all pages)
+  if (product.title === 'Figues djebaa 200g' ||
+      product.title === 'Figues ZIDI 200g' ||
+      product.title === 'Figues Toujane 200g') {
+    return true;
+  }
+  
   // Handle figues-sechees subcategories (all except vrac should show badges)
   if (
     product.category === 'figues-sechees-djebaa' as any ||
@@ -57,13 +64,6 @@ export const shouldShowBadge = (product: Product): boolean => {
     return false;
   }
   
-  // Check for specific figue products by title
-  if (product.title === 'Figues djebaa 200g' ||
-      product.title === 'Figues ZIDI 200g' ||
-      product.title === 'Figues Toujane 200g') {
-    return true;
-  }
-  
   // Specific checks for figue products by ID and title
   if (product.category === 'figues-sechees' as any) {
     // No badge for Figues Séchées en Vrac
@@ -71,7 +71,7 @@ export const shouldShowBadge = (product: Product): boolean => {
       return false;
     }
     
-    return false;
+    return true;
   }
   
   // Regular check for other categories

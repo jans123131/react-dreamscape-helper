@@ -1,4 +1,3 @@
-
 import { motion } from 'framer-motion';
 import { ChevronLeft, Leaf, Award } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -180,6 +179,38 @@ const ProductDetail = ({ productId, onBack }: ProductDetailProps) => {
     { label: 'Type', value: 'Grasse comprise entre 20% et 30%' }
   ];
 
+  // Get translated description based on product type
+  const getTranslatedDescription = () => {
+    let descriptionKey = '';
+    
+    if (product?.category === 'dattes-fraiches' || product?.category === 'dattes-transformees' || product?.category === 'dattes-en-vrac') {
+      descriptionKey = 'products.dates_description_premium';
+    } else if (product?.category === 'figues-sechees' || 
+              product?.category === 'figues-sechees-toujane' || 
+              product?.category === 'figues-sechees-zidi' || 
+              product?.category === 'figues-sechees-vrac' || 
+              product?.category === 'figues-sechees-djebaa') {
+      descriptionKey = 'products.figs_description_premium';
+    } else if (product?.category === 'cafe-dattes') {
+      descriptionKey = 'products.date_coffee_description';
+    } else if (product?.category === 'sucre-dattes') {
+      descriptionKey = 'products.date_sugar_description';
+    } else if (product?.category === 'sirop-dattes') {
+      descriptionKey = 'products.date_syrup_description';
+    }
+    
+    return descriptionKey ? t(descriptionKey) : productData.description;
+  };
+
+  // Get translated ingredient note
+  const getTranslatedIngredientNote = () => {
+    if (product?.category === 'dattes-fraiches' || product?.category === 'dattes-transformees' || product?.category === 'dattes-en-vrac') {
+      return t('products.dates_ingredient_note');
+    } else {
+      return t('products.general_ingredient_note');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FDF6F0]/50 to-white/50 pt-32 pb-16">
       <div className="container mx-auto px-4">
@@ -194,7 +225,7 @@ const ProductDetail = ({ productId, onBack }: ProductDetailProps) => {
             className="flex items-center text-[#700100] hover:text-[#96cc39] transition-colors bg-transparent px-4 py-2 rounded-lg"
           >
             <ChevronLeft className="w-5 h-5 mr-2" />
-            {t('products.back_to_products', 'Retour aux produits')}
+            {t('products.back_to_products')}
           </button>
         </motion.div>
 
@@ -214,13 +245,13 @@ const ProductDetail = ({ productId, onBack }: ProductDetailProps) => {
                 {productData.isOrganic && (
                   <span className="bg-[#96cc39] text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 shadow-lg">
                     <Leaf className="w-4 h-4" />
-                    {t('products.organic', 'Bio')}
+                    {t('products.organic')}
                   </span>
                 )}
                 {productData.isFairTrade && (
                   <span className="bg-[#700100] text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 shadow-lg">
                     <Award className="w-4 h-4" />
-                    {t('products.fair_trade', 'Équitable')}
+                    {t('products.fair_trade')}
                   </span>
                 )}
               </div>
@@ -243,7 +274,7 @@ const ProductDetail = ({ productId, onBack }: ProductDetailProps) => {
                 <div className="mb-4 bg-[#96cc39]/10 p-3 rounded-lg inline-block">
                   <p className="text-sm font-medium text-[#700100]">
                     <span className="font-bold">{calorieDisplay}</span>
-                    <span className="ml-1 text-gray-600">{t('products.per_portion', 'par portion')}</span>
+                    <span className="ml-1 text-gray-600">{t('products.per_portion')}</span>
                   </p>
                 </div>
               )}
@@ -258,7 +289,7 @@ const ProductDetail = ({ productId, onBack }: ProductDetailProps) => {
                       : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
-                  {t('products.description', 'Description')}
+                  {t('products.description')}
                 </button>
                 <button 
                   onClick={() => setActiveTab('ingredients')}
@@ -268,7 +299,7 @@ const ProductDetail = ({ productId, onBack }: ProductDetailProps) => {
                       : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
-                  {t('products.ingredients', 'Ingrédients')}
+                  {t('products.ingredients')}
                 </button>
                 <button 
                   onClick={() => setActiveTab('nutrition')}
@@ -278,7 +309,7 @@ const ProductDetail = ({ productId, onBack }: ProductDetailProps) => {
                       : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
-                  {t('products.nutritional_values', 'Valeurs Nutritionnelles')}
+                  {t('products.nutritional_values')}
                 </button>
               </div>
               
@@ -293,31 +324,7 @@ const ProductDetail = ({ productId, onBack }: ProductDetailProps) => {
                     className="text-gray-600 leading-relaxed text-lg"
                   >
                     {productData.description}
-                    {product?.category === 'dattes-fraiches' && (
-                      <p className="mt-4">
-                        {t('products.dates_description_premium', 'Ces dattes premium sont soigneusement cultivées dans les palmeraies tunisiennes, où le climat et le terroir exceptionnels confèrent à nos dattes leurs qualités uniques. Chaque fruit est sélectionné à la main pour garantir un produit d\'une qualité irréprochable.')}
-                      </p>
-                    )}
-                    {product?.category === 'figues-sechees' && (
-                      <p className="mt-4">
-                        {t('products.figs_description_premium', 'Ces figues sont délicatement séchées selon des méthodes traditionnelles tunisiennes, préservant leurs saveurs naturelles et leurs bienfaits nutritionnels. Récoltées à maturité, elles conservent toutes leurs qualités gustatives.')}
-                      </p>
-                    )}
-                    {product?.category === 'cafe-dattes' && (
-                      <p className="mt-4">
-                        {t('products.date_coffee_description', 'Ce café de noyaux de dattes est une alternative naturelle sans caféine au café traditionnel, offrant des notes douces et légèrement caramélisées. Une spécialité tunisienne aux vertus digestives reconnues.')}
-                      </p>
-                    )}
-                    {product?.category === 'sucre-dattes' && (
-                      <p className="mt-4">
-                        {t('products.date_sugar_description', 'Notre sucre de dattes est obtenu par déshydratation et broyage minutieux de dattes de première qualité. Il conserve les minéraux, vitamines et fibres naturellement présents dans les fruits.')}
-                      </p>
-                    )}
-                    {product?.category === 'sirop-dattes' && (
-                      <p className="mt-4">
-                        {t('products.date_syrup_description', 'Ce sirop est un concentré naturel de saveurs obtenu par extraction soigneuse des jus de dattes sélectionnées. Un nectar ambré, légèrement visqueux et intensément parfumé.')}
-                      </p>
-                    )}
+                    <p className="mt-4">{getTranslatedDescription()}</p>
                   </motion.div>
                 )}
                 
@@ -337,9 +344,7 @@ const ProductDetail = ({ productId, onBack }: ProductDetailProps) => {
                       ))}
                     </ul>
                     <p className="mt-6 text-gray-600 text-sm italic">
-                      {product?.category === 'dattes-fraiches' || product?.category === 'dattes-transformees' ? 
-                        t('products.dates_ingredient_note', "Aucun additif, conservateur ou colorant ajouté. Nos dattes sont conditionnées dans un environnement contrôlé pour préserver leur qualité et leur fraîcheur.") : 
-                        t('products.general_ingredient_note', "Produit 100% naturel, sans additifs ni conservateurs. Conditionné dans un environnement contrôlé pour préserver sa qualité et ses bienfaits.")}
+                      {getTranslatedIngredientNote()}
                     </p>
                   </motion.div>
                 )}
@@ -376,7 +381,7 @@ const ProductDetail = ({ productId, onBack }: ProductDetailProps) => {
                       ))}
                     </div>
                     <div className="p-4 bg-gray-50 text-xs text-gray-500 italic">
-                      {t('products.nutrition_note', '*Les valeurs nutritionnelles sont données pour 100g de produit')}
+                      {t('products.nutrition_note')}
                     </div>
                   </motion.div>
                 )}
@@ -395,21 +400,21 @@ const ProductDetail = ({ productId, onBack }: ProductDetailProps) => {
           >
             <div>
               <h2 className="text-2xl font-playfair text-[#700100] mb-6">
-                {t('products.packaging_info', 'Informations de Conditionnement')}
+                {t('products.packaging_info')}
               </h2>
               <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[800px]">
                     <thead>
                       <tr className="bg-gradient-to-br from-[#64381b] to-[#4e2b15] text-white">
-                        <th className="px-6 py-4 text-left text-sm font-semibold">{t('products.packaging_designation', 'Désignation')}</th>
-                        <th className="px-4 py-4 text-center text-sm font-semibold whitespace-nowrap">{t('products.packaging_packs_carton', 'Paquets/Carton')}</th>
-                        <th className="px-4 py-4 text-center text-sm font-semibold whitespace-nowrap">{t('products.packaging_cartons_pallet', 'Cartons/Palette')}</th>
-                        <th className="px-4 py-4 text-center text-sm font-semibold whitespace-nowrap">{t('products.packaging_net_weight', 'Poids Net Pal')}</th>
-                        <th className="px-4 py-4 text-center text-sm font-semibold whitespace-nowrap">{t('products.packaging_gross_weight', 'Poids Brut Pal')}</th>
-                        <th className="px-4 py-4 text-center text-sm font-semibold">{t('products.packaging_height', 'Hteur Pal')}</th>
-                        <th className="px-4 py-4 text-center text-sm font-semibold">{t('products.packaging_pal_sr', 'Pal./SR')}</th>
-                        <th className="px-4 py-4 text-center text-sm font-semibold whitespace-nowrap">{t('products.packaging_pal_container', 'Pal./conteneur 20\'')}</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold">{t('products.packaging_designation')}</th>
+                        <th className="px-4 py-4 text-center text-sm font-semibold whitespace-nowrap">{t('products.packaging_packs_carton')}</th>
+                        <th className="px-4 py-4 text-center text-sm font-semibold whitespace-nowrap">{t('products.packaging_cartons_pallet')}</th>
+                        <th className="px-4 py-4 text-center text-sm font-semibold whitespace-nowrap">{t('products.packaging_net_weight')}</th>
+                        <th className="px-4 py-4 text-center text-sm font-semibold whitespace-nowrap">{t('products.packaging_gross_weight')}</th>
+                        <th className="px-4 py-4 text-center text-sm font-semibold">{t('products.packaging_height')}</th>
+                        <th className="px-4 py-4 text-center text-sm font-semibold">{t('products.packaging_pal_sr')}</th>
+                        <th className="px-4 py-4 text-center text-sm font-semibold whitespace-nowrap">{t('products.packaging_pal_container')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -433,11 +438,11 @@ const ProductDetail = ({ productId, onBack }: ProductDetailProps) => {
 
             <div>
               <h2 className="text-2xl font-playfair text-[#700100] mb-6">
-                {t('products.technical_specs', 'Spécifications Techniques')}
+                {t('products.technical_specs')}
               </h2>
               <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
                 <div className="px-6 py-4 bg-gradient-to-br from-[#64381b] to-[#4e2b15]">
-                  <h3 className="text-xl font-playfair text-white">{t('products.technical_sheet', 'Fiche technique')}</h3>
+                  <h3 className="text-xl font-playfair text-white">{t('products.technical_sheet')}</h3>
                 </div>
                 <div className="divide-y divide-gray-100">
                   {technicalSpecs.map((spec, index) => (
