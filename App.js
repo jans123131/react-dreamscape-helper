@@ -125,7 +125,6 @@ function MainNavigator({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Enhanced Header with gradient background */}
       <LinearGradient
         colors={['#9b87f5', '#7E69AB']}
         start={{ x: 0, y: 0 }}
@@ -133,12 +132,14 @@ function MainNavigator({ navigation }) {
         style={styles.headerGradient}
       >
         <View style={styles.header}>
-          <Image source={require("./assets/ticket.png")} style={styles.logo} />
+          <Image 
+            source={require("./assets/ticket.png")} 
+            style={styles.logo} 
+          />
           <Text style={styles.title}>Ticket App</Text>
         </View>
       </LinearGradient>
       
-      {/* Main content area */}
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
@@ -149,7 +150,6 @@ function MainNavigator({ navigation }) {
         </View>
       </ScrollView>
       
-      {/* Footer with contact information */}
       <View style={styles.footer}>
         <View style={styles.footerContent}>
           <View style={styles.footerSection}>
@@ -182,7 +182,6 @@ function MainNavigator({ navigation }) {
         <Text style={styles.copyright}>© 2023 Ticket App. All rights reserved.</Text>
       </View>
       
-      {/* Improved bottom navigation with modern icons */}
       <View style={styles.menuContainer}>
         <View style={styles.menu}>
           <TouchableOpacity
@@ -287,7 +286,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F6F6F7",
   },
-  // Footer styles
   footer: {
     backgroundColor: "#F8F9FA",
     padding: 16,
@@ -324,7 +322,6 @@ const styles = StyleSheet.create({
     color: "#999",
     marginTop: 8,
   },
-  // Bottom nav styles
   menuContainer: {
     backgroundColor: "#ffffff",
     borderTopWidth: 1,

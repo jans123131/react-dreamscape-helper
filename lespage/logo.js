@@ -14,6 +14,7 @@ export default function Logo({ navigation }) {
         source={require("../assets/ticket.png")} 
         style={styles.logo} 
         resizeMode="contain"
+        tintColor="#9b87f5"
       />
       <Text style={styles.appName}>Ticket</Text>
     </View>
@@ -35,6 +36,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginTop: 20,
-    color: "#333",
+    color: "#9b87f5",
   },
 });
