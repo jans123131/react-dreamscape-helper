@@ -14,7 +14,7 @@ import {
   ScrollView
 } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
-import { Home as HomeIcon, Ticket, LayoutGrid, MapPin, Phone, Mail, Info } from 'lucide-react';
+import { Ionicons } from '@expo/vector-icons';
 
 // Import screens from existing project
 import Home from "./lespage/Home.js"; 
@@ -155,26 +155,26 @@ function MainNavigator({ navigation }) {
           <View style={styles.footerSection}>
             <Text style={styles.footerTitle}>Contact Us</Text>
             <View style={styles.footerItem}>
-              <Phone size={16} color="#9b87f5" />
+              <Ionicons name="call-outline" size={16} color="#9b87f5" />
               <Text style={styles.footerText}>+216 12 345 678</Text>
             </View>
             <View style={styles.footerItem}>
-              <Mail size={16} color="#9b87f5" />
+              <Ionicons name="mail-outline" size={16} color="#9b87f5" />
               <Text style={styles.footerText}>contact@ticketapp.com</Text>
             </View>
             <View style={styles.footerItem}>
-              <MapPin size={16} color="#9b87f5" />
+              <Ionicons name="location-outline" size={16} color="#9b87f5" />
               <Text style={styles.footerText}>Tunis, Tunisia</Text>
             </View>
           </View>
           <View style={styles.footerSection}>
             <Text style={styles.footerTitle}>Quick Links</Text>
             <TouchableOpacity style={styles.footerItem} onPress={() => navigateTo('Services', 'services')}>
-              <Info size={16} color="#9b87f5" />
+              <Ionicons name="information-circle-outline" size={16} color="#9b87f5" />
               <Text style={styles.footerText}>About Us</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.footerItem} onPress={() => navigateTo('MesTickets', 'tickets')}>
-              <Ticket size={16} color="#9b87f5" />
+              <Ionicons name="ticket-outline" size={16} color="#9b87f5" />
               <Text style={styles.footerText}>Support</Text>
             </TouchableOpacity>
           </View>
@@ -190,7 +190,8 @@ function MainNavigator({ navigation }) {
             onPress={() => navigateTo('Main', 'home')}
           >
             <View style={styles.menuIcon}>
-              <HomeIcon 
+              <Ionicons 
+                name="home-outline" 
                 size={22}
                 color={activeTab === 'home' ? '#9b87f5' : '#8A898C'} 
               />
@@ -205,7 +206,8 @@ function MainNavigator({ navigation }) {
             onPress={() => navigateTo('MesTickets', 'tickets')}
           >
             <View style={styles.menuIcon}>
-              <Ticket 
+              <Ionicons 
+                name="ticket-outline" 
                 size={22}
                 color={activeTab === 'tickets' ? '#9b87f5' : '#8A898C'} 
               />
@@ -220,7 +222,8 @@ function MainNavigator({ navigation }) {
             onPress={() => navigateTo('Services', 'services')}
           >
             <View style={styles.menuIcon}>
-              <LayoutGrid 
+              <Ionicons 
+                name="grid-outline" 
                 size={22}
                 color={activeTab === 'services' ? '#9b87f5' : '#8A898C'} 
               />
