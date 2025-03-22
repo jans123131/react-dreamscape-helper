@@ -1,0 +1,38 @@
+
+{
+  "expo": {
+    "name": "application",
+    "slug": "application",
+    "main": "index.js",
+    "jsEngine": "hermes",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/ticket.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/ticket.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/ticket.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.anonymous.application"
+    },
+    "web": {
+      "favicon": "./assets/ticket.png"
+    },
+    "permissions": [
+      "LOCATION"
+    ]
+  }
+}
