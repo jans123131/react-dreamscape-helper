@@ -21,6 +21,7 @@
     "expo-linear-gradient": "^14.0.2",
     "expo-location": "~18.0.6",
     "expo-status-bar": "~2.0.1",
+    "lucide-react": "^0.483.0",
     "react": "^18.2.0",
     "react-native": "^0.76.7",
     "react-native-geolocation-service": "^5.3.1",

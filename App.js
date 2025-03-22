@@ -1,5 +1,4 @@
 
-// Import React and Navigation components
 import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -15,6 +14,7 @@ import {
   ScrollView
 } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
+import { Home as HomeIcon, Ticket, LayoutGrid, MapPin, Phone, Mail, Info } from 'lucide-react';
 
 // Import screens from existing project
 import Home from "./lespage/Home.js"; 
@@ -112,7 +112,7 @@ function App() {
   );
 }
 
-// Main Navigator - replaced Drawer with simple Home screen with navigation menu
+// Main Navigator with improved design
 function MainNavigator({ navigation }) {
   const [activeTab, setActiveTab] = useState('home');
 
@@ -125,7 +125,7 @@ function MainNavigator({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header with gradient background */}
+      {/* Enhanced Header with gradient background */}
       <LinearGradient
         colors={['#9b87f5', '#7E69AB']}
         start={{ x: 0, y: 0 }}
@@ -138,7 +138,7 @@ function MainNavigator({ navigation }) {
         </View>
       </LinearGradient>
       
-      {/* Main content area with ScrollView for responsiveness */}
+      {/* Main content area */}
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
@@ -149,7 +149,40 @@ function MainNavigator({ navigation }) {
         </View>
       </ScrollView>
       
-      {/* Bottom navigation menu with icons */}
+      {/* Footer with contact information */}
+      <View style={styles.footer}>
+        <View style={styles.footerContent}>
+          <View style={styles.footerSection}>
+            <Text style={styles.footerTitle}>Contact Us</Text>
+            <View style={styles.footerItem}>
+              <Phone size={16} color="#9b87f5" />
+              <Text style={styles.footerText}>+216 12 345 678</Text>
+            </View>
+            <View style={styles.footerItem}>
+              <Mail size={16} color="#9b87f5" />
+              <Text style={styles.footerText}>contact@ticketapp.com</Text>
+            </View>
+            <View style={styles.footerItem}>
+              <MapPin size={16} color="#9b87f5" />
+              <Text style={styles.footerText}>Tunis, Tunisia</Text>
+            </View>
+          </View>
+          <View style={styles.footerSection}>
+            <Text style={styles.footerTitle}>Quick Links</Text>
+            <TouchableOpacity style={styles.footerItem} onPress={() => navigateTo('Services', 'services')}>
+              <Info size={16} color="#9b87f5" />
+              <Text style={styles.footerText}>About Us</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.footerItem} onPress={() => navigateTo('MesTickets', 'tickets')}>
+              <Ticket size={16} color="#9b87f5" />
+              <Text style={styles.footerText}>Support</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <Text style={styles.copyright}>© 2023 Ticket App. All rights reserved.</Text>
+      </View>
+      
+      {/* Improved bottom navigation with modern icons */}
       <View style={styles.menuContainer}>
         <View style={styles.menu}>
           <TouchableOpacity
@@ -157,9 +190,9 @@ function MainNavigator({ navigation }) {
             onPress={() => navigateTo('Main', 'home')}
           >
             <View style={styles.menuIcon}>
-              <Image 
-                source={require("./assets/ticket.png")} 
-                style={[styles.menuIconImage, activeTab === 'home' && styles.activeMenuIcon]} 
+              <HomeIcon 
+                size={22}
+                color={activeTab === 'home' ? '#9b87f5' : '#8A898C'} 
               />
             </View>
             <Text style={[styles.menuText, activeTab === 'home' && styles.activeMenuText]}>
@@ -172,9 +205,9 @@ function MainNavigator({ navigation }) {
             onPress={() => navigateTo('MesTickets', 'tickets')}
           >
             <View style={styles.menuIcon}>
-              <Image 
-                source={require("./assets/ticket.png")} 
-                style={[styles.menuIconImage, activeTab === 'tickets' && styles.activeMenuIcon]} 
+              <Ticket 
+                size={22}
+                color={activeTab === 'tickets' ? '#9b87f5' : '#8A898C'} 
               />
             </View>
             <Text style={[styles.menuText, activeTab === 'tickets' && styles.activeMenuText]}>
@@ -187,9 +220,9 @@ function MainNavigator({ navigation }) {
             onPress={() => navigateTo('Services', 'services')}
           >
             <View style={styles.menuIcon}>
-              <Image 
-                source={require("./assets/ticket.png")} 
-                style={[styles.menuIconImage, activeTab === 'services' && styles.activeMenuIcon]} 
+              <LayoutGrid 
+                size={22}
+                color={activeTab === 'services' ? '#9b87f5' : '#8A898C'} 
               />
             </View>
             <Text style={[styles.menuText, activeTab === 'services' && styles.activeMenuText]}>
@@ -202,7 +235,7 @@ function MainNavigator({ navigation }) {
   );
 }
 
-// Enhanced Styles for responsive design
+// Enhanced Styles with footer and improved navigation
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -251,8 +284,48 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F6F6F7",
   },
+  // Footer styles
+  footer: {
+    backgroundColor: "#F8F9FA",
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#E8E8E8",
+  },
+  footerContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  footerSection: {
+    flex: 1,
+  },
+  footerTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 12,
+  },
+  footerItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  footerText: {
+    fontSize: 14,
+    color: "#666",
+    marginLeft: 8,
+  },
+  copyright: {
+    textAlign: "center",
+    fontSize: 12,
+    color: "#999",
+    marginTop: 8,
+  },
+  // Bottom nav styles
   menuContainer: {
     backgroundColor: "#ffffff",
+    borderTopWidth: 1,
+    borderTopColor: "#F0F0F0",
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -286,19 +359,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  menuIconImage: {
-    width: 20,
-    height: 20,
-    resizeMode: 'contain',
-    tintColor: '#8A898C',
-  },
-  activeMenuIcon: {
-    tintColor: '#9b87f5',
-  },
   menuText: {
     fontSize: 12,
     color: "#8A898C",
-    marginTop: 2,
+    marginTop: 4,
   },
   activeMenuText: {
     color: "#9b87f5",
