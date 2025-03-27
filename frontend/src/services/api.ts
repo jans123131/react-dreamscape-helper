@@ -8,7 +8,7 @@ export interface User {
   nom: string;
   prenom: string;
   email: string;
-  role: 'admin' | 'user';
+  role: 'admin' | 'user' | 'owner';
   created_at?: string;
   updated_at?: string;
 }
@@ -21,7 +21,7 @@ export interface UserLogin {
 export interface UserRegister extends UserLogin {
   nom: string;
   prenom: string;
-  role?: 'admin' | 'user';
+  role?: 'admin' | 'user' | 'owner';
 }
 
 export interface UserUpdate {
@@ -29,7 +29,7 @@ export interface UserUpdate {
   prenom?: string;
   email?: string;
   password?: string;
-  role?: 'admin' | 'user';
+  role?: 'admin' | 'user' | 'owner';
 }
 
 // API Error handling

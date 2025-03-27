@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -47,19 +46,36 @@ export const Sidebar: React.FC = () => {
   const { isOpen, toggle, isMobile } = useSidebar();
   const { user, logout, hasAccess } = useAuth();
   
-  // Define all possible routes
-  const allRoutes = [
-    { path: '/dashboard', label: 'Tableau de bord', icon: <LayoutDashboard size={20} /> },
-    { path: '/properties', label: 'Propriétés', icon: <Building2 size={20} /> },
-    { path: '/bookings', label: 'Réservations', icon: <Calendar size={20} /> },
-    { path: '/users', label: 'Utilisateurs', icon: <Users size={20} /> },
-    { path: '/reviews', label: 'Avis', icon: <MessageSquare size={20} /> },
-    { path: '/messages', label: 'Messages', icon: <Mail size={20} /> },
-    { path: '/settings', label: 'Paramètres', icon: <Settings size={20} /> },
-  ];
+  // Define route configurations based on role
+  const roleRoutes = {
+    admin: [
+      { path: '/dashboard', label: 'Tableau de bord', icon: <LayoutDashboard size={20} /> },
+      { path: '/properties', label: 'Propriétés', icon: <Building2 size={20} /> },
+      { path: '/users', label: 'Utilisateurs', icon: <Users size={20} /> },
+      { path: '/messages', label: 'Messages', icon: <Mail size={20} /> },
+      { path: '/settings', label: 'Paramètres', icon: <Settings size={20} /> },
+    ],
+    owner: [
+      { path: '/dashboard', label: 'Tableau de bord', icon: <LayoutDashboard size={20} /> },
+      { path: '/properties', label: 'Propriétés', icon: <Building2 size={20} /> },
+      { path: '/bookings', label: 'Réservations', icon: <Calendar size={20} /> },
+      { path: '/reviews', label: 'Avis', icon: <MessageSquare size={20} /> },
+      { path: '/settings', label: 'Paramètres', icon: <Settings size={20} /> },
+    ],
+    user: [
+      { path: '/dashboard', label: 'Tableau de bord', icon: <LayoutDashboard size={20} /> },
+      { path: '/settings', label: 'Paramètres', icon: <Settings size={20} /> },
+    ]
+  };
 
-  // Filter routes based on user role
-  const routes = allRoutes.filter(route => hasAccess(route.path));
+  // Get routes for current user role
+  const getUserRoutes = () => {
+    if (!user) return [];
+    return roleRoutes[user.role] || roleRoutes.user;
+  };
+
+  // Filter routes based on user access permissions
+  const routes = getUserRoutes().filter(route => hasAccess(route.path));
 
   const handleLogout = () => {
     logout();

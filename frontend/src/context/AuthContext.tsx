@@ -9,7 +9,7 @@ interface AuthUser {
   nom: string;
   prenom: string;
   email: string;
-  role: 'admin' | 'user';
+  role: 'admin' | 'user' | 'owner';
   // Add a virtual property for convenience
   name?: string;
 }
@@ -36,19 +36,24 @@ export const useAuth = () => {
 
 // Define route access by role
 const roleAccess = {
-  user: ['/dashboard'],
-  admin: ['/dashboard', '/properties', '/users', '/messages', '/bookings', '/reviews', '/settings']
+  user: ['/dashboard', '/settings'],
+  admin: ['/dashboard', '/properties', '/users', '/messages', '/bookings', '/reviews', '/settings'],
+  owner: ['/dashboard', '/properties', '/bookings', '/reviews', '/settings']
 };
 
 // Define action permissions by role and resource
 const rolePermissions = {
   user: {
-    edit: [],
+    edit: ['settings'],
     delete: []
   },
   admin: {
     edit: ['users', 'settings', 'properties', 'bookings'],
     delete: ['properties', 'users', 'messages', 'bookings']
+  },
+  owner: {
+    edit: ['settings', 'properties', 'bookings'],
+    delete: ['properties', 'bookings']
   }
 };
 
