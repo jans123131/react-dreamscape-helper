@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Users as UsersIcon, 
@@ -21,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { UserForm } from '@/components/UserForm';
 import { userApi, ApiError } from '@/services/api';
 
@@ -290,6 +289,9 @@ const Users = () => {
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Ajouter un nouvel utilisateur</DialogTitle>
+            <DialogDescription>
+              Remplissez le formulaire ci-dessous pour créer un nouvel utilisateur
+            </DialogDescription>
           </DialogHeader>
           <UserForm onSubmit={handleAddUser} onCancel={() => setIsFormOpen(false)} />
         </DialogContent>
