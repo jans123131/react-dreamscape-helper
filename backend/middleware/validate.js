@@ -1,4 +1,3 @@
-
 const { body, validationResult, param } = require("express-validator");
 
 exports.registerValidation = [
@@ -6,10 +5,10 @@ exports.registerValidation = [
   body("prenom").notEmpty().withMessage("Prenom is required"),
   body("email").isEmail().withMessage("Invalid email"),
   body("password")
-    .isLength({ min: 8 })
-    .withMessage("Password must be at least 8 characters"),
+    .isLength({ min: 6 })  // Changed from 8 to 6 to match the frontend validation
+    .withMessage("Password must be at least 6 characters"),
+  body("role").optional().isIn(["admin", "user"]).withMessage("Role must be either admin or user"),
 ];
-
 exports.loginValidation = [
   body("email").isEmail().withMessage("Invalid email"),
   body("password").notEmpty().withMessage("Password is required"),

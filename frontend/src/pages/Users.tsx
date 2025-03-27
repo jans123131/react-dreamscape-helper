@@ -106,42 +106,50 @@ const Users = () => {
   };
 
   const handleAddUser = async (userData: Partial<UserData> & { password?: string }) => {
-    try {
-      if (!userData.password) {
-        throw new Error("Le mot de passe est requis");
-      }
-      
-      const response = await userApi.register({
-        nom: userData.nom || '',
-        prenom: userData.prenom || '',
-        email: userData.email || '',
-        password: userData.password,
-        role: userData.role || 'user'
-      });
-      
-      fetchUsers(); // Refresh the list after adding
-      
-      toast({
-        title: "Utilisateur ajouté",
-        description: `Nouvel utilisateur ${userData.prenom} ${userData.nom} ajouté avec succès.`,
-      });
-      setIsFormOpen(false);
-    } catch (error) {
-      if (error instanceof ApiError) {
-        toast({
-          title: "Erreur",
-          description: error.message || "Erreur lors de l'ajout de l'utilisateur",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Erreur",
-          description: "Erreur lors de l'ajout de l'utilisateur",
-          variant: "destructive",
-        });
-      }
+  try {
+    if (!userData.password) {
+      throw new Error("Le mot de passe est requis");
     }
-  };
+    
+    const response = await userApi.register({
+      nom: userData.nom || '',
+      prenom: userData.prenom || '',
+      email: userData.email || '',
+      password: userData.password,
+      role: userData.role || 'user'
+    });
+    
+    fetchUsers(); // Refresh the list after adding
+    
+    toast({
+      title: "Utilisateur ajouté",
+      description: `Nouvel utilisateur ${userData.prenom} ${userData.nom} ajouté avec succès.`,
+    });
+    setIsFormOpen(false);
+  } catch (error) {
+    console.error("Error adding user:", error);
+    
+    if (error instanceof ApiError) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de l'ajout de l'utilisateur",
+        variant: "destructive",
+      });
+    } else if (error instanceof Error) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de l'ajout de l'utilisateur",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de l'ajout de l'utilisateur",
+        variant: "destructive",
+      });
+    }
+  }
+};
 
   const handleUpdateUser = async (updatedUserData: Partial<UserData> & { password?: string }) => {
     if (!updatedUserData.user_id) return;

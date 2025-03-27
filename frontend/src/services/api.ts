@@ -45,14 +45,24 @@ export class ApiError extends Error {
 
 // Helper method to handle API responses
 const handleResponse = async (response: Response) => {
+  const contentType = response.headers.get('content-type');
+  
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new ApiError(
-      errorData.message || `Erreur ${response.status}`,
-      response.status
-    );
+    let errorMessage = `Erreur ${response.status}`;
+    
+    if (contentType && contentType.includes('application/json')) {
+      const errorData = await response.json();
+      errorMessage = errorData.message || errorData.errors?.[0]?.msg || errorMessage;
+    }
+    
+    throw new ApiError(errorMessage, response.status);
   }
-  return response.json();
+  
+  if (contentType && contentType.includes('application/json')) {
+    return response.json();
+  }
+  
+  return { success: true };
 };
 
 // API service for user operations
@@ -75,13 +85,20 @@ export const userApi = {
 
   // Register a new user
   register: async (userData: UserRegister) => {
-    const response = await fetch(`${API_BASE_URL}/users/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(userData),
-    });
-    return handleResponse(response);
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(userData),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError("Erreur de connexion au serveur", 500);
+    }
   },
 
   // Login

@@ -1,4 +1,3 @@
-
 const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
@@ -34,9 +33,20 @@ exports.register = async (req, res) => {
   }
 
   try {
+    // Check if user with this email already exists
+    const existingUser = await User.findByEmail(req.body.email);
+    if (existingUser) {
+      return res.status(400).json({ message: "Cet email est déjà utilisé" });
+    }
+
     const userId = await User.create(req.body);
-    res.status(201).json({ message: "Utilisateur créé avec succès", userId });
+    res.status(201).json({ 
+      message: "Utilisateur créé avec succès", 
+      userId,
+      success: true 
+    });
   } catch (error) {
+    console.error("Error creating user:", error);
     res.status(400).json({ message: error.message });
   }
 };
