@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   View, 
@@ -84,16 +85,37 @@ const ForgotPasswordScreen = () => {
     setLoading(true);
     
     try {
-      // S'assurer que le code est un tableau avant d'appeler join
-      // (Ensure code is an array before calling join)
-      const codeString = Array.isArray(code) ? code.join('') : code;
+      console.log('Code type:', typeof code, 'Code value:', code);
+      
+      // S'assurer que le code est correctement formaté pour la comparaison
+      // (Ensure code is properly formatted for comparison)
+      let codeString;
+      
+      if (Array.isArray(code)) {
+        codeString = code.join('');
+      } else if (typeof code === 'string') {
+        codeString = code;
+      } else if (code === undefined || code === null) {
+        throw new Error('Code de vérification manquant');
+      } else {
+        codeString = String(code);
+      }
+      
+      console.log('Comparing codes:', codeString, resetCode);
       
       // Vérifie si le code entré correspond au code généré
       // (Check if entered code matches the generated code)
       if (codeString === resetCode) {
-        // Si c'est un tableau, stockez-le, sinon créez un tableau à partir de la chaîne
-        // (If it's an array, store it, otherwise create an array from the string)
-        setVerificationCode(Array.isArray(code) ? code : code.split(''));
+        // Stocke le code pour les étapes suivantes
+        // (Store code for next steps)
+        if (Array.isArray(code)) {
+          setVerificationCode(code);
+        } else if (typeof code === 'string') {
+          setVerificationCode(code.split(''));
+        }
+        
+        // Passe à l'étape suivante
+        // (Move to the next step)
         setCurrentStep(3);
       } else {
         throw new Error(t('forgotPassword.verificationError') || 'Code de vérification invalide');
