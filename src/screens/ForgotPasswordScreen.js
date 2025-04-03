@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -36,6 +35,13 @@ const ForgotPasswordScreen = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // For debugging purposes
+  useEffect(() => {
+    console.log('Current step:', currentStep);
+    console.log('Email:', email);
+    console.log('Reset code:', resetCode);
+  }, [currentStep, email, resetCode]);
+
   // Génère un code de vérification à 4 chiffres aléatoire
   // (Generates a random 4-digit verification code)
   const generateVerificationCode = () => {
@@ -43,12 +49,20 @@ const ForgotPasswordScreen = () => {
     for (let i = 0; i < 4; i++) {
       code += Math.floor(Math.random() * 10).toString();
     }
+    console.log('Generated code:', code);
     return code;
   };
 
   // Gère la soumission de l'email et l'envoi du code de vérification
   // (Handles email submission and sending verification code)
   const handleEmailSubmit = async (submittedEmail) => {
+    console.log('Email submit handler called with:', submittedEmail);
+    
+    if (!submittedEmail || typeof submittedEmail !== 'string' || !submittedEmail.includes('@')) {
+      setError(t('forgotPassword.invalidEmail') || 'Email invalide');
+      return;
+    }
+    
     setError('');
     setLoading(true);
     try {
@@ -71,8 +85,12 @@ const ForgotPasswordScreen = () => {
       // (Move to the next step)
       setCurrentStep(2);
     } catch (err) {
-      setError(t('forgotPassword.emailError') || 'Échec de l\'envoi du code de vérification');
       console.error('Erreur lors de l\'envoi du code:', err);
+      Alert.alert(
+        t('forgotPassword.errorTitle') || 'Erreur',
+        t('forgotPassword.emailError') || 'Échec de l\'envoi du code de vérification'
+      );
+      setError(t('forgotPassword.emailError') || 'Échec de l\'envoi du code de vérification');
     } finally {
       setLoading(false);
     }
@@ -80,15 +98,15 @@ const ForgotPasswordScreen = () => {
 
   // Gère la soumission du code de vérification
   // (Handles verification code submission)
-  const handleVerificationSubmit = async (code) => {
+  const handleVerificationSubmit = (code) => {
+    console.log('Verification submit handler called with:', code);
+    
     setError('');
     setLoading(true);
     
     try {
-      console.log('Code type:', typeof code, 'Code value:', code);
-      
-      // S'assurer que le code est correctement formaté pour la comparaison
-      // (Ensure code is properly formatted for comparison)
+      // Formatter le code pour la comparaison
+      // (Format the code for comparison)
       let codeString;
       
       if (Array.isArray(code)) {
@@ -106,6 +124,8 @@ const ForgotPasswordScreen = () => {
       // Vérifie si le code entré correspond au code généré
       // (Check if entered code matches the generated code)
       if (codeString === resetCode) {
+        console.log('Code verified successfully');
+        
         // Stocke le code pour les étapes suivantes
         // (Store code for next steps)
         if (Array.isArray(code)) {
@@ -118,11 +138,16 @@ const ForgotPasswordScreen = () => {
         // (Move to the next step)
         setCurrentStep(3);
       } else {
+        console.log('Code verification failed');
         throw new Error(t('forgotPassword.verificationError') || 'Code de vérification invalide');
       }
     } catch (err) {
-      setError(err.message || t('forgotPassword.verificationError') || 'Code de vérification invalide');
       console.error('Erreur de vérification du code:', err);
+      Alert.alert(
+        t('forgotPassword.errorTitle') || 'Erreur',
+        err.message || t('forgotPassword.verificationError') || 'Code de vérification invalide'
+      );
+      setError(err.message || t('forgotPassword.verificationError') || 'Code de vérification invalide');
     } finally {
       setLoading(false);
     }
@@ -131,6 +156,8 @@ const ForgotPasswordScreen = () => {
   // Gère la réinitialisation du mot de passe
   // (Handles password reset)
   const handlePasswordReset = async (password) => {
+    console.log('Password reset handler called');
+    
     setError('');
     setLoading(true);
     try {
@@ -144,8 +171,12 @@ const ForgotPasswordScreen = () => {
       // (Move to the final step)
       setCurrentStep(4);
     } catch (err) {
-      setError(t('forgotPassword.resetError') || 'Échec de la réinitialisation du mot de passe');
       console.error('Erreur lors de la réinitialisation du mot de passe:', err);
+      Alert.alert(
+        t('forgotPassword.errorTitle') || 'Erreur',
+        t('forgotPassword.resetError') || 'Échec de la réinitialisation du mot de passe'
+      );
+      setError(t('forgotPassword.resetError') || 'Échec de la réinitialisation du mot de passe');
     } finally {
       setLoading(false);
     }
@@ -225,15 +256,17 @@ const ForgotPasswordScreen = () => {
             {renderStep()}
           </View>
           
-          <TouchableOpacity 
-            style={styles.backButton} 
-            onPress={() => navigation.navigate(ROUTES.LOGIN)}
-            disabled={loading || currentStep === 4}
-          >
-            <Text style={styles.backButtonText}>
-              {t('forgotPassword.backToLogin') || 'Back to Login'}
-            </Text>
-          </TouchableOpacity>
+          {currentStep !== 4 && (
+            <TouchableOpacity 
+              style={styles.backButton} 
+              onPress={() => navigation.navigate(ROUTES.LOGIN)}
+              disabled={loading}
+            >
+              <Text style={styles.backButtonText}>
+                {t('forgotPassword.backToLogin') || 'Back to Login'}
+              </Text>
+            </TouchableOpacity>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
