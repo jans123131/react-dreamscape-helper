@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   View, 
@@ -15,7 +16,6 @@ import { useTranslation } from 'react-i18next';
 import { COLORS } from '../theme/colors';
 import { SPACING } from '../theme/spacing';
 import { FONT_SIZE, FONT_FAMILY } from '../theme/typography';
-import { API_URL } from '../config/apiConfig';
 import EmailStep from '../components/forgotPassword/EmailStep';
 import VerificationStep from '../components/forgotPassword/VerificationStep';
 import ResetPasswordStep from '../components/forgotPassword/ResetPasswordStep';
@@ -259,11 +259,20 @@ const ForgotPasswordScreen = () => {
           {currentStep !== 4 && (
             <TouchableOpacity 
               style={styles.backButton} 
-              onPress={() => navigation.navigate(ROUTES.LOGIN)}
+              onPress={() => {
+                // Instead of navigating away, we just go back to the previous step
+                if (currentStep > 1) {
+                  setCurrentStep(currentStep - 1);
+                } else {
+                  navigation.navigate(ROUTES.LOGIN);
+                }
+              }}
               disabled={loading}
             >
               <Text style={styles.backButtonText}>
-                {t('forgotPassword.backToLogin') || 'Back to Login'}
+                {currentStep > 1 
+                  ? (t('forgotPassword.backToStep') || 'Back to Previous Step') 
+                  : (t('forgotPassword.backToLogin') || 'Back to Login')}
               </Text>
             </TouchableOpacity>
           )}
