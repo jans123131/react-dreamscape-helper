@@ -28,6 +28,8 @@ const ForgotPasswordScreen = () => {
   const { t } = useTranslation();
   const navigation = useNavigation();
   const { forgotPassword, resetPassword } = useAuth();
+  
+  // State management
   const [currentStep, setCurrentStep] = useState(1);
   const [email, setEmail] = useState('');
   const [resetCode, setResetCode] = useState('');
@@ -35,69 +37,73 @@ const ForgotPasswordScreen = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // For debugging purposes
+  // Debug logging
   useEffect(() => {
-    console.log('Current step:', currentStep);
-    console.log('Email:', email);
-    console.log('Reset code:', resetCode);
+    console.log('ForgotPasswordScreen - Current step:', currentStep);
+    console.log('ForgotPasswordScreen - Email:', email);
+    console.log('ForgotPasswordScreen - Reset code:', resetCode);
   }, [currentStep, email, resetCode]);
 
-  // Génère un code de vérification à 4 chiffres aléatoire
-  // (Generates a random 4-digit verification code)
+  // Generate a random 4-digit verification code
   const generateVerificationCode = () => {
     let code = '';
     for (let i = 0; i < 4; i++) {
       code += Math.floor(Math.random() * 10).toString();
     }
-    console.log('Generated code:', code);
+    console.log('Generated verification code:', code);
     return code;
   };
 
-  // Gère la soumission de l'email et l'envoi du code de vérification
-  // (Handles email submission and sending verification code)
+  // Handle email submission and sending verification code
   const handleEmailSubmit = async (submittedEmail) => {
     console.log('Email submit handler called with:', submittedEmail);
     
+    // Validate email
     if (!submittedEmail || typeof submittedEmail !== 'string' || !submittedEmail.includes('@')) {
-      setError(t('forgotPassword.invalidEmail') || 'Email invalide');
+      const errorMsg = t('forgotPassword.invalidEmail') || 'Email invalide';
+      setError(errorMsg);
+      Alert.alert(t('forgotPassword.errorTitle') || 'Erreur', errorMsg);
       return;
     }
     
     setError('');
     setLoading(true);
+    
     try {
-      // Génère un code aléatoire
-      // (Generate a random code)
+      // Generate a random code
       const code = generateVerificationCode();
       
-      // Utiliser la fonction forgotPassword du contexte Auth
-      // (Use the forgotPassword function from Auth context)
-      await forgotPassword(submittedEmail, code);
+      console.log('Attempting to send reset code to:', submittedEmail, 'with code:', code);
       
-      console.log('Code envoyé avec succès:', code);
+      // Use the forgotPassword function from Auth context
+      const response = await forgotPassword(submittedEmail, code);
       
-      // Stocke l'email et le code pour une vérification ultérieure
-      // (Store email and code for later verification)
+      console.log('Forgot password API response:', response);
+      
+      // Store email and code for later verification
       setEmail(submittedEmail);
       setResetCode(code);
       
-      // Passe à l'étape suivante
-      // (Move to the next step)
+      // Move to the next step
       setCurrentStep(2);
+      
+      console.log('Successfully moved to verification step. Current step:', 2);
     } catch (err) {
-      console.error('Erreur lors de l\'envoi du code:', err);
+      console.error('Error sending verification code:', err);
+      const errorMsg = t('forgotPassword.emailError') || 'Échec de l\'envoi du code de vérification';
+      
       Alert.alert(
         t('forgotPassword.errorTitle') || 'Erreur',
-        t('forgotPassword.emailError') || 'Échec de l\'envoi du code de vérification'
+        errorMsg
       );
-      setError(t('forgotPassword.emailError') || 'Échec de l\'envoi du code de vérification');
+      
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
-  // Gère la soumission du code de vérification
-  // (Handles verification code submission)
+  // Handle verification code submission
   const handleVerificationSubmit = (code) => {
     console.log('Verification submit handler called with:', code);
     
@@ -105,8 +111,7 @@ const ForgotPasswordScreen = () => {
     setLoading(true);
     
     try {
-      // Formatter le code pour la comparaison
-      // (Format the code for comparison)
+      // Format the code for comparison
       let codeString;
       
       if (Array.isArray(code)) {
@@ -119,77 +124,92 @@ const ForgotPasswordScreen = () => {
         codeString = String(code);
       }
       
-      console.log('Comparing codes:', codeString, resetCode);
+      console.log('Comparing verification codes - Input:', codeString, 'Expected:', resetCode);
       
-      // Vérifie si le code entré correspond au code généré
-      // (Check if entered code matches the generated code)
+      // Check if entered code matches the generated code
       if (codeString === resetCode) {
         console.log('Code verified successfully');
         
-        // Stocke le code pour les étapes suivantes
-        // (Store code for next steps)
+        // Store code for next steps if needed
         if (Array.isArray(code)) {
           setVerificationCode(code);
         } else if (typeof code === 'string') {
           setVerificationCode(code.split(''));
         }
         
-        // Passe à l'étape suivante
-        // (Move to the next step)
+        // Move to the next step
         setCurrentStep(3);
+        console.log('Successfully moved to reset password step. Current step:', 3);
       } else {
-        console.log('Code verification failed');
+        console.log('Code verification failed - Input code does not match expected code');
         throw new Error(t('forgotPassword.verificationError') || 'Code de vérification invalide');
       }
     } catch (err) {
-      console.error('Erreur de vérification du code:', err);
+      console.error('Verification code error:', err);
+      const errorMsg = err.message || t('forgotPassword.verificationError') || 'Code de vérification invalide';
+      
       Alert.alert(
         t('forgotPassword.errorTitle') || 'Erreur',
-        err.message || t('forgotPassword.verificationError') || 'Code de vérification invalide'
+        errorMsg
       );
-      setError(err.message || t('forgotPassword.verificationError') || 'Code de vérification invalide');
+      
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
-  // Gère la réinitialisation du mot de passe
-  // (Handles password reset)
+  // Handle password reset
   const handlePasswordReset = async (password) => {
     console.log('Password reset handler called');
     
     setError('');
     setLoading(true);
+    
     try {
-      // Utiliser la fonction resetPassword du contexte Auth
-      // (Use the resetPassword function from Auth context)
-      await resetPassword(email, resetCode, password);
+      console.log('Attempting to reset password for:', email, 'with code:', resetCode);
       
-      console.log('Mot de passe réinitialisé avec succès pour:', email);
+      // Use the resetPassword function from Auth context
+      const response = await resetPassword(email, resetCode, password);
       
-      // Passe à l'étape finale
-      // (Move to the final step)
+      console.log('Password reset API response:', response);
+      
+      // Move to the final success step
       setCurrentStep(4);
+      console.log('Successfully moved to success step. Current step:', 4);
     } catch (err) {
-      console.error('Erreur lors de la réinitialisation du mot de passe:', err);
+      console.error('Error resetting password:', err);
+      const errorMsg = t('forgotPassword.resetError') || 'Échec de la réinitialisation du mot de passe';
+      
       Alert.alert(
         t('forgotPassword.errorTitle') || 'Erreur',
-        t('forgotPassword.resetError') || 'Échec de la réinitialisation du mot de passe'
+        errorMsg
       );
-      setError(t('forgotPassword.resetError') || 'Échec de la réinitialisation du mot de passe');
+      
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
-  // Gère le retour à la page de connexion après réinitialisation réussie
-  // (Handles return to login page after successful reset)
+  // Handle return to login page after successful reset
   const handleReturnToLogin = () => {
+    console.log('Navigating back to login screen');
     navigation.navigate(ROUTES.LOGIN);
   };
 
-  // Rendu de l'étape appropriée en fonction de currentStep
-  // (Render the appropriate step based on currentStep)
+  // Handle going back to previous step or login screen
+  const handleGoBack = () => {
+    if (currentStep > 1) {
+      console.log('Going back to previous step');
+      setCurrentStep(currentStep - 1);
+    } else {
+      console.log('Navigating back to login screen');
+      navigation.navigate(ROUTES.LOGIN);
+    }
+  };
+
+  // Render the appropriate step based on currentStep
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -232,6 +252,7 @@ const ForgotPasswordScreen = () => {
             </Text>
           </View>
           
+          {/* Step indicators */}
           <View style={styles.stepIndicatorContainer}>
             {[1, 2, 3, 4].map((step) => (
               <View 
@@ -252,21 +273,16 @@ const ForgotPasswordScreen = () => {
             ))}
           </View>
           
+          {/* Current step content */}
           <View style={styles.content}>
             {renderStep()}
           </View>
           
+          {/* Back button - only show if not on success step */}
           {currentStep !== 4 && (
             <TouchableOpacity 
               style={styles.backButton} 
-              onPress={() => {
-                // Instead of navigating away, we just go back to the previous step
-                if (currentStep > 1) {
-                  setCurrentStep(currentStep - 1);
-                } else {
-                  navigation.navigate(ROUTES.LOGIN);
-                }
-              }}
+              onPress={handleGoBack}
               disabled={loading}
             >
               <Text style={styles.backButtonText}>
