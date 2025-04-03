@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   View, 
@@ -23,10 +22,12 @@ import ResetPasswordStep from '../components/forgotPassword/ResetPasswordStep';
 import SuccessStep from '../components/forgotPassword/SuccessStep';
 import { ROUTES } from '../navigation/navigationConstants';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '../context/AuthContext';
 
 const ForgotPasswordScreen = () => {
   const { t } = useTranslation();
   const navigation = useNavigation();
+  const { forgotPassword, resetPassword } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [email, setEmail] = useState('');
   const [resetCode, setResetCode] = useState('');
@@ -54,23 +55,9 @@ const ForgotPasswordScreen = () => {
       // (Generate a random code)
       const code = generateVerificationCode();
       
-      // Envoie une requête à l'API pour demander la réinitialisation du mot de passe
-      // (Send a request to the API to request password reset)
-      const response = await fetch(`${API_URL}/password/forgot`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: submittedEmail,
-          resetCode: code
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Échec de l\'envoi du code');
-      }
+      // Utiliser la fonction forgotPassword du contexte Auth
+      // (Use the forgotPassword function from Auth context)
+      await forgotPassword(submittedEmail, code);
       
       console.log('Code envoyé avec succès:', code);
       
@@ -97,14 +84,16 @@ const ForgotPasswordScreen = () => {
     setLoading(true);
     
     try {
-      // Convertit le tableau de code en chaîne
-      // (Convert code array to string)
-      const codeString = code.join('');
+      // S'assurer que le code est un tableau avant d'appeler join
+      // (Ensure code is an array before calling join)
+      const codeString = Array.isArray(code) ? code.join('') : code;
       
       // Vérifie si le code entré correspond au code généré
       // (Check if entered code matches the generated code)
       if (codeString === resetCode) {
-        setVerificationCode(code);
+        // Si c'est un tableau, stockez-le, sinon créez un tableau à partir de la chaîne
+        // (If it's an array, store it, otherwise create an array from the string)
+        setVerificationCode(Array.isArray(code) ? code : code.split(''));
         setCurrentStep(3);
       } else {
         throw new Error(t('forgotPassword.verificationError') || 'Code de vérification invalide');
@@ -123,23 +112,9 @@ const ForgotPasswordScreen = () => {
     setError('');
     setLoading(true);
     try {
-      // Envoie une requête à l'API pour réinitialiser le mot de passe
-      // (Send a request to the API to reset the password)
-      const response = await fetch(`${API_URL}/password/reset`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Échec de la réinitialisation du mot de passe');
-      }
+      // Utiliser la fonction resetPassword du contexte Auth
+      // (Use the resetPassword function from Auth context)
+      await resetPassword(email, resetCode, password);
       
       console.log('Mot de passe réinitialisé avec succès pour:', email);
       
