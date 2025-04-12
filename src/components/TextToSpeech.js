@@ -5,191 +5,146 @@ import * as Icons from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import { SPACING } from '../theme/spacing';
 
-// We'll handle Tts as a module that gets loaded asynchronously
-let Tts = null;
-let ttsInitializationPromise = null;
-
-// Function to initialize TTS module
-const initializeTtsModule = async () => {
-  if (Platform.OS === 'web') {
-    console.warn('TTS not supported on web platform');
-    return null;
-  }
-  
-  if (!ttsInitializationPromise) {
-    ttsInitializationPromise = new Promise(async (resolve) => {
-      try {
-        // Import the module
-        const ttsModule = await import('react-native-tts');
-        resolve(ttsModule.default);
-      } catch (error) {
-        console.warn('Failed to import react-native-tts:', error);
-        resolve(null);
-      }
-    });
-  }
-  
-  return ttsInitializationPromise;
-};
+// Global variable to track if we've already shown the warning
+let warnedAboutTTS = false;
 
 const TextToSpeech = ({ text, autoPlay = false, language = 'fr-FR' }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isReady, setIsReady] = useState(false);
-  const [initialized, setInitialized] = useState(false);
   const [ttsAvailable, setTtsAvailable] = useState(false);
-  const [ttsModule, setTtsModule] = useState(null);
 
   // Initialize TTS on component mount
   useEffect(() => {
-    let isMounted = true; // Track if component is mounted
-    
+    let isMounted = true;
+    let Tts = null;
+
+    // Function to load and initialize TTS
     const setupTts = async () => {
       try {
-        // Load the TTS module
-        const loadedTtsModule = await initializeTtsModule();
-        
-        if (!isMounted) return;
-        
-        if (!loadedTtsModule) {
-          console.warn('TTS is not available in this environment');
-          setTtsAvailable(false);
+        // Skip TTS setup on web or Expo Go
+        if (Platform.OS === 'web' || (global.expo && global.expo.modules)) {
+          if (!warnedAboutTTS) {
+            console.warn('TTS is not fully supported in Expo Go. For full TTS functionality, build a development client.');
+            warnedAboutTTS = true;
+          }
           return;
         }
 
-        // Store the TTS module reference
-        setTtsModule(loadedTtsModule);
-        
-        // Initialize TTS with proper error handlers
-        loadedTtsModule.addEventListener('tts-start', () => {
-          if (isMounted) setIsSpeaking(true);
+        // Dynamically import TTS module
+        const ttsModule = await import('react-native-tts').catch(err => {
+          console.error('Failed to import react-native-tts:', err);
+          return null;
         });
+
+        // Check if component is still mounted
+        if (!isMounted) return;
         
-        loadedTtsModule.addEventListener('tts-finish', () => {
-          if (isMounted) setIsSpeaking(false);
-        });
+        if (!ttsModule || !ttsModule.default) {
+          console.warn('TTS module could not be loaded');
+          return;
+        }
+
+        Tts = ttsModule.default;
         
-        loadedTtsModule.addEventListener('tts-cancel', () => {
-          if (isMounted) setIsSpeaking(false);
-        });
-        
-        loadedTtsModule.addEventListener('tts-error', (error) => {
+        // Setup listeners
+        Tts.addEventListener('tts-start', () => isMounted && setIsSpeaking(true));
+        Tts.addEventListener('tts-finish', () => isMounted && setIsSpeaking(false));
+        Tts.addEventListener('tts-cancel', () => isMounted && setIsSpeaking(false));
+        Tts.addEventListener('tts-error', (error) => {
           console.error('TTS error:', error);
-          if (isMounted) setIsSpeaking(false);
+          isMounted && setIsSpeaking(false);
         });
         
         try {
-          // Set language to French
-          await loadedTtsModule.setDefaultLanguage(language);
-          await loadedTtsModule.setDefaultRate(0.5); // Slower rate for better comprehension
-          await loadedTtsModule.setDefaultPitch(1.0);
+          // Configure TTS
+          await Tts.setDefaultLanguage(language);
+          await Tts.setDefaultRate(0.5);
+          await Tts.setDefaultPitch(1.0);
           
           if (isMounted) {
             setTtsAvailable(true);
-            setInitialized(true);
             setIsReady(true);
             
             // Auto-play if enabled
             if (autoPlay && text) {
               setTimeout(() => {
-                if (isMounted && loadedTtsModule) {
-                  speak(text, loadedTtsModule);
+                if (isMounted && Tts) {
+                  speak(text, Tts);
                 }
-              }, 1000); // Delay a bit to ensure UI is ready
+              }, 1000);
             }
           }
         } catch (initError) {
           console.error('TTS initialization error:', initError);
-          if (isMounted) {
-            setTtsAvailable(false);
-            setInitialized(false);
-          }
         }
       } catch (error) {
         console.error('Failed to initialize TTS:', error);
-        if (isMounted) {
-          setTtsAvailable(false);
-          setInitialized(false);
-        }
       }
     };
 
-    // Setup TTS based on platform
-    if (Platform.OS !== 'web') {
-      setupTts();
-    } else {
-      if (isMounted) {
-        setTtsAvailable(false);
-        setInitialized(false);
-      }
-    }
+    setupTts();
     
-    // Clean up on unmount
+    // Cleanup on unmount
     return () => {
-      isMounted = false; // Update flag to prevent state updates after unmount
-      
-      // Cleanup TTS if initialized
-      if (ttsModule && initialized) {
+      isMounted = false;
+      if (Tts) {
         try {
-          // Only stop if currently speaking
           if (isSpeaking) {
-            ttsModule.stop().catch(err => console.error('Error stopping TTS:', err));
+            Tts.stop().catch(err => console.error('Error stopping TTS:', err));
           }
-          
-          // Remove all listeners
-          ttsModule.removeAllListeners();
+          Tts.removeAllListeners();
         } catch (error) {
           console.error('Error during TTS cleanup:', error);
         }
       }
     };
-  }, []);
-  
-  // Update when text changes
-  useEffect(() => {
-    if (text && isReady && autoPlay && initialized && ttsAvailable && ttsModule) {
-      speak(text, ttsModule);
-    }
-  }, [text, isReady, initialized, ttsAvailable, ttsModule]);
+  }, [language, autoPlay, text]);
 
   const speak = async (textToSpeak, ttsInstance) => {
-    try {
-      // Safety check to ensure TTS is initialized and available
-      if (!initialized || !ttsAvailable || !ttsInstance) {
-        console.error('TTS not initialized or not available');
-        return;
-      }
+    if (!ttsInstance || !ttsAvailable) return;
 
+    try {
       if (isSpeaking) {
-        // Stop speaking
-        try {
-          await ttsInstance.stop();
-          setIsSpeaking(false);
-        } catch (error) {
-          console.error('Error stopping TTS:', error);
-        }
+        await ttsInstance.stop();
+        setIsSpeaking(false);
       } else {
-        // Start speaking
-        try {
-          await ttsInstance.speak(textToSpeak);
-        } catch (error) {
-          console.error('Error speaking text:', error);
-        }
+        await ttsInstance.speak(textToSpeak);
       }
     } catch (error) {
       console.error('TTS error when speaking:', error);
     }
   };
 
-  // Render nothing if TTS is not available (especially on web)
-  if (!ttsAvailable && Platform.OS === 'web') {
-    return null;
+  // In Expo Go or web platforms, render a disabled button or nothing
+  if (Platform.OS === 'web' || (global.expo && global.expo.modules)) {
+    return (
+      <View style={styles.container}>
+        <TouchableOpacity
+          style={[styles.button, { opacity: 0.5 }]}
+          disabled={true}
+        >
+          <Icons.VolumeX size={20} color={COLORS.gray} />
+        </TouchableOpacity>
+      </View>
+    );
   }
 
+  // For native platforms
   return (
     <View style={styles.container}>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => ttsModule && speak(text, ttsModule)}
+        onPress={() => {
+          // We'll attempt to dynamically import and use TTS when button is pressed
+          import('react-native-tts').then(ttsModule => {
+            if (ttsModule && ttsModule.default) {
+              speak(text, ttsModule.default);
+            }
+          }).catch(error => {
+            console.error('Failed to load TTS module:', error);
+          });
+        }}
+        disabled={!ttsAvailable}
       >
         {isSpeaking ? (
           <Icons.Pause size={20} color={COLORS.primary} />
