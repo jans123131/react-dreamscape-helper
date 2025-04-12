@@ -5,28 +5,39 @@ import * as Icons from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import { SPACING } from '../theme/spacing';
 
-// Import TTS conditionally to handle web environment
+// We'll handle Tts as a module that gets loaded asynchronously
 let Tts = null;
-if (Platform.OS !== 'web') {
-  try {
-    // Dynamic import to handle potential missing module
-    import('react-native-tts')
-      .then(module => {
-        Tts = module.default;
-      })
-      .catch(err => {
-        console.warn('Failed to import react-native-tts:', err);
-      });
-  } catch (error) {
-    console.warn('Failed to import react-native-tts:', error);
+let ttsInitializationPromise = null;
+
+// Function to initialize TTS module
+const initializeTtsModule = async () => {
+  if (Platform.OS === 'web') {
+    console.warn('TTS not supported on web platform');
+    return null;
   }
-}
+  
+  if (!ttsInitializationPromise) {
+    ttsInitializationPromise = new Promise(async (resolve) => {
+      try {
+        // Import the module
+        const ttsModule = await import('react-native-tts');
+        resolve(ttsModule.default);
+      } catch (error) {
+        console.warn('Failed to import react-native-tts:', error);
+        resolve(null);
+      }
+    });
+  }
+  
+  return ttsInitializationPromise;
+};
 
 const TextToSpeech = ({ text, autoPlay = false, language = 'fr-FR' }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [ttsAvailable, setTtsAvailable] = useState(false);
+  const [ttsModule, setTtsModule] = useState(null);
 
   // Initialize TTS on component mount
   useEffect(() => {
@@ -34,58 +45,63 @@ const TextToSpeech = ({ text, autoPlay = false, language = 'fr-FR' }) => {
     
     const setupTts = async () => {
       try {
-        // Check if TTS is available in this environment
-        if (!Tts) {
+        // Load the TTS module
+        const loadedTtsModule = await initializeTtsModule();
+        
+        if (!isMounted) return;
+        
+        if (!loadedTtsModule) {
           console.warn('TTS is not available in this environment');
+          setTtsAvailable(false);
           return;
         }
 
-        // Check if TTS is already initialized to prevent multiple initializations
-        if (!initialized) {
-          // Initialize TTS with proper error handlers
-          Tts.addEventListener('tts-start', () => {
-            if (isMounted) setIsSpeaking(true);
-          });
+        // Store the TTS module reference
+        setTtsModule(loadedTtsModule);
+        
+        // Initialize TTS with proper error handlers
+        loadedTtsModule.addEventListener('tts-start', () => {
+          if (isMounted) setIsSpeaking(true);
+        });
+        
+        loadedTtsModule.addEventListener('tts-finish', () => {
+          if (isMounted) setIsSpeaking(false);
+        });
+        
+        loadedTtsModule.addEventListener('tts-cancel', () => {
+          if (isMounted) setIsSpeaking(false);
+        });
+        
+        loadedTtsModule.addEventListener('tts-error', (error) => {
+          console.error('TTS error:', error);
+          if (isMounted) setIsSpeaking(false);
+        });
+        
+        try {
+          // Set language to French
+          await loadedTtsModule.setDefaultLanguage(language);
+          await loadedTtsModule.setDefaultRate(0.5); // Slower rate for better comprehension
+          await loadedTtsModule.setDefaultPitch(1.0);
           
-          Tts.addEventListener('tts-finish', () => {
-            if (isMounted) setIsSpeaking(false);
-          });
-          
-          Tts.addEventListener('tts-cancel', () => {
-            if (isMounted) setIsSpeaking(false);
-          });
-          
-          Tts.addEventListener('tts-error', (error) => {
-            console.error('TTS error:', error);
-            if (isMounted) setIsSpeaking(false);
-          });
-          
-          try {
-            // Set language to French
-            await Tts.setDefaultLanguage(language);
-            await Tts.setDefaultRate(0.5); // Slower rate for better comprehension
-            await Tts.setDefaultPitch(1.0);
+          if (isMounted) {
+            setTtsAvailable(true);
+            setInitialized(true);
+            setIsReady(true);
             
-            if (isMounted) {
-              setTtsAvailable(true);
-              setInitialized(true);
-              setIsReady(true);
-              
-              // Auto-play if enabled
-              if (autoPlay && text) {
-                setTimeout(() => {
-                  if (isMounted) {
-                    speak(text);
-                  }
-                }, 1000); // Delay a bit to ensure UI is ready
-              }
+            // Auto-play if enabled
+            if (autoPlay && text) {
+              setTimeout(() => {
+                if (isMounted && loadedTtsModule) {
+                  speak(text, loadedTtsModule);
+                }
+              }, 1000); // Delay a bit to ensure UI is ready
             }
-          } catch (initError) {
-            console.error('TTS initialization error:', initError);
-            if (isMounted) {
-              setTtsAvailable(false);
-              setInitialized(false);
-            }
+          }
+        } catch (initError) {
+          console.error('TTS initialization error:', initError);
+          if (isMounted) {
+            setTtsAvailable(false);
+            setInitialized(false);
           }
         }
       } catch (error) {
@@ -97,34 +113,30 @@ const TextToSpeech = ({ text, autoPlay = false, language = 'fr-FR' }) => {
       }
     };
 
-    // Platform-specific TTS setup
-    if (Platform.OS === 'web') {
-      // For web, we might want to use the Web Speech API instead
-      console.warn('TTS not fully supported on web platform');
+    // Setup TTS based on platform
+    if (Platform.OS !== 'web') {
+      setupTts();
+    } else {
       if (isMounted) {
         setTtsAvailable(false);
         setInitialized(false);
       }
-    } else {
-      setupTts();
     }
     
     // Clean up on unmount
     return () => {
       isMounted = false; // Update flag to prevent state updates after unmount
       
-      // Check if Tts is available before calling methods on it
-      if (Tts) {
+      // Cleanup TTS if initialized
+      if (ttsModule && initialized) {
         try {
           // Only stop if currently speaking
           if (isSpeaking) {
-            Tts.stop().catch(err => console.error('Error stopping TTS:', err));
+            ttsModule.stop().catch(err => console.error('Error stopping TTS:', err));
           }
           
-          // Remove all listeners safely - using removeAllListeners instead of removeEventListener
-          if (initialized) {
-            Tts.removeAllListeners();
-          }
+          // Remove all listeners
+          ttsModule.removeAllListeners();
         } catch (error) {
           console.error('Error during TTS cleanup:', error);
         }
@@ -134,31 +146,31 @@ const TextToSpeech = ({ text, autoPlay = false, language = 'fr-FR' }) => {
   
   // Update when text changes
   useEffect(() => {
-    if (text && isReady && autoPlay && initialized && ttsAvailable) {
-      speak(text);
+    if (text && isReady && autoPlay && initialized && ttsAvailable && ttsModule) {
+      speak(text, ttsModule);
     }
-  }, [text, isReady, initialized, ttsAvailable]);
+  }, [text, isReady, initialized, ttsAvailable, ttsModule]);
 
-  const speak = async (textToSpeak) => {
+  const speak = async (textToSpeak, ttsInstance) => {
     try {
       // Safety check to ensure TTS is initialized and available
-      if (!initialized || !ttsAvailable || !Tts) {
+      if (!initialized || !ttsAvailable || !ttsInstance) {
         console.error('TTS not initialized or not available');
         return;
       }
 
       if (isSpeaking) {
-        // Make sure Tts exists before calling stop
+        // Stop speaking
         try {
-          await Tts.stop();
+          await ttsInstance.stop();
           setIsSpeaking(false);
         } catch (error) {
           console.error('Error stopping TTS:', error);
         }
       } else {
-        // Make sure Tts exists before speaking
+        // Start speaking
         try {
-          await Tts.speak(textToSpeak);
+          await ttsInstance.speak(textToSpeak);
         } catch (error) {
           console.error('Error speaking text:', error);
         }
@@ -177,7 +189,7 @@ const TextToSpeech = ({ text, autoPlay = false, language = 'fr-FR' }) => {
     <View style={styles.container}>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => speak(text)}
+        onPress={() => ttsModule && speak(text, ttsModule)}
       >
         {isSpeaking ? (
           <Icons.Pause size={20} color={COLORS.primary} />
