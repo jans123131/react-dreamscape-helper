@@ -9,7 +9,14 @@ import { SPACING } from '../theme/spacing';
 let Tts = null;
 if (Platform.OS !== 'web') {
   try {
-    Tts = require('react-native-tts').default;
+    // Dynamic import to handle potential missing module
+    import('react-native-tts')
+      .then(module => {
+        Tts = module.default;
+      })
+      .catch(err => {
+        console.warn('Failed to import react-native-tts:', err);
+      });
   } catch (error) {
     console.warn('Failed to import react-native-tts:', error);
   }
@@ -114,12 +121,9 @@ const TextToSpeech = ({ text, autoPlay = false, language = 'fr-FR' }) => {
             Tts.stop().catch(err => console.error('Error stopping TTS:', err));
           }
           
-          // Remove all listeners safely
+          // Remove all listeners safely - using removeAllListeners instead of removeEventListener
           if (initialized) {
-            Tts.removeEventListener('tts-start');
-            Tts.removeEventListener('tts-finish');
-            Tts.removeEventListener('tts-cancel');
-            Tts.removeEventListener('tts-error');
+            Tts.removeAllListeners();
           }
         } catch (error) {
           console.error('Error during TTS cleanup:', error);
