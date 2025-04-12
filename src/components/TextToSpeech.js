@@ -4,7 +4,16 @@ import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import * as Icons from 'lucide-react-native';
 import { COLORS } from '../theme/colors';
 import { SPACING } from '../theme/spacing';
-import Tts from 'react-native-tts';
+
+// Import TTS conditionally to handle web environment
+let Tts = null;
+if (Platform.OS !== 'web') {
+  try {
+    Tts = require('react-native-tts').default;
+  } catch (error) {
+    console.warn('Failed to import react-native-tts:', error);
+  }
+}
 
 const TextToSpeech = ({ text, autoPlay = false, language = 'fr-FR' }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -84,8 +93,11 @@ const TextToSpeech = ({ text, autoPlay = false, language = 'fr-FR' }) => {
     // Platform-specific TTS setup
     if (Platform.OS === 'web') {
       // For web, we might want to use the Web Speech API instead
-      console.warn('TTS might not be fully supported on web platform');
-      // Consider implementing a web fallback here
+      console.warn('TTS not fully supported on web platform');
+      if (isMounted) {
+        setTtsAvailable(false);
+        setInitialized(false);
+      }
     } else {
       setupTts();
     }
@@ -102,8 +114,13 @@ const TextToSpeech = ({ text, autoPlay = false, language = 'fr-FR' }) => {
             Tts.stop().catch(err => console.error('Error stopping TTS:', err));
           }
           
-          // Remove all listeners
-          Tts.removeAllListeners();
+          // Remove all listeners safely
+          if (initialized) {
+            Tts.removeEventListener('tts-start');
+            Tts.removeEventListener('tts-finish');
+            Tts.removeEventListener('tts-cancel');
+            Tts.removeEventListener('tts-error');
+          }
         } catch (error) {
           console.error('Error during TTS cleanup:', error);
         }
@@ -128,28 +145,29 @@ const TextToSpeech = ({ text, autoPlay = false, language = 'fr-FR' }) => {
 
       if (isSpeaking) {
         // Make sure Tts exists before calling stop
-        if (Tts) {
-          try {
-            await Tts.stop();
-            setIsSpeaking(false);
-          } catch (error) {
-            console.error('Error stopping TTS:', error);
-          }
+        try {
+          await Tts.stop();
+          setIsSpeaking(false);
+        } catch (error) {
+          console.error('Error stopping TTS:', error);
         }
       } else {
         // Make sure Tts exists before speaking
-        if (Tts) {
-          try {
-            await Tts.speak(textToSpeak);
-          } catch (error) {
-            console.error('Error speaking text:', error);
-          }
+        try {
+          await Tts.speak(textToSpeak);
+        } catch (error) {
+          console.error('Error speaking text:', error);
         }
       }
     } catch (error) {
       console.error('TTS error when speaking:', error);
     }
   };
+
+  // Render nothing if TTS is not available (especially on web)
+  if (!ttsAvailable && Platform.OS === 'web') {
+    return null;
+  }
 
   return (
     <View style={styles.container}>
