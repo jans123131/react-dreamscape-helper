@@ -9,7 +9,7 @@
  */
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   MapPin, 
   Star, 
@@ -99,7 +99,6 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     // Si le clic n'est pas sur un bouton, naviguer vers la page détaillée
     if (!(e.target as HTMLElement).closest('button')) {
       e.preventDefault();
-      console.log("Navigating to property details:", property.id);
       navigate(`/properties/${property.id}`);
     }
   };
