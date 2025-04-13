@@ -9,6 +9,7 @@
  */
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Table, 
   TableBody, 
@@ -88,6 +89,8 @@ export const OfficePropertyTable: React.FC<OfficePropertyTableProps> = ({
   showActions = true,
   onPropertyClick
 }) => {
+  const navigate = useNavigate();
+  
   // Génération de la liste des équipements pour l'infobulle
   const getAmenitiesList = (amenities: OfficePropertyData['amenities']) => {
     const list = [];
@@ -103,7 +106,12 @@ export const OfficePropertyTable: React.FC<OfficePropertyTableProps> = ({
   };
 
   const handleRowClick = (id: string) => {
-    if (onPropertyClick) onPropertyClick(id);
+    if (onPropertyClick) {
+      onPropertyClick(id);
+    } else {
+      // Naviguer vers la page de détails de la propriété
+      navigate(`/properties/${id}`);
+    }
   };
 
   // Configuration des styles de couleur pour les différents statuts

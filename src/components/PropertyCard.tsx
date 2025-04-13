@@ -9,6 +9,7 @@
  */
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   MapPin, 
   Star, 
@@ -88,6 +89,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const navigate = useNavigate();
 
   // Configuration des styles de couleur pour les différents statuts
   const statusColors = {
@@ -100,10 +102,15 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   
   // Fonction pour gérer le clic sur la carte
   const handleCardClick = (e: React.MouseEvent) => {
-    // Si le clic n'est pas sur un bouton, déclencher le callback onClick
+    // Si le clic n'est pas sur un bouton, déclencher la navigation
     if (!(e.target as HTMLElement).closest('button')) {
       e.preventDefault();
-      if (onClick) onClick();
+      if (onClick) {
+        onClick();
+      } else {
+        // Naviguer vers la page de détails de la propriété
+        navigate(`/properties/${property.id}`);
+      }
     }
   };
 

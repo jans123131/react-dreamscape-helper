@@ -9,6 +9,7 @@
  */
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   MapPin, 
   Star, 
@@ -103,6 +104,7 @@ export const OfficePropertyCard: React.FC<OfficePropertyCardProps> = ({
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const navigate = useNavigate();
 
   // Configuration des styles de couleur pour les différents statuts
   const statusColors = {
@@ -119,7 +121,12 @@ export const OfficePropertyCard: React.FC<OfficePropertyCardProps> = ({
     if (!(e.target as HTMLElement).closest('button')) {
       e.preventDefault();
       console.log("Card clicked for property:", property.id);
-      if (onClick) onClick();
+      if (onClick) {
+        onClick();
+      } else {
+        // Naviguer vers la page de détails de la propriété
+        navigate(`/properties/${property.id}`);
+      }
     }
   };
 
