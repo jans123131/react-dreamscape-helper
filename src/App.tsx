@@ -1,3 +1,4 @@
+
 /**
  * App.tsx
  * 
@@ -24,6 +25,7 @@ import Users from "./pages/Users";
 import Reviews from "./pages/Reviews";
 import Messages from "./pages/Messages";
 import Settings from "./pages/Settings";
+import Dashboard from "./pages/Dashboard";
 import Documentation from "./pages/Documentation";
 import NotFound from "./pages/NotFound";
 
@@ -53,8 +55,8 @@ const App = () => (
             <Sonner />
             <Routes>
               <Route path="/login" element={<Login />} />
-              <Route path="/" element={<Navigate to="/properties" replace />} />
-              <Route path="/dashboard" element={<PrivateRoute element={<Properties />} />} />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} />} />
               <Route path="/properties" element={<PrivateRoute element={<Properties />} />} />
               <Route path="/properties/:id" element={<PrivateRoute element={<PropertyDetails />} />} />
               <Route path="/bookings" element={<PrivateRoute element={<Bookings />} />} />
