@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Building2, 
   Plus, 
@@ -48,6 +49,7 @@ import { propertyApi, PropertyCreate, Property } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import PropertyModal from '@/components/PropertyModal';
 
 /**
  * Composant principal de la page des espaces professionnels
@@ -59,6 +61,11 @@ import { Checkbox } from '@/components/ui/checkbox';
  * - Affichage conditionnel selon le nombre d'espaces
  */
 const Properties = () => {
+  // Get the property ID from URL if present
+  const { id } = useParams<{ id?: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   const { toast } = useToast();
   const { user, canDelete } = useAuth();
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'table'>('grid');
@@ -67,6 +74,10 @@ const Properties = () => {
   const [loading, setLoading] = useState(true);
   const [properties, setProperties] = useState<OfficePropertyData[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  
+  // State for property details modal
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+  const [isPropertyModalOpen, setIsPropertyModalOpen] = useState(false);
   
   // État pour le formulaire d'ajout de propriété
   const [newProperty, setNewProperty] = useState<Partial<PropertyCreate>>({
@@ -96,6 +107,17 @@ const Properties = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+  // Check if there's a property ID in the URL and open the modal if needed
+  useEffect(() => {
+    if (id) {
+      setSelectedPropertyId(id);
+      setIsPropertyModalOpen(true);
+    } else {
+      setIsPropertyModalOpen(false);
+      setSelectedPropertyId(null);
+    }
+  }, [id]);
+
   // Fetch properties on component mount
   useEffect(() => {
     fetchProperties();
@@ -122,6 +144,22 @@ const Properties = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Open the property details modal
+  const handlePropertyClick = (propertyId: string) => {
+    setSelectedPropertyId(propertyId);
+    setIsPropertyModalOpen(true);
+    navigate(`/properties/${propertyId}`, { replace: true });
+  };
+
+  // Close the property details modal
+  const handleClosePropertyModal = () => {
+    setIsPropertyModalOpen(false);
+    setSelectedPropertyId(null);
+    navigate('/properties', { replace: true });
+    // Refresh properties after modal is closed
+    fetchProperties();
   };
 
   // Filtrage des espaces professionnels selon les critères de recherche et filtres
@@ -687,6 +725,7 @@ const Properties = () => {
                     property={property}
                     onDelete={canDelete('properties') ? handleDeleteProperty : undefined}
                     showActions={canDelete('properties')}
+                    onClick={() => handlePropertyClick(property.id)}
                   />
                 ))}
               </div>
@@ -702,6 +741,7 @@ const Properties = () => {
                     onDelete={canDelete('properties') ? handleDeleteProperty : undefined}
                     className="flex flex-row h-auto max-h-64"
                     showActions={canDelete('properties')}
+                    onClick={() => handlePropertyClick(property.id)}
                   />
                 ))}
               </div>
@@ -713,10 +753,18 @@ const Properties = () => {
                 properties={filteredProperties}
                 onDelete={canDelete('properties') ? handleDeleteProperty : undefined}
                 showActions={canDelete('properties')}
+                onPropertyClick={handlePropertyClick}
               />
             )}
           </>
         )}
+
+        {/* Property Details Modal */}
+        <PropertyModal 
+          isOpen={isPropertyModalOpen}
+          onClose={handleClosePropertyModal}
+          propertyId={selectedPropertyId}
+        />
       </div>
     </Layout>
   );

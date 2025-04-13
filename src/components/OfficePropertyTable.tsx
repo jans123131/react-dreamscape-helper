@@ -9,7 +9,6 @@
  */
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { 
   Table, 
   TableBody, 
@@ -64,6 +63,12 @@ interface OfficePropertyTableProps {
    * Détermine si les actions (édition, suppression) sont affichées
    */
   showActions?: boolean;
+
+  /**
+   * Fonction de rappel pour gérer le clic sur une propriété
+   * @param id Identifiant de la propriété cliquée
+   */
+  onPropertyClick?: (id: string) => void;
 }
 
 /**
@@ -80,17 +85,9 @@ export const OfficePropertyTable: React.FC<OfficePropertyTableProps> = ({
   properties,
   onDelete,
   onEdit,
-  showActions = true
+  showActions = true,
+  onPropertyClick
 }) => {
-  const navigate = useNavigate();
-
-  // Configuration des styles de couleur pour les différents statuts
-  const statusColors = {
-    available: { bg: 'bg-green-100', text: 'text-green-700', label: 'Disponible' },
-    booked: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Réservé' },
-    maintenance: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Maintenance' }
-  };
-
   // Génération de la liste des équipements pour l'infobulle
   const getAmenitiesList = (amenities: OfficePropertyData['amenities']) => {
     const list = [];
@@ -106,7 +103,14 @@ export const OfficePropertyTable: React.FC<OfficePropertyTableProps> = ({
   };
 
   const handleRowClick = (id: string) => {
-    navigate(`/properties/${id}`);
+    if (onPropertyClick) onPropertyClick(id);
+  };
+
+  // Configuration des styles de couleur pour les différents statuts
+  const statusColors = {
+    available: { bg: 'bg-green-100', text: 'text-green-700', label: 'Disponible' },
+    booked: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Réservé' },
+    maintenance: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Maintenance' }
   };
 
   return (
@@ -218,7 +222,7 @@ export const OfficePropertyTable: React.FC<OfficePropertyTableProps> = ({
                       className="h-8 w-8"
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/properties/${property.id}`);
+                        if (onPropertyClick) onPropertyClick(property.id);
                       }}
                     >
                       <Eye className="h-4 w-4" />

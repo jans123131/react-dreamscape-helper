@@ -9,7 +9,6 @@
  */
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { 
   MapPin, 
   Star, 
@@ -79,6 +78,11 @@ interface OfficePropertyCardProps {
    * Détermine si les actions (suppression) sont affichées
    */
   showActions?: boolean;
+
+  /**
+   * Fonction de rappel pour gérer le clic sur la carte
+   */
+  onClick?: () => void;
 }
 
 /**
@@ -95,8 +99,8 @@ export const OfficePropertyCard: React.FC<OfficePropertyCardProps> = ({
   onDelete,
   className,
   showActions = true,
+  onClick
 }) => {
-  const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
 
@@ -109,13 +113,13 @@ export const OfficePropertyCard: React.FC<OfficePropertyCardProps> = ({
 
   const statusStyle = statusColors[property.status];
   
-  // Fonction pour naviguer vers la page de détails
+  // Fonction pour gérer le clic sur la carte
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Si le clic n'est pas sur un bouton, naviguer vers la page détaillée
+    // Si le clic n'est pas sur un bouton, déclencher le callback onClick
     if (!(e.target as HTMLElement).closest('button')) {
       e.preventDefault();
-      console.log("Navigating to property details:", property.id);
-      navigate(`/properties/${property.id}`);
+      console.log("Card clicked for property:", property.id);
+      if (onClick) onClick();
     }
   };
 

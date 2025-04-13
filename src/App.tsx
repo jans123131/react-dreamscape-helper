@@ -1,3 +1,4 @@
+
 /**
  * App.tsx
  * 
@@ -54,7 +55,7 @@ const App = () => (
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/" element={<Navigate to="/properties" replace />} />
-              <Route path="/dashboard" element={<PrivateRoute element={<Properties />} />} />
+              <Route path="/dashboard" element={<Navigate to="/properties" replace />} />
               <Route path="/properties" element={<PrivateRoute element={<Properties />} />} />
               <Route path="/properties/:id" element={<PrivateRoute element={<PropertyDetails />} />} />
               <Route path="/bookings" element={<PrivateRoute element={<Bookings />} />} />
