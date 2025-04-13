@@ -1,4 +1,3 @@
-
 /**
  * AuthContext.tsx
  * 
@@ -50,9 +49,9 @@ export const useAuth = () => {
 
 // Define route access by role
 const roleAccess = {
-  user: ['/dashboard', '/settings', '/properties'],
-  admin: ['/dashboard', '/properties', '/users', '/messages', '/bookings', '/reviews', '/settings'],
-  owner: ['/dashboard', '/properties', '/bookings', '/reviews', '/settings']
+  user: ['/properties', '/settings'],
+  admin: ['/properties', '/users', '/messages', '/bookings', '/reviews', '/settings'],
+  owner: ['/properties', '/bookings', '/reviews', '/settings']
 };
 
 // Define action permissions by role and resource

@@ -41,8 +41,8 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ element }) => {
   
   // Check if user has access to this route
   if (!hasAccess(location.pathname)) {
-    // Redirect to dashboard if they don't have access
-    return <Navigate to="/dashboard" replace />;
+    // Redirect to properties instead of dashboard if they don't have access
+    return <Navigate to="/properties" replace />;
   }
   
   // If authenticated and has access, render the protected component

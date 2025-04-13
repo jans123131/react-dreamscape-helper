@@ -25,17 +25,17 @@ const Login = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Si l'utilisateur est déjà authentifié, on le redirige vers le tableau de bord
+  // Si l'utilisateur est déjà authentifié, on le redirige vers la page des propriétés
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate('/properties');
     }
   }, [isAuthenticated, navigate]);
 
   // Liste d'utilisateurs de test pour simuler différents rôles
   const testUsers = [
     { role: 'Admin', email: 'admin@example.com', password: 'password123', access: 'Accès complet' },
-    { role: 'Utilisateur', email: 'user@example.com', password: 'password123', access: 'Mobile uniquement (Tableau de bord)' }
+    { role: 'Utilisateur', email: 'user@example.com', password: 'password123', access: 'Mobile uniquement (Propriétés)' }
   ];
 
   // Fonction déclenchée lors de la soumission du formulaire de connexion
@@ -45,11 +45,11 @@ const Login = () => {
     setError('');
 
     try {
-      const success = await login(email, password); // Appel au contexte d’authentification
+      const success = await login(email, password); // Appel au contexte d'authentification
       if (success) {
-        navigate('/dashboard'); // Redirection si succès
+        navigate('/properties'); // Redirection vers la page des propriétés si succès
       } else {
-        setError('Email ou mot de passe incorrect'); // Message d’erreur si échec
+        setError('Email ou mot de passe incorrect'); // Message d'erreur si échec
       }
     } catch (err) {
       setError('Une erreur est survenue lors de la connexion');
@@ -67,7 +67,7 @@ const Login = () => {
     try {
       const success = await login(testEmail, testPassword);
       if (success) {
-        navigate('/dashboard');
+        navigate('/properties');
       } else {
         setError('Échec de la connexion rapide');
       }
