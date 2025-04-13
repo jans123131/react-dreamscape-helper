@@ -24,9 +24,9 @@ const NotFound = () => {
             </Link>
           </Button>
           <Button asChild className="gap-2">
-            <Link to="/dashboard">
+            <Link to="/properties">
               <Home className="h-4 w-4" />
-              Dashboard
+              Properties
             </Link>
           </Button>
         </div>
