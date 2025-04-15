@@ -5,5 +5,5 @@ import React from 'react';
 import { Redirect } from 'expo-router';
 
 export default function PropertiesRedirect() {
-  return <Redirect href="/(tabs)/properties/index" />;
+  return <Redirect href="/(tabs)/properties" />;
 }
