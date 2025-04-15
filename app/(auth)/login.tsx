@@ -20,7 +20,7 @@ export default function LoginScreen() {
   // Only redirect if user is already logged in and we haven't attempted yet
   useEffect(() => {
     if (user && !loading && !redirectAttempted) {
-      console.log("User already logged in, redirecting...");
+      console.log("User already logged in, redirecting...", user);
       setRedirectAttempted(true);
       redirectBasedOnRole(user.role);
     }
@@ -38,6 +38,7 @@ export default function LoginScreen() {
 
   const redirectBasedOnRole = (role: string) => {
     console.log(`Redirecting based on role: ${role}`);
+    // Force immediate redirection to tabs and let the tabs layout handle the role-specific UI
     router.replace('/(tabs)');
   };
 

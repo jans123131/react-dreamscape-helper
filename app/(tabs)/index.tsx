@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { useAuth } from '../../src/contexts/AuthContext';
 import OwnerDashboard from '../../src/pages/owner/OwnerDashboard';
 import Dashboard from '../../src/pages/Dashboard';
