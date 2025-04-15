@@ -1,6 +1,6 @@
 
 import { Tabs } from 'expo-router';
-import { Chrome as Home, User, Building, Bookmark, MessageCircle } from 'lucide-react-native';
+import { Home, User, Building, Bookmark, MessageCircle } from 'lucide-react-native';
 import { useEffect } from 'react';
 import { useAuth } from '../../src/contexts/AuthContext';
 

@@ -1,17 +1,14 @@
 
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './App';
-import { AuthProvider } from './contexts/AuthContext';
-import './index.css';
+// This file is no longer used as we've migrated to Expo Router
+// It's kept for reference purposes only
 
-const container = document.getElementById('root');
-const root = createRoot(container!);
+/**
+ * Note: This file is deprecated and not being used in the current application.
+ * The app now uses Expo Router for navigation, with the entry point being in app/_layout.tsx
+ */
 
-root.render(
-  <React.StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  </React.StrictMode>
-);
+const noop = () => {
+  // No operation
+};
+
+export default noop;
