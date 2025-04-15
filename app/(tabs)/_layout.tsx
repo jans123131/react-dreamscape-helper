@@ -1,6 +1,6 @@
 
 import { Tabs } from 'expo-router';
-import { Chrome as Home, User, Building } from 'lucide-react-native';
+import { Chrome as Home, User, Building, Bookmark, MessageCircleHelp } from 'lucide-react-native';
 import { useEffect } from 'react';
 import { useAuth } from '../../src/contexts/AuthContext';
 
@@ -40,11 +40,44 @@ function TabsNavigator() {
       />
       {isOwner && (
         <Tabs.Screen
-          name="properties"
+          name="properties/index"
           options={{
             title: 'Propriétés',
             tabBarIcon: ({ color, size }) => (
               <Building size={size} color={color} />
+            ),
+          }}
+        />
+      )}
+      {!isOwner && (
+        <Tabs.Screen
+          name="favorites"
+          options={{
+            title: 'Favoris',
+            tabBarIcon: ({ color, size }) => (
+              <Bookmark size={size} color={color} />
+            ),
+          }}
+        />
+      )}
+      {!isOwner && (
+        <Tabs.Screen
+          name="bookings"
+          options={{
+            title: 'Réservations',
+            tabBarIcon: ({ color, size }) => (
+              <Building size={size} color={color} />
+            ),
+          }}
+        />
+      )}
+      {!isOwner && (
+        <Tabs.Screen
+          name="support"
+          options={{
+            title: 'Support',
+            tabBarIcon: ({ color, size }) => (
+              <MessageCircleHelp size={size} color={color} />
             ),
           }}
         />
