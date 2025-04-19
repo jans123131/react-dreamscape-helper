@@ -166,8 +166,24 @@ const PlaceDetailsScreen = ({ route, navigation }) => {
     });
   };
 
+  const handleContactOwner = () => {
+    if (place && place.provider) {
+      navigation.navigate(ROUTES.CONVERSATION, {
+        recipientId: place.provider.id,
+        recipientName: `${place.provider.firstName || ''} ${place.provider.lastName || ''}`.trim() || 'Prestataire',
+        placeId: place.id,
+        placeName: place.name
+      });
+    } else {
+      Alert.alert(
+        t('common.error', 'Erreur'),
+        t('placeDetails.noContactInfo', "Les informations de contact du prestataire ne sont pas disponibles.")
+      );
+    }
+  };
+
   const handleMessagePrestataire = () => {
-    if (place?.provider) {
+    if (place && place.provider) {
       navigation.navigate(ROUTES.CONVERSATION, {
         recipientId: place.provider.id,
         recipientName: `${place.provider.firstName || ''} ${place.provider.lastName || ''}`.trim() || 'Prestataire',
@@ -178,22 +194,6 @@ const PlaceDetailsScreen = ({ route, navigation }) => {
       Alert.alert(
         t('common.error', 'Erreur'),
         t('placeDetails.noProviderFound', 'Information du prestataire non disponible')
-      );
-    }
-  };
-
-  const handleContactOwner = () => {
-    if (place && place.owner) {
-      navigation.navigate(ROUTES.CONVERSATION, {
-        recipientId: place.owner.id,
-        recipientName: `${place.owner.firstName || ''} ${place.owner.lastName || ''}`.trim() || 'Propriétaire',
-        placeId: place.id,
-        placeName: place.name
-      });
-    } else {
-      Alert.alert(
-        t('common.error', 'Erreur'),
-        t('placeDetails.noContactInfo', "Les informations de contact du propriétaire ne sont pas disponibles.")
       );
     }
   };
