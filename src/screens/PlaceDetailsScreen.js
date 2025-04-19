@@ -226,12 +226,12 @@ const PlaceDetailsScreen = ({ route, navigation }) => {
           </View>
         )}
         
-          <View style={styles.eventInfo}>
-            <Icons.UsersRound size={16} color={COLORS.primary} />
-            <Text style={styles.eventInfoText}>
+        <View style={styles.eventInfo}>
+          <Icons.UsersRound size={16} color={COLORS.primary} />
+          <Text style={styles.eventInfoText}>
             Capacité de l'événement {event.capacity}
-            </Text>
-          </View>
+          </Text>
+        </View>
       </View>
 
       <TouchableOpacity 
@@ -282,8 +282,14 @@ const PlaceDetailsScreen = ({ route, navigation }) => {
         });
       }
 
-      // Only add events section once
+      // Add events header section if there are events
       if (events && events.length > 0) {
+        sections.push({
+          type: 'eventsHeader',
+          data: [{ id: 'events_header_section' }]
+        });
+        
+        // Then add the events
         sections.push({
           type: 'events',
           data: events.map((event, index) => ({
@@ -424,6 +430,11 @@ const PlaceDetailsScreen = ({ route, navigation }) => {
             <Text style={styles.sectionTitle}>{t('placeDetails.events', 'Événements')}</Text>
             {eventsLoading && <ActivityIndicator size="large" color={COLORS.primary} />}
             {eventsError && <Text style={styles.errorText}>{eventsError}</Text>}
+            {!eventsLoading && !eventsError && events.length === 0 && (
+              <Text style={styles.noEventsText}>
+                {t('placeDetails.noEvents', 'Aucun événement prévu pour le moment')}
+              </Text>
+            )}
           </View>
         );
       
@@ -458,6 +469,44 @@ const PlaceDetailsScreen = ({ route, navigation }) => {
       </TouchableOpacity>
     </View>
   );
+
+  // Add loading and error states
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.loadingContainer} edges={['top', 'right', 'left']}>
+        <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text style={styles.loadingText}>{t('placeDetails.loading', 'Chargement des détails...')}</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (error || !place) {
+    return (
+      <SafeAreaView style={styles.errorContainer} edges={['top', 'right', 'left']}>
+        <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+        <TouchableOpacity 
+          style={styles.backButtonIcon}
+          onPress={() => navigation.goBack()}
+          accessibilityLabel={t('common.back', 'Retour')}
+        >
+          <Icons.ArrowLeft size={24} color={COLORS.primary} />
+        </TouchableOpacity>
+        <Text style={styles.errorTitle}>{t('common.error', 'Erreur')}</Text>
+        <Text style={styles.errorText}>{error || t('placeDetails.errorLoading', 'Impossible de charger les détails du lieu')}</Text>
+        <CustomButton 
+          title={t('common.back', 'Retour')}
+          onPress={() => navigation.goBack()}
+          style={styles.errorBackButton}
+        />
+      </SafeAreaView>
+    );
+  }
+
+  // Define the place cover image variable
+  const placeCoverImage = place.images && place.images.length > 0 
+    ? { uri: place.images[0] } 
+    : require('../../assets/icon.png');
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'right', 'left']}>
@@ -740,7 +789,17 @@ const styles = StyleSheet.create({
     fontWeight: FONT_WEIGHT.bold,
     fontSize: FONT_SIZE.md,
   },
-  
+  eventsHeaderSection: {
+    marginTop: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  noEventsText: {
+    fontSize: FONT_SIZE.md,
+    color: COLORS.gray,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginVertical: SPACING.md,
+  },
   bottomSpacer: {
     height: SPACING.xl,
   },
@@ -842,35 +901,11 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZE.sm,
     fontWeight: FONT_WEIGHT.bold,
   },
-  noEventsText: {
-    fontSize: FONT_SIZE.md,
-    color: COLORS.gray,
-    textAlign: 'center',
-    paddingVertical: SPACING.xl,
-  },
-  contactOwnerButton: {
-    flexDirection: 'row',
-    backgroundColor: COLORS.primary,
-    padding: SPACING.md,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: SPACING.lg,
-    marginTop: SPACING.md,
-  },
-  contactOwnerButtonIcon: {
-    marginRight: SPACING.sm,
-  },
-  contactOwnerButtonText: {
-    color: COLORS.white,
-    fontSize: FONT_SIZE.md,
-    fontWeight: FONT_WEIGHT.medium,
-  },
   contactButtonsContainer: {
     flexDirection: 'column',
     gap: SPACING.md,
-    marginHorizontal: SPACING.lg,
     marginTop: SPACING.md,
+    marginBottom: SPACING.xl,
   },
   messagePrestataireButton: {
     flexDirection: 'row',
@@ -895,11 +930,6 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: FONT_SIZE.md,
     fontWeight: FONT_WEIGHT.medium,
-  },
-  placeCoverImage: {
-    width: '100%',
-    height: 200, // Adjust the height as needed
-    resizeMode: 'cover',
   },
 });
 
