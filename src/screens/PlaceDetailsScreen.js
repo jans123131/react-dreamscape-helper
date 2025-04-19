@@ -183,8 +183,13 @@ const PlaceDetailsScreen = ({ route, navigation }) => {
   };
 
   const handleContactOwner = () => {
-    if (place && place.owner && place.owner.email) {
-      Linking.openURL(`mailto:${place.owner.email}?subject=${encodeURIComponent(t('placeDetails.contactOwner', 'Contact concernant le lieu'))} ${place.name}`);
+    if (place && place.owner) {
+      navigation.navigate(ROUTES.CONVERSATION, {
+        recipientId: place.owner.id,
+        recipientName: `${place.owner.firstName || ''} ${place.owner.lastName || ''}`.trim() || 'Propriétaire',
+        placeId: place.id,
+        placeName: place.name
+      });
     } else {
       Alert.alert(
         t('common.error', 'Erreur'),
@@ -277,12 +282,8 @@ const PlaceDetailsScreen = ({ route, navigation }) => {
         });
       }
 
+      // Only add events section once
       if (events && events.length > 0) {
-        sections.push({
-          type: 'eventsHeader',
-          data: [{ id: 'events_header_section' }]
-        });
-        
         sections.push({
           type: 'events',
           data: events.map((event, index) => ({
@@ -458,73 +459,6 @@ const PlaceDetailsScreen = ({ route, navigation }) => {
     </View>
   );
 
-  const renderContactAndEventsSection = () => (
-    <View>
-      {renderContactButtons()}
-      
-      <View style={styles.eventsSection}>
-        <Text style={styles.sectionTitle}>{t('placeDetails.events', 'Événements')}</Text>
-        
-        {eventsLoading ? (
-          <ActivityIndicator size="large" color={COLORS.primary} />
-        ) : eventsError ? (
-          <Text style={styles.errorText}>{eventsError}</Text>
-        ) : events.length > 0 ? (
-          <FlatList
-            data={events}
-            renderItem={renderEventCard}
-            keyExtractor={(item) => item.id.toString()}
-            showsVerticalScrollIndicator={false}
-            scrollEnabled={false}
-            contentContainerStyle={styles.eventsList}
-          />
-        ) : (
-          <Text style={styles.noEventsText}>
-            {t('placeDetails.noEvents', 'Aucun événement prévu pour le moment')}
-          </Text>
-        )}
-      </View>
-      
-      <View style={styles.bottomSpacer} />
-    </View>
-  );
-
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.loadingContainer} edges={['top', 'right', 'left']}>
-        <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>{t('placeDetails.loading', 'Chargement des détails...')}</Text>
-      </SafeAreaView>
-    );
-  }
-
-  if (error || !place) {
-    return (
-      <SafeAreaView style={styles.errorContainer} edges={['top', 'right', 'left']}>
-        <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
-        <TouchableOpacity 
-          style={styles.backButtonIcon}
-          onPress={() => navigation.goBack()}
-          accessibilityLabel={t('common.back', 'Retour')}
-        >
-          <Icons.ArrowLeft size={24} color={COLORS.primary} />
-        </TouchableOpacity>
-        <Text style={styles.errorTitle}>{t('common.error', 'Erreur')}</Text>
-        <Text style={styles.errorText}>{error || t('placeDetails.errorLoading', 'Impossible de charger les détails du lieu')}</Text>
-        <CustomButton 
-          title={t('common.back', 'Retour')}
-          onPress={() => navigation.goBack()}
-          style={styles.errorBackButton}
-        />
-      </SafeAreaView>
-    );
-  }
-
-  const placeCoverImage = place.images && place.images.length > 0 
-    ? { uri: place.images[0] } 
-    : require('../../assets/icon.png');
-
   return (
     <SafeAreaView style={styles.container} edges={['top', 'right', 'left']}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary_dark} />
@@ -553,7 +487,7 @@ const PlaceDetailsScreen = ({ route, navigation }) => {
         contentContainerStyle={styles.scrollContent}
         stickySectionHeadersEnabled={false}
         showsVerticalScrollIndicator={false}
-        ListFooterComponent={renderContactAndEventsSection}
+        ListFooterComponent={renderContactButtons}
       />
       
       <View style={styles.reserveButtonContainer}>
@@ -961,6 +895,11 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: FONT_SIZE.md,
     fontWeight: FONT_WEIGHT.medium,
+  },
+  placeCoverImage: {
+    width: '100%',
+    height: 200, // Adjust the height as needed
+    resizeMode: 'cover',
   },
 });
 
