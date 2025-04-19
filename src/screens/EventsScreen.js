@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Calendar, Clock, Search, SortAsc, SortDesc, MapPin, Euro, Users } from 'lucide-react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
+import { Calendar, Clock, MapPin, Euro, Users } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import SearchBar from '../components/SearchBar';
+import EventSearchHeader from '../components/events/EventSearchHeader';
+import EventFilters from '../components/events/EventFilters';
 import { FooterNav } from '../components/FooterNav';
 import { getAllEvents } from '../services/EventService';
 import { COLORS } from '../theme/colors';
@@ -17,9 +17,14 @@ const EventsScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortOrder, setSortOrder] = useState('asc');
-  const [sortBy, setSortBy] = useState('startDate');
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState('');
+  const [priceRange, setPriceRange] = useState(200);
+
+  // Extract unique regions from events
+  const regions = [...new Set(events.map(event => 
+    JSON.parse(event.place?.location || '{}').region
+  ).filter(Boolean))];
 
   useEffect(() => {
     fetchEvents();
@@ -28,8 +33,8 @@ const EventsScreen = ({ navigation }) => {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const data = await getAllEvents();
-      setEvents(data);
+      const response = await getAllEvents();
+      setEvents(response.data);
     } catch (err) {
       setError(t('errors.loadingEvents'));
       console.error('Error fetching events:', err);
@@ -55,36 +60,18 @@ const EventsScreen = ({ navigation }) => {
     });
   };
 
-  const handleSearch = (query) => {
-    setSearchQuery(query);
-  };
+  const filteredEvents = events.filter(event => {
+    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         event.location.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesRegion = !selectedRegion || 
+                         JSON.parse(event.place?.location || '{}').region === selectedRegion;
+    
+    const matchesPrice = parseFloat(event.ticketPrice) <= priceRange;
 
-  const handleSort = (field) => {
-    if (sortBy === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(field);
-      setSortOrder('asc');
-    }
-  };
-
-  const filteredAndSortedEvents = events
-    .filter(event => 
-      event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.location.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .sort((a, b) => {
-      const aValue = sortBy === 'startDate' ? new Date(a.startDate) : 
-                     sortBy === 'ticketPrice' ? parseFloat(a.ticketPrice) :
-                     a.title;
-      const bValue = sortBy === 'startDate' ? new Date(b.startDate) :
-                     sortBy === 'ticketPrice' ? parseFloat(b.ticketPrice) :
-                     b.title;
-      return sortOrder === 'asc' ? 
-        (aValue > bValue ? 1 : -1) :
-        (aValue < bValue ? 1 : -1);
-    });
+    return matchesSearch && matchesRegion && matchesPrice;
+  });
 
   const renderEvent = ({ item }) => (
     <TouchableOpacity 
@@ -133,31 +120,29 @@ const EventsScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>{t('events.title')}</Text>
-        <SearchBar
-          value={searchQuery}
-          onChangeText={handleSearch}
-          placeholder={t('events.searchPlaceholder')}
-          onClear={() => setSearchQuery('')}
-        />
-        <View style={styles.sortButtons}>
-          {Object.entries(t('events.sortBy', { returnObjects: true })).map(([key, label]) => (
-            <TouchableOpacity
-              key={key}
-              style={[styles.sortButton, sortBy === key && styles.sortButtonActive]}
-              onPress={() => handleSort(key)}
-            >
-              {sortBy === key && sortOrder === 'asc' ? (
-                <SortAsc size={20} color={COLORS.primary} />
-              ) : (
-                <SortDesc size={20} color={COLORS.primary} />
-              )}
-              <Text style={styles.sortButtonText}>{label}</Text>
-            </TouchableOpacity>
-          ))}
+      <EventSearchHeader
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onFilterPress={() => setShowFilters(true)}
+      />
+
+      <Modal
+        visible={showFilters}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowFilters(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <EventFilters
+            selectedRegion={selectedRegion}
+            setSelectedRegion={setSelectedRegion}
+            priceRange={priceRange}
+            setPriceRange={setPriceRange}
+            regions={regions}
+            onClose={() => setShowFilters(false)}
+          />
         </View>
-      </View>
+      </Modal>
 
       {loading ? (
         <View style={styles.centered}>
@@ -170,13 +155,13 @@ const EventsScreen = ({ navigation }) => {
             <Text style={styles.retryButtonText}>{t('common.retry')}</Text>
           </TouchableOpacity>
         </View>
-      ) : filteredAndSortedEvents.length === 0 ? (
+      ) : filteredEvents.length === 0 ? (
         <View style={styles.centered}>
           <Text style={styles.noResults}>{t('events.noResults')}</Text>
         </View>
       ) : (
         <FlatList
-          data={filteredAndSortedEvents}
+          data={filteredEvents}
           renderItem={renderEvent}
           keyExtractor={item => item.id.toString()}
           contentContainerStyle={styles.listContainer}
@@ -314,6 +299,12 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: FONT_SIZE.md,
     fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: SPACING.lg,
   },
 });
 
