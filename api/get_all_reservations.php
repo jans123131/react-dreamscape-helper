@@ -26,14 +26,11 @@ try {
     $countStmt->execute($params);
     $total = $countStmt->fetch()['total'];
     
-    // Get reservations with pagination
-    $query = "SELECT * FROM reservations " . $whereClause . " ORDER BY date_creation DESC LIMIT ? OFFSET ?";
+    // Get reservations with pagination - fix the parameter binding
+    $query = "SELECT * FROM reservations " . $whereClause . " ORDER BY date_creation DESC LIMIT " . $limit . " OFFSET " . $offset;
     $stmt = $db->prepare($query);
     
-    // Add limit and offset to params
-    $params[] = $limit;
-    $params[] = $offset;
-    
+    // Execute with only the status params (not limit/offset since they're already in the query)
     $stmt->execute($params);
     $reservations = $stmt->fetchAll();
     
