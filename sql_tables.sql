@@ -1,3 +1,4 @@
+
 -- Create products table with all specified fields
 CREATE TABLE IF NOT EXISTS `products` (
   `id_product` int(11) NOT NULL AUTO_INCREMENT,
@@ -212,52 +213,108 @@ CREATE TABLE IF NOT EXISTS `visitor_tracking` (
     KEY `idx_country` (`country`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert some sample data for products
-INSERT INTO `products` (`reference_product`, `nom_product`, `img_product`, `description_product`, `type_product`, `category_product`, `itemgroup_product`, `price_product`, `qnty_product`, `s_size`, `m_size`, `l_size`, `xl_size`, `color_product`, `status_product`, `discount_product`) VALUES
-('REF001', 'Chemise en Coton Rayé', '/placeholder.svg', 'Une chemise élégante en coton rayé pour garçons', 'Shirt', 'GARÇONS 8-14 ANS', 'Clothing', 320.00, 50, 10, 15, 20, 5, 'Blue', 'active', 10.00),
-('REF002', 'Blouse en Soie Premium', '/placeholder.svg', 'Blouse luxueuse en soie pour femmes', 'Blouse', 'FEMMES', 'Clothing', 420.00, 30, 8, 12, 8, 2, 'White', 'active', 0.00),
-('REF003', 'Sac à Main Élégant', '/placeholder.svg', 'Sac à main en cuir véritable', 'Bag', 'ACCESSOIRES', 'Accessories', 650.00, 25, 0, 0, 0, 0, 'Black', 'active', 20.00);
+-- DUMMY DATA INSERTION
 
--- Insert some sample reservations
+-- Insert comprehensive sample data for products
+INSERT INTO `products` (`reference_product`, `nom_product`, `img_product`, `img2_product`, `description_product`, `type_product`, `category_product`, `itemgroup_product`, `price_product`, `qnty_product`, `s_size`, `m_size`, `l_size`, `xl_size`, `xxl_size`, `color_product`, `status_product`, `discount_product`) VALUES
+('REF001', 'Chemise en Coton Rayé', '/placeholder.svg', '/placeholder2.svg', 'Une chemise élégante en coton rayé pour garçons', 'Shirt', 'GARÇONS 8-14 ANS', 'Clothing', 320.00, 50, 10, 15, 20, 5, 0, 'Blue', 'active', 10.00),
+('REF002', 'Blouse en Soie Premium', '/placeholder.svg', '/placeholder2.svg', 'Blouse luxueuse en soie pour femmes', 'Blouse', 'FEMMES', 'Clothing', 420.00, 30, 8, 12, 8, 2, 0, 'White', 'active', 0.00),
+('REF003', 'Sac à Main Élégant', '/placeholder.svg', '/placeholder2.svg', 'Sac à main en cuir véritable', 'Bag', 'ACCESSOIRES', 'Accessories', 650.00, 25, 0, 0, 0, 0, 0, 'Black', 'active', 20.00),
+('REF004', 'Costume Trois Pièces', '/placeholder.svg', '/placeholder2.svg', 'Costume classique pour homme', 'Suit', 'HOMMES', 'Clothing', 1200.00, 15, 0, 5, 8, 2, 0, 'Navy', 'active', 15.00),
+('REF005', 'Robe de Soirée', '/placeholder.svg', '/placeholder2.svg', 'Robe élégante pour occasions spéciales', 'Dress', 'FEMMES', 'Clothing', 850.00, 20, 3, 8, 7, 2, 0, 'Red', 'active', 0.00),
+('REF006', 'Pantalon Enfant', '/placeholder.svg', '/placeholder2.svg', 'Pantalon confortable pour enfants', 'Pants', 'GARÇONS 8-14 ANS', 'Clothing', 180.00, 40, 12, 15, 10, 3, 0, 'Gray', 'active', 5.00),
+('REF007', 'Chaussures de Ville', '/placeholder.svg', '/placeholder2.svg', 'Chaussures en cuir pour homme', 'Shoes', 'HOMMES', 'Footwear', 450.00, 35, 0, 0, 0, 0, 0, 'Brown', 'active', 10.00),
+('REF008', 'Foulard en Soie', '/placeholder.svg', '/placeholder2.svg', 'Accessoire élégant en soie', 'Scarf', 'ACCESSOIRES', 'Accessories', 120.00, 60, 0, 0, 0, 0, 0, 'Multi', 'active', 0.00);
+
+-- Insert sample reservations with varied statuses
 INSERT INTO `reservations` (`nom_client`, `email_client`, `telephone_client`, `date_reservation`, `heure_reservation`, `statut_reservation`, `notes_reservation`) VALUES
 ('Jean Dupont', 'jean.dupont@email.com', '+33123456789', '2024-01-15', '10:00:00', 'confirmed', 'Mesure pour costume sur mesure'),
-('Marie Martin', 'marie.martin@email.com', '+33987654321', '2024-01-16', '14:30:00', 'pending', 'Première consultation pour robe de soirée');
+('Marie Martin', 'marie.martin@email.com', '+33987654321', '2024-01-16', '14:30:00', 'pending', 'Première consultation pour robe de soirée'),
+('Pierre Bernard', 'pierre.bernard@email.com', '+33456789123', '2024-01-18', '11:00:00', 'completed', 'Essayage final terminé'),
+('Sophie Dubois', 'sophie.dubois@email.com', '+33789123456', '2024-01-20', '15:30:00', 'confirmed', 'Retouches sur pantalon'),
+('Ahmed Ben Ali', 'ahmed.benali@email.com', '+216123456789', '2024-01-22', '09:00:00', 'pending', 'Consultation pour costume de mariage'),
+('Fatma Trabelsi', 'fatma.trabelsi@email.com', '+216987654321', '2024-01-25', '16:00:00', 'cancelled', 'Annulé par le client');
 
--- Insert sample customer data
+-- Insert sample customer data with more variety
 INSERT INTO `customers` (`nom_customer`, `prenom_customer`, `email_customer`, `telephone_customer`, `adresse_customer`, `ville_customer`, `code_postal_customer`, `pays_customer`) VALUES
 ('Dupont', 'Jean', 'jean.dupont@email.com', '+33123456789', '123 Rue de la Paix', 'Paris', '75001', 'France'),
-('Martin', 'Marie', 'marie.martin@email.com', '+33987654321', '456 Avenue des Champs', 'Lyon', '69001', 'France');
+('Martin', 'Marie', 'marie.martin@email.com', '+33987654321', '456 Avenue des Champs', 'Lyon', '69001', 'France'),
+('Bernard', 'Pierre', 'pierre.bernard@email.com', '+33456789123', '789 Boulevard Saint-Germain', 'Marseille', '13001', 'France'),
+('Dubois', 'Sophie', 'sophie.dubois@email.com', '+33789123456', '321 Rue de Rivoli', 'Nice', '06000', 'France'),
+('Ben Ali', 'Ahmed', 'ahmed.benali@email.com', '+216123456789', '15 Avenue Bourguiba', 'Tunis', '1000', 'Tunisia'),
+('Trabelsi', 'Fatma', 'fatma.trabelsi@email.com', '+216987654321', '25 Rue de la Liberté', 'Sfax', '3000', 'Tunisia'),
+('El Amri', 'Youssef', 'youssef.amri@email.com', '+216555666777', '10 Avenue de la République', 'Sousse', '4000', 'Tunisia');
 
--- Insert sample order data with vue tracking
-INSERT INTO `orders` (`id_customer`, `numero_commande`, `sous_total_order`, `discount_amount_order`, `delivery_cost_order`, `total_order`, `status_order`, `date_livraison_souhaitee`, `vue_par_admin`) VALUES
-(1, 'CMD-2024-001', 970.00, 50.00, 15.00, 935.00, 'confirmed', '2024-02-01', 1),
-(2, 'CMD-2024-002', 420.00, 0.00, 10.00, 430.00, 'pending', '2024-02-05', 0);
+-- Insert sample order data with various statuses
+INSERT INTO `orders` (`id_customer`, `numero_commande`, `sous_total_order`, `discount_amount_order`, `delivery_cost_order`, `total_order`, `status_order`, `date_livraison_souhaitee`, `payment_status`, `vue_par_admin`) VALUES
+(1, 'CMD-2024-001', 970.00, 50.00, 15.00, 935.00, 'confirmed', '2024-02-01', 'paid', 1),
+(2, 'CMD-2024-002', 420.00, 0.00, 10.00, 430.00, 'pending', '2024-02-05', 'pending', 0),
+(3, 'CMD-2024-003', 1200.00, 180.00, 20.00, 1040.00, 'processing', '2024-02-10', 'paid', 1),
+(4, 'CMD-2024-004', 650.00, 0.00, 12.00, 662.00, 'shipped', '2024-02-08', 'paid', 1),
+(5, 'CMD-2024-005', 850.00, 0.00, 18.00, 868.00, 'delivered', '2024-01-30', 'paid', 1),
+(6, 'CMD-2024-006', 300.00, 15.00, 8.00, 293.00, 'cancelled', '2024-02-15', 'refunded', 0);
 
 -- Insert sample order items
 INSERT INTO `order_items` (`id_order`, `id_product`, `nom_product_snapshot`, `reference_product_snapshot`, `price_product_snapshot`, `size_selected`, `color_selected`, `quantity_ordered`, `subtotal_item`, `total_item`) VALUES
 (1, 1, 'Chemise en Coton Rayé', 'REF001', 320.00, 'L', 'Blue', 2, 640.00, 640.00),
 (1, 3, 'Sac à Main Élégant', 'REF003', 650.00, NULL, 'Black', 1, 650.00, 650.00),
-(2, 2, 'Blouse en Soie Premium', 'REF002', 420.00, 'M', 'White', 1, 420.00, 420.00);
+(2, 2, 'Blouse en Soie Premium', 'REF002', 420.00, 'M', 'White', 1, 420.00, 420.00),
+(3, 4, 'Costume Trois Pièces', 'REF004', 1200.00, 'L', 'Navy', 1, 1200.00, 1200.00),
+(4, 3, 'Sac à Main Élégant', 'REF003', 650.00, NULL, 'Black', 1, 650.00, 650.00),
+(5, 5, 'Robe de Soirée', 'REF005', 850.00, 'M', 'Red', 1, 850.00, 850.00),
+(6, 6, 'Pantalon Enfant', 'REF006', 180.00, 'L', 'Gray', 1, 180.00, 180.00),
+(6, 8, 'Foulard en Soie', 'REF008', 120.00, NULL, 'Multi', 1, 120.00, 120.00);
 
--- Insert sample newsletter subscribers
-INSERT INTO `newsletter_subscribers` (`email_subscriber`, `nom_subscriber`, `prenom_subscriber`, `status_subscriber`, `source_subscriber`, `date_inscription`) VALUES
-('jean.dupont@email.com', 'Dupont', 'Jean', 'active', 'website', '2024-01-15 10:30:00'),
-('marie.martin@email.com', 'Martin', 'Marie', 'active', 'checkout', '2024-01-10 09:15:00'),
-('pierre.dubois@email.com', 'Dubois', 'Pierre', 'unsubscribed', 'website', '2023-12-20 16:45:00'),
-('sophie.bernard@email.com', 'Bernard', 'Sophie', 'active', 'social', '2024-01-18 14:20:00'),
-('claire.moreau@email.com', 'Moreau', 'Claire', 'active', 'website', '2024-01-20 11:30:00'),
-('lucas.petit@email.com', 'Petit', 'Lucas', 'active', 'manual', '2024-01-22 15:45:00');
+-- Insert order tracking data
+INSERT INTO `order_tracking` (`id_order`, `status_previous`, `status_new`, `notes_tracking`) VALUES
+(1, NULL, 'pending', 'Commande créée'),
+(1, 'pending', 'confirmed', 'Commande confirmée par l\'admin'),
+(3, NULL, 'pending', 'Commande créée'),
+(3, 'pending', 'confirmed', 'Commande confirmée'),
+(3, 'confirmed', 'processing', 'En cours de préparation'),
+(4, NULL, 'pending', 'Commande créée'),
+(4, 'pending', 'confirmed', 'Commande confirmée'),
+(4, 'confirmed', 'processing', 'En préparation'),
+(4, 'processing', 'shipped', 'Expédiée'),
+(5, 'shipped', 'delivered', 'Livrée avec succès');
 
--- Insert some sample visitor tracking data
+-- Insert delivery addresses for some orders
+INSERT INTO `delivery_addresses` (`id_order`, `nom_destinataire`, `prenom_destinataire`, `telephone_destinataire`, `adresse_livraison`, `ville_livraison`, `code_postal_livraison`, `pays_livraison`, `instructions_livraison`) VALUES
+(4, 'Dubois', 'Sophie', '+33789123456', '321 Rue de Rivoli, Apt 5B', 'Nice', '06000', 'France', 'Sonner à l\'interphone, 3ème étage'),
+(5, 'Ben Ali', 'Ahmed', '+216123456789', '15 Avenue Bourguiba, Bureau 12', 'Tunis', '1000', 'Tunisia', 'Livraison en bureau, horaires 9h-17h');
+
+-- Insert comprehensive newsletter subscribers
+INSERT INTO `newsletter_subscribers` (`email_subscriber`, `nom_subscriber`, `prenom_subscriber`, `status_subscriber`, `source_subscriber`, `date_inscription`, `token_unsubscribe`) VALUES
+('jean.dupont@email.com', 'Dupont', 'Jean', 'active', 'website', '2024-01-15 10:30:00', 'token_001'),
+('marie.martin@email.com', 'Martin', 'Marie', 'active', 'checkout', '2024-01-10 09:15:00', 'token_002'),
+('pierre.dubois@email.com', 'Dubois', 'Pierre', 'unsubscribed', 'website', '2023-12-20 16:45:00', 'token_003'),
+('sophie.bernard@email.com', 'Bernard', 'Sophie', 'active', 'social', '2024-01-18 14:20:00', 'token_004'),
+('claire.moreau@email.com', 'Moreau', 'Claire', 'active', 'website', '2024-01-20 11:30:00', 'token_005'),
+('lucas.petit@email.com', 'Petit', 'Lucas', 'active', 'manual', '2024-01-22 15:45:00', 'token_006'),
+('ahmed.benali@email.com', 'Ben Ali', 'Ahmed', 'active', 'website', '2024-01-25 08:20:00', 'token_007'),
+('fatma.trabelsi@email.com', 'Trabelsi', 'Fatma', 'bounced', 'checkout', '2024-01-12 12:10:00', 'token_008'),
+('youssef.amri@email.com', 'El Amri', 'Youssef', 'pending', 'social', '2024-01-28 16:30:00', 'token_009'),
+('salma.khelifi@email.com', 'Khelifi', 'Salma', 'active', 'import', '2024-01-30 10:45:00', 'token_010');
+
+-- Insert diverse visitor tracking data
 INSERT INTO `visitor_tracking` (`ip_address`, `page_visited`, `referrer`, `user_agent`, `city`, `country`, `visit_date`, `session_id`) VALUES
 ('192.168.1.100', 'Home', 'Google Search', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Paris', 'France', '2024-01-20 10:30:00', 'sess_001'),
 ('192.168.1.101', 'Products', 'Facebook', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)', 'Lyon', 'France', '2024-01-20 11:15:00', 'sess_002'),
 ('192.168.1.102', 'About', 'Direct', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)', 'Tunis', 'Tunisia', '2024-01-20 12:00:00', 'sess_003'),
 ('192.168.1.103', 'Home', 'Instagram', 'Mozilla/5.0 (Android 13; Mobile; rv:109.0)', 'New York', 'United States', '2024-01-20 13:30:00', 'sess_004'),
-('192.168.1.104', 'Products', 'Google Search', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 'Casablanca', 'Morocco', '2024-01-20 14:45:00', 'sess_005');
+('192.168.1.104', 'Products', 'Google Search', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 'Casablanca', 'Morocco', '2024-01-20 14:45:00', 'sess_005'),
+('41.230.45.123', 'Home', 'Google Search', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 'Sfax', 'Tunisia', '2024-01-21 09:20:00', 'sess_006'),
+('197.15.89.234', 'Contact', 'Direct', 'Mozilla/5.0 (Linux; Android 12)', 'Sousse', 'Tunisia', '2024-01-21 15:40:00', 'sess_007'),
+('86.195.123.45', 'Products', 'Twitter', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 'Marseille', 'France', '2024-01-22 11:25:00', 'sess_008'),
+('105.98.67.189', 'About', 'LinkedIn', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)', 'Algiers', 'Algeria', '2024-01-22 14:10:00', 'sess_009'),
+('78.246.135.78', 'Home', 'WhatsApp', 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)', 'Nice', 'France', '2024-01-23 16:55:00', 'sess_010');
 
--- Insert sample message data
-INSERT INTO `messages` (`nom_client`, `email_client`, `telephone_client`, `message_client`, `vue_par_admin`) VALUES
-('Jean Dupont', 'jean.dupont@email.com', '+33123456789', 'Bonjour, j\'aimerais avoir plus d\'informations sur vos costumes sur mesure.', 0),
-('Marie Martin', 'marie.martin@email.com', '+33987654321', 'Pouvez-vous me renseigner sur les délais de livraison pour les commandes spéciales?', 1),
-('Pierre Bernard', 'pierre.bernard@email.com', '+33456789123', 'J\'ai une question concernant les retours et échanges.', 0);
+-- Insert sample message data with different statuses
+INSERT INTO `messages` (`nom_client`, `email_client`, `telephone_client`, `message_client`,  `vue_par_admin`, `date_vue_admin`) VALUES
+('Jean Dupont', 'jean.dupont@email.com', '+33123456789', 'Bonjour, j\'aimerais avoir plus d\'informations sur vos costumes sur mesure. Quels sont vos délais de confection ?', 0, NULL),
+('Marie Martin', 'marie.martin@email.com', '+33987654321', 'Pouvez-vous me renseigner sur les délais de livraison pour les commandes spéciales? J\'ai besoin d\'une robe pour un événement.', 1, '2024-01-21 10:30:00'),
+('Pierre Bernard', 'pierre.bernard@email.com', '+33456789123', 'J\'ai une question concernant les retours et échanges. Quelle est votre politique de retour ?', 0, NULL),
+('Ahmed Ben Ali', 'ahmed.benali@email.com', '+216123456789', 'Salut, est-ce que vous livrez en Tunisie ? Quels sont les frais de port ?', 1, '2024-01-22 14:15:00'),
+('Sophie Dubois', 'sophie.dubois@email.com', '+33789123456', 'Bonjour, je voudrais savoir si vous proposez des services de retouches après achat ?', 0, NULL),
+('Youssef Amri', 'youssef.amri@email.com', '+216555666777', 'Bonsoir, j\'ai vu vos créations sur Instagram. Proposez-vous des consultations en ligne ?', 1, '2024-01-23 09:45:00'),
+('Fatma Trabelsi', 'fatma.trabelsi@email.com', '+216987654321', 'Bonjour, quels sont vos horaires d\'ouverture pour les essayages ? Merci.', 0, NULL);

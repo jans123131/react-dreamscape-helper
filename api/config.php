@@ -17,9 +17,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 class Database {
     private $host = "localhost";
-    private $username = "respizen_mylittle";
-    private $password = "TPmxm9Z2T83g4B4P4Yzj";
-    private $database = "respizen_mylittle";
+    private $username = "dramines_lucci";
+    private $password = "n2nAeZEr3BrdzJv6fQtK";
+    private $database = "dramines_lucci";
     public $conn;
 
     public function getConnection() {
