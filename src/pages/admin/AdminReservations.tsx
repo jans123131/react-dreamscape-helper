@@ -34,10 +34,10 @@ const AdminReservations = () => {
 
   const fetchReservations = async () => {
     try {
-      const response = await fetch('https://draminesaid.com/lucci/api/get_reservations.php');
+      const response = await fetch('https://draminesaid.com/lucci/api/get_all_reservations.php');
       const data = await response.json();
       if (data.success) {
-        setReservations(data.reservations);
+        setReservations(data.data);
       } else {
         throw new Error(data.message);
       }
@@ -57,12 +57,8 @@ const AdminReservations = () => {
 
   const handleConfirmReservation = async (id: number) => {
     try {
-      const response = await fetch(`https://draminesaid.com/lucci/api/confirmer_reservation.php`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id_reservation: id })
+      const response = await fetch(`https://draminesaid.com/lucci/api/confirmer_reservation.php?id=${id}`, {
+        method: 'PUT'
       });
 
       const result = await response.json();
@@ -88,12 +84,8 @@ const AdminReservations = () => {
 
   const handleDeleteReservation = async (id: number) => {
     try {
-      const response = await fetch(`https://draminesaid.com/lucci/api/delete_reservation.php`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id_reservation: id })
+      const response = await fetch(`https://draminesaid.com/lucci/api/delete_reservation.php?id=${id}`, {
+        method: 'DELETE'
       });
 
       const result = await response.json();
