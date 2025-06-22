@@ -28,7 +28,7 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWi
     { key: 'sale', label: t('nav.sale') },
   ];
 
-  const topUtilityItems = [
+  const utilityItems = [
     { 
       icon: Heart, 
       label: 'Liste de souhaits',
@@ -47,9 +47,6 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWi
         onContactOpen?.();
       }
     },
-  ];
-
-  const utilityItems = [
     { 
       icon: MapPin, 
       label: 'Rdv sur mesure',
@@ -101,37 +98,8 @@ const MobileSidebar = ({ isOpen, onClose, onStoreFinderOpen, onBookingOpen, onWi
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto">
           <div className="px-4 py-4">
-            {/* Top Utility Items */}
-            <div className="space-y-0.5 mb-4">
-              <h3 className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-2 px-2">
-                Raccourcis
-              </h3>
-              {topUtilityItems.map((item, index) => (
-                <a
-                  key={index}
-                  href="#"
-                  className="group flex items-center p-2 text-white hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-blue-500/20 rounded-lg transition-all duration-200 border border-transparent hover:border-blue-400/20"
-                  onClick={item.onClick || onClose}
-                >
-                  <div className="flex items-center justify-center w-7 h-7 bg-white/10 group-hover:bg-blue-500/20 rounded-lg mr-2 transition-colors duration-200">
-                    <item.icon className="w-3 h-3 text-white/80 group-hover:text-blue-200 transition-colors duration-200" />
-                  </div>
-                  <div className="flex-1">
-                    <span className="font-medium text-sm block group-hover:text-blue-200 transition-colors">
-                      {item.label}
-                    </span>
-                    <span className="text-xs text-white/60 group-hover:text-blue-300/80 transition-colors">
-                      {item.description}
-                    </span>
-                  </div>
-                </a>
-              ))}
-            </div>
-
-            <Separator className="my-4 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-
             {/* Main Navigation */}
-            <div className="space-y-0.5">
+            <div className="space-y-0.5 mb-4">
               <h3 className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-2 px-2">
                 Collections
               </h3>
