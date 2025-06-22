@@ -36,10 +36,13 @@ interface Order {
   total_order: number;
   status_order: string;
   date_creation_order: string;
-  customer_name: string;
-  customer_email: string;
-  customer_phone: string;
-  customer_address: string;
+  customer: {
+    nom: string;
+    prenom: string;
+    email: string;
+    telephone: string;
+    adresse: string;
+  };
 }
 
 interface PaginationInfo {
@@ -87,8 +90,31 @@ const AdminOrders = () => {
       const result = await response.json();
 
       if (result.success) {
-        setOrders(result.data);
-        setPagination(result.pagination);
+        // Process orders data to ensure proper structure and number conversion
+        const processedOrders = result.data.map((order: any) => ({
+          id_order: order.id_order,
+          numero_commande: order.numero_commande,
+          total_order: parseFloat(order.total_order) || 0,
+          status_order: order.status_order,
+          date_creation_order: order.date_creation_order,
+          customer: order.customer || {
+            nom: order.nom_customer || '',
+            prenom: order.prenom_customer || '',
+            email: order.email_customer || '',
+            telephone: order.telephone_customer || '',
+            adresse: order.adresse_customer || ''
+          }
+        }));
+        
+        setOrders(processedOrders);
+        setPagination({
+          current_page: currentPage,
+          total_pages: Math.ceil((result.total || processedOrders.length) / 20),
+          total_records: result.total || processedOrders.length,
+          per_page: 20,
+          has_next: currentPage < Math.ceil((result.total || processedOrders.length) / 20),
+          has_prev: currentPage > 1
+        });
       } else {
         throw new Error(result.message);
       }
@@ -143,6 +169,12 @@ const AdminOrders = () => {
     return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>;
   };
 
+  // Calculate total revenue safely
+  const totalRevenue = orders.reduce((acc, order) => {
+    const orderTotal = parseFloat(String(order.total_order)) || 0;
+    return acc + orderTotal;
+  }, 0);
+
   return (
     <AdminLayout>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
@@ -193,7 +225,7 @@ const AdminOrders = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-green-900 mb-1">
-                  €{orders.reduce((acc, order) => acc + order.total_order, 0).toFixed(2)}
+                  €{totalRevenue.toFixed(2)}
                 </div>
                 <div className="flex items-center text-xs text-green-700">
                   <Euro className="h-3 w-3 mr-1" />
@@ -281,7 +313,7 @@ const AdminOrders = () => {
                         Commande
                       </SortableTableHead>
                       <SortableTableHead 
-                        sortKey="customer_name" 
+                        sortKey="customer.nom" 
                         sortConfig={sortConfig} 
                         onSort={requestSort}
                       >
@@ -325,11 +357,11 @@ const AdminOrders = () => {
                       sortedOrders.map((order) => (
                         <TableRow key={order.id_order}>
                           <TableCell className="font-medium">{order.numero_commande}</TableCell>
-                          <TableCell>{order.customer_name}</TableCell>
-                          <TableCell>{order.customer_email}</TableCell>
-                          <TableCell>{order.customer_phone}</TableCell>
-                          <TableCell>{order.customer_address}</TableCell>
-                          <TableCell>€{order.total_order.toFixed(2)}</TableCell>
+                          <TableCell>{`${order.customer.prenom} ${order.customer.nom}`}</TableCell>
+                          <TableCell>{order.customer.email}</TableCell>
+                          <TableCell>{order.customer.telephone}</TableCell>
+                          <TableCell>{order.customer.adresse}</TableCell>
+                          <TableCell>€{parseFloat(String(order.total_order)).toFixed(2)}</TableCell>
                           <TableCell>{getStatusBadge(order.status_order)}</TableCell>
                           <TableCell>
                             {format(new Date(order.date_creation_order), 'dd/MM/yyyy HH:mm', { locale: fr })}
@@ -399,7 +431,9 @@ const AdminOrders = () => {
                     <User className="h-4 w-4" />
                     Nom du client
                   </div>
-                  <p className="text-sm text-muted-foreground">{selectedOrder.customer_name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {`${selectedOrder.customer.prenom} ${selectedOrder.customer.nom}`}
+                  </p>
                 </div>
                 
                 <div className="space-y-2">
@@ -407,7 +441,7 @@ const AdminOrders = () => {
                     <Mail className="h-4 w-4" />
                     Email
                   </div>
-                  <p className="text-sm text-muted-foreground">{selectedOrder.customer_email}</p>
+                  <p className="text-sm text-muted-foreground">{selectedOrder.customer.email}</p>
                 </div>
                 
                 <div className="space-y-2">
@@ -415,7 +449,7 @@ const AdminOrders = () => {
                     <Phone className="h-4 w-4" />
                     Téléphone
                   </div>
-                  <p className="text-sm text-muted-foreground">{selectedOrder.customer_phone}</p>
+                  <p className="text-sm text-muted-foreground">{selectedOrder.customer.telephone}</p>
                 </div>
                 
                 <div className="space-y-2">
@@ -434,7 +468,7 @@ const AdminOrders = () => {
                     Total
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    €{selectedOrder.total_order.toFixed(2)}
+                    €{parseFloat(String(selectedOrder.total_order)).toFixed(2)}
                   </p>
                 </div>
 
