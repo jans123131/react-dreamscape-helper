@@ -24,7 +24,7 @@ interface Reservation {
   telephone_client: string;
   date_reservation: string;
   heure_reservation: string;
-  message_client: string;
+  message_client?: string;
   statut_reservation: string;
   notes_reservation?: string;
   date_creation: string;
@@ -36,10 +36,21 @@ const AdminReservations = () => {
 
   const fetchReservations = async () => {
     try {
+      console.log('Fetching reservations...');
       const response = await fetch('https://draminesaid.com/lucci/api/get_all_reservations.php');
       const data = await response.json();
+      
+      console.log('API Response:', data);
+      
       if (data.success) {
-        setReservations(data.data);
+        // Convert string IDs to numbers for consistency
+        const processedReservations = data.data.map((reservation: any) => ({
+          ...reservation,
+          id_reservation: parseInt(reservation.id_reservation)
+        }));
+        
+        console.log('Processed reservations:', processedReservations);
+        setReservations(processedReservations);
       } else {
         throw new Error(data.message);
       }
@@ -111,6 +122,8 @@ const AdminReservations = () => {
     }
   };
 
+  console.log('Current reservations state:', reservations);
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -118,7 +131,7 @@ const AdminReservations = () => {
           <div>
             <h2 className="text-2xl font-bold">Réservations</h2>
             <p className="text-muted-foreground">
-              Suivez et gérez les réservations.
+              Suivez et gérez les réservations. ({reservations.length} réservations)
             </p>
           </div>
         </div>
@@ -140,7 +153,7 @@ const AdminReservations = () => {
           <TabsContent value="table">
             <div className="rounded-md border">
               <Table>
-                <TableCaption>A list of your reservations.</TableCaption>
+                <TableCaption>Liste de vos réservations.</TableCaption>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[100px]">ID</TableHead>
@@ -149,7 +162,7 @@ const AdminReservations = () => {
                     <TableHead>Téléphone</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Heure</TableHead>
-                    <TableHead>Message</TableHead>
+                    <TableHead>Notes</TableHead>
                     <TableHead>Statut</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -163,10 +176,10 @@ const AdminReservations = () => {
                       <TableCell>{reservation.telephone_client}</TableCell>
                       <TableCell>{reservation.date_reservation}</TableCell>
                       <TableCell>{reservation.heure_reservation}</TableCell>
-                      <TableCell>{reservation.message_client}</TableCell>
+                      <TableCell>{reservation.notes_reservation || '-'}</TableCell>
                       <TableCell>{reservation.statut_reservation}</TableCell>
                       <TableCell className="text-right">
-                        {reservation.statut_reservation === 'en attente' ? (
+                        {reservation.statut_reservation === 'pending' ? (
                           <>
                             <Button
                               variant="ghost"
