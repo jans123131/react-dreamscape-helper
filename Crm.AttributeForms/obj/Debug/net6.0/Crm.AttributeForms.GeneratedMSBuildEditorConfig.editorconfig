@@ -1,0 +1,283 @@
+is_global = true
+build_property.TargetFramework = net6.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = Crm.AttributeForms
+build_property.RootNamespace = Crm.AttributeForms
+build_property.ProjectDir = C:\Source\crm6\src\Crm.Web\Plugins\Crm.AttributeForms\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 6.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Source\crm6\src\Crm.Web\Plugins\Crm.AttributeForms
+build_property._RazorSourceGeneratorDebug = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/AttributeFormContactRelationship/FormDesignerSidebarTabContent.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXR0cmlidXRlRm9ybUNvbnRhY3RSZWxhdGlvbnNoaXBcRm9ybURlc2lnbmVyU2lkZWJhclRhYkNvbnRlbnQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/AttributeFormContactRelationship/FormDesignerSidebarTabHeader.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXR0cmlidXRlRm9ybUNvbnRhY3RSZWxhdGlvbnNoaXBcRm9ybURlc2lnbmVyU2lkZWJhclRhYkhlYWRlci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/AttributeFormContactRelationship/RelationshipEditor.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXR0cmlidXRlRm9ybUNvbnRhY3RSZWxhdGlvbnNoaXBcUmVsYXRpb25zaGlwRWRpdG9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/AttributeForm/AttributeFormEntry.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXR0cmlidXRlRm9ybVxBdHRyaWJ1dGVGb3JtRW50cnkuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/AttributeForm/AttributeFormsExtensions.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXR0cmlidXRlRm9ybVxBdHRyaWJ1dGVGb3Jtc0V4dGVuc2lvbnMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/AttributeForm/ContactDetailsTopMenu.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXR0cmlidXRlRm9ybVxDb250YWN0RGV0YWlsc1RvcE1lbnUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/AttributeForm/CreateTemplate.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXR0cmlidXRlRm9ybVxDcmVhdGVUZW1wbGF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/AttributeForm/DynamicFormDesignerAlert.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXR0cmlidXRlRm9ybVxEeW5hbWljRm9ybURlc2lnbmVyQWxlcnQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/AttributeForm/FormDesignerElementDisplayExtension.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXR0cmlidXRlRm9ybVxGb3JtRGVzaWduZXJFbGVtZW50RGlzcGxheUV4dGVuc2lvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/AttributeForm/FormDesignerElementFilterableExtension.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXR0cmlidXRlRm9ybVxGb3JtRGVzaWduZXJFbGVtZW50RmlsdGVyYWJsZUV4dGVuc2lvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/AttributeForm/FormDesignerHeaderExtension.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXR0cmlidXRlRm9ybVxGb3JtRGVzaWduZXJIZWFkZXJFeHRlbnNpb24uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/AttributeForm/HistoryTemplate.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXR0cmlidXRlRm9ybVxIaXN0b3J5VGVtcGxhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/AttributeForm/MaterialFormDesignerElementDisplayExtension.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXR0cmlidXRlRm9ybVxNYXRlcmlhbEZvcm1EZXNpZ25lckVsZW1lbnREaXNwbGF5RXh0ZW5zaW9uLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/AttributeForm/MaterialFormDesignerElementFilterableExtension.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXR0cmlidXRlRm9ybVxNYXRlcmlhbEZvcm1EZXNpZ25lckVsZW1lbnRGaWx0ZXJhYmxlRXh0ZW5zaW9uLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/AttributeForm/MaterialGenericListFilterExtensions.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXR0cmlidXRlRm9ybVxNYXRlcmlhbEdlbmVyaWNMaXN0RmlsdGVyRXh0ZW5zaW9ucy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/AttributeForm/MaterialItemTemplateExtension.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXR0cmlidXRlRm9ybVxNYXRlcmlhbEl0ZW1UZW1wbGF0ZUV4dGVuc2lvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialEditTemplates.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRWRpdFRlbXBsYXRlcy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialEditTemplates/CheckBoxList.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRWRpdFRlbXBsYXRlc1xDaGVja0JveExpc3QuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialEditTemplates/Date.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRWRpdFRlbXBsYXRlc1xEYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialEditTemplates/DropDown.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRWRpdFRlbXBsYXRlc1xEcm9wRG93bi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialEditTemplates/FileAttachmentDynamicFormElement.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRWRpdFRlbXBsYXRlc1xGaWxlQXR0YWNobWVudER5bmFtaWNGb3JtRWxlbWVudC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialEditTemplates/Hint.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRWRpdFRlbXBsYXRlc1xIaW50LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialEditTemplates/History.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRWRpdFRlbXBsYXRlc1xIaXN0b3J5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialEditTemplates/Image.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRWRpdFRlbXBsYXRlc1xJbWFnZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialEditTemplates/Literal.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRWRpdFRlbXBsYXRlc1xMaXRlcmFsLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialEditTemplates/MultiLineText.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRWRpdFRlbXBsYXRlc1xNdWx0aUxpbmVUZXh0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialEditTemplates/Number.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRWRpdFRlbXBsYXRlc1xOdW1iZXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialEditTemplates/PageSeparator.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRWRpdFRlbXBsYXRlc1xQYWdlU2VwYXJhdG9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialEditTemplates/RadioButtonList.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRWRpdFRlbXBsYXRlc1xSYWRpb0J1dHRvbkxpc3QuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialEditTemplates/SectionSeparator.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRWRpdFRlbXBsYXRlc1xTZWN0aW9uU2VwYXJhdG9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialEditTemplates/SignaturePad.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRWRpdFRlbXBsYXRlc1xTaWduYXR1cmVQYWQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialEditTemplates/SignaturePadWithPrivacyPolicy.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRWRpdFRlbXBsYXRlc1xTaWduYXR1cmVQYWRXaXRoUHJpdmFjeVBvbGljeS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialEditTemplates/SingleLineText.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRWRpdFRlbXBsYXRlc1xTaW5nbGVMaW5lVGV4dC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialEditTemplates/Time.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRWRpdFRlbXBsYXRlc1xUaW1lLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialFilterTemplates.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRmlsdGVyVGVtcGxhdGVzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialFilterTemplates/CheckBoxList.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRmlsdGVyVGVtcGxhdGVzXENoZWNrQm94TGlzdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialFilterTemplates/Date.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRmlsdGVyVGVtcGxhdGVzXERhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialFilterTemplates/DropDown.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRmlsdGVyVGVtcGxhdGVzXERyb3BEb3duLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialFilterTemplates/FileAttachmentDynamicFormElement.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRmlsdGVyVGVtcGxhdGVzXEZpbGVBdHRhY2htZW50RHluYW1pY0Zvcm1FbGVtZW50LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialFilterTemplates/Image.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRmlsdGVyVGVtcGxhdGVzXEltYWdlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialFilterTemplates/Literal.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRmlsdGVyVGVtcGxhdGVzXExpdGVyYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialFilterTemplates/MultiLineText.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRmlsdGVyVGVtcGxhdGVzXE11bHRpTGluZVRleHQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialFilterTemplates/Number.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRmlsdGVyVGVtcGxhdGVzXE51bWJlci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialFilterTemplates/PageSeparator.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRmlsdGVyVGVtcGxhdGVzXFBhZ2VTZXBhcmF0b3IuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialFilterTemplates/RadioButtonList.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRmlsdGVyVGVtcGxhdGVzXFJhZGlvQnV0dG9uTGlzdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialFilterTemplates/SectionSeparator.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRmlsdGVyVGVtcGxhdGVzXFNlY3Rpb25TZXBhcmF0b3IuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialFilterTemplates/SignaturePad.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRmlsdGVyVGVtcGxhdGVzXFNpZ25hdHVyZVBhZC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialFilterTemplates/SignaturePadWithPrivacyPolicy.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRmlsdGVyVGVtcGxhdGVzXFNpZ25hdHVyZVBhZFdpdGhQcml2YWN5UG9saWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialFilterTemplates/SingleLineText.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRmlsdGVyVGVtcGxhdGVzXFNpbmdsZUxpbmVUZXh0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialFilterTemplates/Time.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsRmlsdGVyVGVtcGxhdGVzXFRpbWUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialResponseTemplates.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsUmVzcG9uc2VUZW1wbGF0ZXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialResponseTemplates/CheckBoxList.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsUmVzcG9uc2VUZW1wbGF0ZXNcQ2hlY2tCb3hMaXN0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialResponseTemplates/Date.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsUmVzcG9uc2VUZW1wbGF0ZXNcRGF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialResponseTemplates/DropDown.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsUmVzcG9uc2VUZW1wbGF0ZXNcRHJvcERvd24uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialResponseTemplates/FileAttachmentDynamicFormElement.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsUmVzcG9uc2VUZW1wbGF0ZXNcRmlsZUF0dGFjaG1lbnREeW5hbWljRm9ybUVsZW1lbnQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialResponseTemplates/Image.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsUmVzcG9uc2VUZW1wbGF0ZXNcSW1hZ2UuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialResponseTemplates/Literal.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsUmVzcG9uc2VUZW1wbGF0ZXNcTGl0ZXJhbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialResponseTemplates/MultiLineText.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsUmVzcG9uc2VUZW1wbGF0ZXNcTXVsdGlMaW5lVGV4dC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialResponseTemplates/Number.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsUmVzcG9uc2VUZW1wbGF0ZXNcTnVtYmVyLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialResponseTemplates/PageSeparator.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsUmVzcG9uc2VUZW1wbGF0ZXNcUGFnZVNlcGFyYXRvci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialResponseTemplates/RadioButtonList.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsUmVzcG9uc2VUZW1wbGF0ZXNcUmFkaW9CdXR0b25MaXN0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialResponseTemplates/SectionSeparator.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsUmVzcG9uc2VUZW1wbGF0ZXNcU2VjdGlvblNlcGFyYXRvci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialResponseTemplates/SignaturePad.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsUmVzcG9uc2VUZW1wbGF0ZXNcU2lnbmF0dXJlUGFkLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialResponseTemplates/SignaturePadWithPrivacyPolicy.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsUmVzcG9uc2VUZW1wbGF0ZXNcU2lnbmF0dXJlUGFkV2l0aFByaXZhY3lQb2xpY3kuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialResponseTemplates/SingleLineText.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsUmVzcG9uc2VUZW1wbGF0ZXNcU2luZ2xlTGluZVRleHQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Source/crm6/src/Crm.Web/Plugins/Crm.AttributeForms/Views/Shared/MaterialResponseTemplates/Time.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXE1hdGVyaWFsUmVzcG9uc2VUZW1wbGF0ZXNcVGltZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
