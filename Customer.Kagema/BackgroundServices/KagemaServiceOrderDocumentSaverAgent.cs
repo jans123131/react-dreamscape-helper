@@ -1,4 +1,4 @@
-﻿namespace Customer.Kagema.BackgroundServices
+namespace Customer.Kagema.BackgroundServices
 {
 	using System;
 	using System.IO;
@@ -44,7 +44,7 @@
 	using Crm.Library.Globalization.Lookup;
 	using Crm.Service.Model.Lookup;
 	using Ical.Net.DataTypes;
-
+	using Customer.Kagema.Services;
 
 	[DisallowConcurrentExecution]
 	public class KagemaServiceOrderDocumentSaverAgent : ServiceOrderDocumentSaverAgent
@@ -57,6 +57,8 @@
 		private readonly IEnumerable<IDispatchReportAttachmentProvider> dispatchReportAttachmentProviders;
 		private readonly IRepositoryWithTypedId<DocumentAttribute, Guid> documentAttributeRepository;
 		private readonly IClientSideGlobalizationService clientSideGlobalizationService;
+		private readonly ReportCompletenessValidator validator;
+
 		public KagemaServiceOrderDocumentSaverAgent(ISessionProvider sessionProvider, IServiceOrderDocumentSaverConfiguration serviceOrderDocumentSaverConfiguration, IServiceOrderService serviceOrderService, IRepositoryWithTypedId<ServiceOrderHead, Guid> serviceOrderRepository, ILog logger, IAppSettingsProvider appSettingsProvider, IHostApplicationLifetime hostApplicationLifetime, IFileService fileService, IRepositoryWithTypedId<DocumentAttribute, Guid> documentAttributeRepository, IEnumerable<IDispatchReportAttachmentProvider> dispatchReportAttachmentProviders, Func<DynamicFormReference, ServiceOrderChecklistResponseViewModel> responseViewModelFactory, IClientSideGlobalizationService clientSideGlobalizationService)
 			: base(sessionProvider,serviceOrderDocumentSaverConfiguration,serviceOrderService,serviceOrderRepository,logger,appSettingsProvider,hostApplicationLifetime)
 		{
@@ -66,33 +68,111 @@
 			this.appSettingsProvider = appSettingsProvider;
 			this.dispatchReportAttachmentProviders = dispatchReportAttachmentProviders;
 			this.fileService = fileService;
-			//this.userService = userService;
 			this.documentAttributeRepository = documentAttributeRepository;
 			this.clientSideGlobalizationService = clientSideGlobalizationService;
-
+			this.validator = new ReportCompletenessValidator(logger);
 		}
+
 		protected override void SaveServiceOrderReport(ServiceOrderHead order, string exportServiceOrderReportsPath)
 		{
+			// Validate order completeness before generating reports
+			if (!validator.ValidateServiceOrderCompleteness(order))
+			{
+				throw new InvalidOperationException($"Service Order {order.OrderNo} failed validation - incomplete data detected");
+			}
+
+			// Force eager loading of critical relationships to prevent lazy loading issues
+			EnsureDataIsLoaded(order);
+
 			ExportServiceReport(order);
 			ExportServiceOrderChecklists(order);
 			ExportServiceOrderDocuments(order);
 		}
 
+		private void EnsureDataIsLoaded(ServiceOrderHead order)
+		{
+			try
+			{
+				// Force loading of lazy-loaded relationships
+				if (order.CustomerContact != null)
+				{
+					var _ = order.CustomerContact.Name; // Access property to trigger loading
+				}
+
+				if (order.Dispatches != null)
+				{
+					foreach (var dispatch in order.Dispatches)
+					{
+						if (dispatch.DispatchedUser != null)
+						{
+							var _ = dispatch.DispatchedUser.DisplayName; // Force loading
+						}
+					}
+				}
+
+				// Ensure collections are initialized
+				var materialsCount = order.ServiceOrderMaterials?.Count ?? 0;
+				var postingsCount = order.ServiceOrderTimePostings?.Count ?? 0;
+				var dispatchesCount = order.Dispatches?.Count ?? 0;
+
+				Logger.Info($"Order {order.OrderNo} - Loaded: {dispatchesCount} dispatches, {materialsCount} materials, {postingsCount} postings");
+			}
+			catch (Exception ex)
+			{
+				Logger.Error($"Error ensuring data is loaded for order {order.OrderNo}: {ex.Message}", ex);
+				throw;
+			}
+		}
+
 		[AllowAnonymous]
 		private void ExportServiceReport(ServiceOrderHead order)
 		{
-			var bytes = serviceOrderService.CreateServiceOrderReportAsPdf(order);
+			const int maxRetries = 3;
+			Exception lastException = null;
 
-			var exportPath = appSettingsProvider.GetValue(KagemaPlugin.Settings.ServiceOrderReportPath);
-			var filename = serviceOrderDocumentSaverConfiguration.GetReportFileName(order);
-			var directory = Path.Combine(exportPath, order.OrderNo);
-			var directoryWithLmobileFolder = Path.Combine(directory, "L-Mobile");
-			var ServiceOrderReportFullpath = Path.Combine(directoryWithLmobileFolder, filename);
-			if (Directory.Exists(directoryWithLmobileFolder) == false)
+			for (int attempt = 1; attempt <= maxRetries; attempt++)
 			{
-				Directory.CreateDirectory(directoryWithLmobileFolder);
+				try
+				{
+					Logger.Info($"Generating service report for order {order.OrderNo} (attempt {attempt}/{maxRetries})");
+
+					var bytes = serviceOrderService.CreateServiceOrderReportAsPdf(order);
+
+					// Validate generated content
+					var filename = serviceOrderDocumentSaverConfiguration.GetReportFileName(order);
+					if (!validator.ValidateGeneratedFileContent(bytes, filename))
+					{
+						throw new InvalidOperationException($"Generated service report for order {order.OrderNo} failed validation");
+					}
+
+					var exportPath = appSettingsProvider.GetValue(KagemaPlugin.Settings.ServiceOrderReportPath);
+					var directory = Path.Combine(exportPath, order.OrderNo);
+					var directoryWithLmobileFolder = Path.Combine(directory, "L-Mobile");
+					var ServiceOrderReportFullpath = Path.Combine(directoryWithLmobileFolder, filename);
+
+					if (Directory.Exists(directoryWithLmobileFolder) == false)
+					{
+						Directory.CreateDirectory(directoryWithLmobileFolder);
+					}
+
+					File.WriteAllBytes(ServiceOrderReportFullpath, bytes);
+					Logger.Info($"Successfully exported service report for order {order.OrderNo}");
+					return; // Success, exit retry loop
+				}
+				catch (Exception ex)
+				{
+					lastException = ex;
+					Logger.Warn($"Attempt {attempt} failed for service report generation of order {order.OrderNo}: {ex.Message}");
+
+					if (attempt < maxRetries)
+					{
+						Thread.Sleep(1000 * attempt); // Progressive delay
+					}
+				}
 			}
-			File.WriteAllBytes(ServiceOrderReportFullpath, bytes);
+
+			// All retries failed
+			throw new InvalidOperationException($"Failed to generate service report for order {order.OrderNo} after {maxRetries} attempts", lastException);
 		}
 
 		[AllowAnonymous]
@@ -103,39 +183,100 @@
 			var directoryWithLmobileFolder = Path.Combine(directory, "L-Mobile");
 
 			var Checklists = new List<FileResource>();
+
 			foreach (ServiceOrderDispatch dispatch in order.Dispatches)
 			{
+				// Validate dispatch before processing
+				if (!validator.ValidateDispatchCompleteness(dispatch))
+				{
+					Logger.Warn($"Skipping incomplete dispatch {dispatch.Id} for order {order.OrderNo}");
+					continue;
+				}
 
 				var user = dispatch.DispatchedUser;
 				if (user != null)
 				{
-					Thread.CurrentPrincipal = new GenericPrincipal(new GenericIdentity(user.GetIdentityString()), new string[0]);
-					Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(clientSideGlobalizationService.GetCurrentLanguageCultureNameOrDefault());
-					Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo(clientSideGlobalizationService.GetCurrentCultureNameOrDefault());
+					try
+					{
+						Thread.CurrentPrincipal = new GenericPrincipal(new GenericIdentity(user.GetIdentityString()), new string[0]);
+						Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(clientSideGlobalizationService.GetCurrentLanguageCultureNameOrDefault());
+						Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo(clientSideGlobalizationService.GetCurrentCultureNameOrDefault());
+					}
+					catch (Exception ex)
+					{
+						Logger.Warn($"Failed to set thread culture for user {user.GetIdentityString()}: {ex.Message}");
+						// Continue with default culture
+					}
 				}
-				var bytes = serviceOrderService.CreateDispatchReportAsPdf(dispatch);
-				Checklists.Add(fileService.CreateAndSaveFileResource(bytes, MediaTypeNames.Application.Pdf, GetDispatchReportFileName(dispatch).AppendIfMissing(".pdf")));
 
-				foreach (var dispatchReportAttachmentProvider in dispatchReportAttachmentProviders)
+				try
 				{
-					Checklists.AddRange(dispatchReportAttachmentProvider.GetAttachments(dispatch, true).Select(x => fileService.CreateAndSaveFileResource(x.ContentStream.ReadAllBytes(), x.ContentType.MediaType, x.Name)));
+					var bytes = serviceOrderService.CreateDispatchReportAsPdf(dispatch);
+					var fileName = GetDispatchReportFileName(dispatch).AppendIfMissing(".pdf");
+
+					// Validate generated dispatch report
+					if (!validator.ValidateGeneratedFileContent(bytes, fileName))
+					{
+						Logger.Error($"Generated dispatch report for dispatch {dispatch.Id} failed validation - skipping");
+						continue;
+					}
+
+					Checklists.Add(fileService.CreateAndSaveFileResource(bytes, MediaTypeNames.Application.Pdf, fileName));
+
+					foreach (var dispatchReportAttachmentProvider in dispatchReportAttachmentProviders)
+					{
+						var attachments = dispatchReportAttachmentProvider.GetAttachments(dispatch, true);
+						foreach (var attachment in attachments)
+						{
+							try
+							{
+								var attachmentBytes = attachment.ContentStream.ReadAllBytes();
+								if (validator.ValidateGeneratedFileContent(attachmentBytes, attachment.Name))
+								{
+									Checklists.Add(fileService.CreateAndSaveFileResource(attachmentBytes, attachment.ContentType.MediaType, attachment.Name));
+								}
+								else
+								{
+									Logger.Warn($"Attachment {attachment.Name} failed validation - skipping");
+								}
+							}
+							catch (Exception ex)
+							{
+								Logger.Error($"Failed to process attachment {attachment.Name}: {ex.Message}", ex);
+							}
+						}
+					}
+				}
+				catch (Exception ex)
+				{
+					Logger.Error($"Failed to generate dispatch report for dispatch {dispatch.Id}: {ex.Message}", ex);
+					// Continue with other dispatches
 				}
 			}
 
+			// Save validated checklists
 			foreach (FileResource checklist in Checklists)
 			{
-				var fullPath = Path.Combine(directoryWithLmobileFolder, checklist.Filename);
-				using (var unc = new UNCAccessWithCredentials())
+				try
 				{
-
-					if (Directory.Exists(directoryWithLmobileFolder) == false)
+					var fullPath = Path.Combine(directoryWithLmobileFolder, checklist.Filename);
+					using (var unc = new UNCAccessWithCredentials())
 					{
-						Directory.CreateDirectory(directoryWithLmobileFolder);
+						if (Directory.Exists(directoryWithLmobileFolder) == false)
+						{
+							Directory.CreateDirectory(directoryWithLmobileFolder);
+						}
+						File.WriteAllBytes(fullPath, checklist.Content);
 					}
-					File.WriteAllBytes(fullPath, checklist.Content);
 				}
-
+				catch (Exception ex)
+				{
+					Logger.Error($"Failed to save checklist {checklist.Filename}: {ex.Message}", ex);
+					throw; // Re-throw to mark the entire operation as failed
+				}
 			}
+
+			Logger.Info($"Successfully exported {Checklists.Count} checklists for order {order.OrderNo}");
 		}
 
 		[AllowAnonymous]
@@ -184,5 +325,4 @@
 			return $"{dispatch.OrderHead.OrderNo} - {dispatch.Date.ToLocalTime().ToIsoDateString()} {dispatch.Date.ToFormattedString("HH-mm")} - {dispatch.DispatchedUser.DisplayName}";
 		}
 	}
-
 }
