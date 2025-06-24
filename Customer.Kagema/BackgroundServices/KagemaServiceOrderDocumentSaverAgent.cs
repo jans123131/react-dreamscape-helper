@@ -61,6 +61,7 @@ namespace Customer.Kagema.BackgroundServices
 		private readonly IPdfService pdfService;
 		private readonly IRenderViewToStringService renderViewToStringService;
 		private readonly Func<DynamicFormReference, ServiceOrderChecklistResponseViewModel> responseViewModelFactory;
+		private readonly PdfGenerationConfig pdfConfig;
 
 		public KagemaServiceOrderDocumentSaverAgent(ISessionProvider sessionProvider, IServiceOrderDocumentSaverConfiguration serviceOrderDocumentSaverConfiguration, IServiceOrderService serviceOrderService, IRepositoryWithTypedId<ServiceOrderHead, Guid> serviceOrderRepository, ILog logger, IAppSettingsProvider appSettingsProvider, IHostApplicationLifetime hostApplicationLifetime, IFileService fileService, IRepositoryWithTypedId<DocumentAttribute, Guid> documentAttributeRepository, IEnumerable<IDispatchReportAttachmentProvider> dispatchReportAttachmentProviders, Func<DynamicFormReference, ServiceOrderChecklistResponseViewModel> responseViewModelFactory, IClientSideGlobalizationService clientSideGlobalizationService, IPdfService pdfService, IRenderViewToStringService renderViewToStringService)
 			: base(sessionProvider,serviceOrderDocumentSaverConfiguration,serviceOrderService,serviceOrderRepository,logger,appSettingsProvider,hostApplicationLifetime)
@@ -77,6 +78,7 @@ namespace Customer.Kagema.BackgroundServices
 			this.pdfService = pdfService;
 			this.renderViewToStringService = renderViewToStringService;
 			this.responseViewModelFactory = responseViewModelFactory;
+			this.pdfConfig = new PdfGenerationConfig(appSettingsProvider);
 		}
 
 		protected override void SaveServiceOrderReport(ServiceOrderHead order, string exportServiceOrderReportsPath)
@@ -180,6 +182,174 @@ namespace Customer.Kagema.BackgroundServices
 
 			// All retries failed
 			throw new InvalidOperationException($"Failed to generate service report for order {order.OrderNo} after {maxRetries} attempts", lastException);
+		}
+
+		/// <summary>
+		/// Generate service report using exact same method as preview with proper CSS context
+		/// </summary>
+		private byte[] GenerateServiceReportWithProperContext(ServiceOrderHead order)
+		{
+			try
+			{
+				// Establish proper web context for CSS and resource loading
+				EstablishWebRenderingContext();
+				
+				// Create service report model with proper context
+				var reportViewModel = new Crm.Service.ViewModels.ServiceOrderReportViewModel(order, appSettingsProvider);
+				
+				// Use exact same margins as preview
+				var headerMargin = pdfConfig.ServiceReportHeaderMargin;
+				var footerMargin = pdfConfig.ServiceReportFooterMargin;
+				
+				// Render with proper CSS context and base URL
+				var htmlContent = renderViewToStringService.RenderViewToString("Crm.Service", "ServiceOrderReport", "ServiceOrderReport", reportViewModel);
+				
+				// Apply CSS fixes for PDF generation
+				htmlContent = ApplyPdfSpecificCssAdjustments(htmlContent);
+				
+				// Generate PDF with exact same settings as preview
+				return pdfService.Html2Pdf(htmlContent, 
+					headerMargin: headerMargin, 
+					footerMargin: footerMargin,
+					pageSize: pdfConfig.PageSize,
+					orientation: pdfConfig.Orientation,
+					enableLocalFileAccess: true, // Ensure images load properly
+					loadImages: true); // Ensure logos render
+			}
+			catch (Exception ex)
+			{
+				Logger.Error($"Failed to generate service report with proper context for order {order.OrderNo}: {ex.Message}", ex);
+				// Fallback to original method if new method fails
+				return serviceOrderService.CreateServiceOrderReportAsPdf(order);
+			}
+		}
+
+		/// <summary>
+		/// Generate dispatch report using EXACT same method as DispatchReportAttachmentProvider
+		/// </summary>
+		private byte[] GenerateDispatchReportWithProperContext(ServiceOrderDispatch dispatch)
+		{
+			try
+			{
+				// Establish proper web context for CSS and resource loading
+				EstablishWebRenderingContext();
+				
+				// Create dispatch report model - use same factory as preview
+				var model = responseViewModelFactory(dispatch as DynamicFormReference);
+				
+				// Generate main content with EXACT same margins as DispatchReportAttachmentProvider
+				var viewAsPdf = pdfService.Html2Pdf(
+					renderViewToStringService.RenderViewToString("Crm.DynamicForms", "DynamicForm", "Response", model), 
+					headerMargin: pdfConfig.DispatchReportHeaderMargin, // 3.0
+					footerMargin: pdfConfig.DispatchReportFooterMargin, // 2.0
+					pageSize: pdfConfig.PageSize,
+					orientation: pdfConfig.Orientation,
+					enableLocalFileAccess: true,
+					loadImages: true
+				);
+				
+				// Generate header with EXACT same settings
+				byte[] headerAsPdf = null;
+				try
+				{
+					var headerContent = renderViewToStringService.RenderViewToString("Crm.DynamicForms", "DynamicForm", "DynamicFormPageHeader", model);
+					if (!string.IsNullOrWhiteSpace(headerContent))
+					{
+						headerContent = ApplyPdfSpecificCssAdjustments(headerContent);
+						headerAsPdf = pdfService.Html2Pdf(headerContent, 
+							headerMargin: pdfConfig.HeaderOnlyMargin, // 1.0
+							pageSize: pdfConfig.PageSize,
+							orientation: pdfConfig.Orientation,
+							enableLocalFileAccess: true,
+							loadImages: true);
+					}
+				}
+				catch (Exception ex)
+				{
+					Logger.Warn($"Failed to render header for dispatch {dispatch.Id}: {ex.Message}");
+				}
+				
+				// Generate footer with EXACT same settings
+				byte[] footerAsPdf = null;
+				try
+				{
+					var footerContent = renderViewToStringService.RenderViewToString("Crm.DynamicForms", "DynamicForm", "DynamicFormPageFooter", model);
+					if (!string.IsNullOrWhiteSpace(footerContent))
+					{
+						footerContent = ApplyPdfSpecificCssAdjustments(footerContent);
+						footerAsPdf = pdfService.Html2Pdf(footerContent, 
+							headerMargin: pdfConfig.FooterOnlyMargin, // 27.5
+							pageSize: pdfConfig.PageSize,
+							orientation: pdfConfig.Orientation,
+							enableLocalFileAccess: true,
+							loadImages: true);
+					}
+				}
+				catch (Exception ex)
+				{
+					Logger.Warn($"Failed to render footer for dispatch {dispatch.Id}: {ex.Message}");
+				}
+				
+				// Combine header, content, and footer EXACTLY like DispatchReportAttachmentProvider
+				if (headerAsPdf != null && footerAsPdf != null)
+				{
+					return pdfService.AddPageHeadersFooters(viewAsPdf, headerAsPdf, footerAsPdf);
+				}
+				else
+				{
+					return viewAsPdf;
+				}
+			}
+			catch (Exception ex)
+			{
+				Logger.Error($"Failed to generate dispatch report with proper context for dispatch {dispatch.Id}: {ex.Message}", ex);
+				// Fallback to original method if new method fails
+				return serviceOrderService.CreateDispatchReportAsPdf(dispatch);
+			}
+		}
+
+		/// <summary>
+		/// Establish proper web rendering context to match preview environment
+		/// </summary>
+		private void EstablishWebRenderingContext()
+		{
+			try
+			{
+				// Set proper base URL for image/resource resolution
+				var baseUrl = appSettingsProvider.GetValue("Application.BaseUrl") ?? "http://localhost";
+				
+				// Ensure HTTP context is available for resource resolution
+				if (System.Web.HttpContext.Current == null)
+				{
+					// Create minimal HTTP context for resource loading
+					var httpRequest = new System.Web.HttpRequest("", baseUrl, "");
+					var httpResponse = new System.Web.HttpResponse(new System.IO.StringWriter());
+					var httpContext = new System.Web.HttpContext(httpRequest, httpResponse);
+					System.Web.HttpContext.Current = httpContext;
+				}
+			}
+			catch (Exception ex)
+			{
+				Logger.Warn($"Failed to establish web rendering context: {ex.Message}");
+				// Continue without HTTP context - PDF generation will still work but might have resource loading issues
+			}
+		}
+
+		/// <summary>
+		/// Apply CSS adjustments specifically for PDF generation to match preview appearance
+		/// </summary>
+		private string ApplyPdfSpecificCssAdjustments(string htmlContent)
+		{
+			// Fix common PDF rendering issues
+			var adjustedContent = htmlContent
+				// Ensure images use absolute paths
+				.Replace("src=\"/", $"src=\"{appSettingsProvider.GetValue("Application.BaseUrl") ?? "http://localhost"}/")
+				// Fix font rendering
+				.Replace("<head>", "<head><style>body { font-family: Arial, sans-serif; } img { max-width: 100%; height: auto; }</style>")
+				// Ensure proper page breaks
+				.Replace("page-break-inside: avoid", "page-break-inside: avoid; -webkit-print-color-adjust: exact;");
+			
+			return adjustedContent;
 		}
 
 		[AllowAnonymous]
@@ -327,103 +497,6 @@ namespace Customer.Kagema.BackgroundServices
 			}
 
 			return folder;
-		}
-
-		/// <summary>
-		/// Generate service report using the same method as preview to ensure consistency
-		/// </summary>
-		private byte[] GenerateServiceReportWithProperContext(ServiceOrderHead order)
-		{
-			try
-			{
-				// Create service report model with proper context
-				var reportViewModel = new Crm.Service.ViewModels.ServiceOrderReportViewModel(order, appSettingsProvider);
-				
-				// Get configuration values for consistent margins
-				var headerMargin = appSettingsProvider.GetValue(MainPlugin.Settings.Report.HeaderMargin);
-				var footerMargin = appSettingsProvider.GetValue(MainPlugin.Settings.Report.FooterMargin);
-				
-				// Render the view with proper context
-				var htmlContent = renderViewToStringService.RenderViewToString("Crm.Service", "ServiceOrderReport", "ServiceOrderReport", reportViewModel);
-				
-				// Generate PDF with consistent settings
-				return pdfService.Html2Pdf(htmlContent, headerMargin: headerMargin, footerMargin: footerMargin);
-			}
-			catch (Exception ex)
-			{
-				Logger.Error($"Failed to generate service report with proper context for order {order.OrderNo}: {ex.Message}", ex);
-				// Fallback to original method if new method fails
-				return serviceOrderService.CreateServiceOrderReportAsPdf(order);
-			}
-		}
-
-		/// <summary>
-		/// Generate dispatch report using the same method as preview to ensure consistency
-		/// </summary>
-		private byte[] GenerateDispatchReportWithProperContext(ServiceOrderDispatch dispatch)
-		{
-			try
-			{
-				// Create dispatch report model with proper context
-				var reportViewModel = new Crm.Service.ViewModels.DispatchReportViewModel(dispatch, appSettingsProvider);
-				
-				// Get configuration values for consistent margins
-				var headerMargin = appSettingsProvider.GetValue(MainPlugin.Settings.Report.HeaderMargin);
-				var footerMargin = appSettingsProvider.GetValue(MainPlugin.Settings.Report.FooterMargin);
-				
-				// Render the main content
-				var viewAsPdf = pdfService.Html2Pdf(
-					renderViewToStringService.RenderViewToString("Crm.Service", "DispatchReport", "DispatchReport", reportViewModel), 
-					headerMargin: headerMargin, 
-					footerMargin: footerMargin
-				);
-				
-				// Render header if it exists
-				byte[] headerAsPdf = null;
-				try
-				{
-					var headerContent = renderViewToStringService.RenderViewToString("Crm.DynamicForms", "DynamicForm", "DynamicFormPageHeader", reportViewModel);
-					if (!string.IsNullOrWhiteSpace(headerContent))
-					{
-						headerAsPdf = pdfService.Html2Pdf(headerContent, headerMargin: 1);
-					}
-				}
-				catch (Exception ex)
-				{
-					Logger.Warn($"Failed to render header for dispatch {dispatch.Id}: {ex.Message}");
-				}
-				
-				// Render footer if it exists
-				byte[] footerAsPdf = null;
-				try
-				{
-					var footerContent = renderViewToStringService.RenderViewToString("Crm.DynamicForms", "DynamicForm", "DynamicFormPageFooter", reportViewModel);
-					if (!string.IsNullOrWhiteSpace(footerContent))
-					{
-						footerAsPdf = pdfService.Html2Pdf(footerContent, headerMargin: 27.5);
-					}
-				}
-				catch (Exception ex)
-				{
-					Logger.Warn($"Failed to render footer for dispatch {dispatch.Id}: {ex.Message}");
-				}
-				
-				// Combine header, content, and footer like the preview does
-				if (headerAsPdf != null && footerAsPdf != null)
-				{
-					return pdfService.AddPageHeadersFooters(viewAsPdf, headerAsPdf, footerAsPdf);
-				}
-				else
-				{
-					return viewAsPdf;
-				}
-			}
-			catch (Exception ex)
-			{
-				Logger.Error($"Failed to generate dispatch report with proper context for dispatch {dispatch.Id}: {ex.Message}", ex);
-				// Fallback to original method if new method fails
-				return serviceOrderService.CreateDispatchReportAsPdf(dispatch);
-			}
 		}
 
 		public virtual string GetDispatchReportFileName(ServiceOrderDispatch dispatch)
