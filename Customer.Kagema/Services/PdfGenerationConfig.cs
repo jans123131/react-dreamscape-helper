@@ -18,11 +18,5 @@ namespace Customer.Kagema.Services
         public double DispatchReportFooterMargin => 2.0; // Match DispatchReportAttachmentProvider
         public double HeaderOnlyMargin => 1.0; // Match DispatchReportAttachmentProvider
         public double FooterOnlyMargin => 27.5; // Match DispatchReportAttachmentProvider
-        
-        // Ensure consistent page settings
-        public string PageSize => "A4";
-        public string Orientation => "Portrait";
-        public double PageWidth => 210; // A4 width in mm
-        public double PageHeight => 297; // A4 height in mm
     }
 }
