@@ -1,4 +1,4 @@
-﻿namespace Sms.Checklists.Services
+namespace Sms.Checklists.Services
 {
 	using System;
 	using System.Collections.Generic;
@@ -10,6 +10,7 @@
 	using Crm.Library.Data.Domain.DataInterfaces;
 	using Crm.Library.Extensions;
 	using Crm.Library.Services.Interfaces;
+	using Crm.Library.Helper;
 	using Crm.Model;
 	using Crm.Service.BackgroundServices;
 	using Crm.Service.Model;
@@ -26,14 +27,16 @@
 		private readonly IRepositoryWithTypedId<FileResource, Guid> fileResourceRepository;
 		private readonly IRenderViewToStringService renderViewToStringService;
 		private readonly Func<DynamicFormReference, ServiceOrderChecklistResponseViewModel> responseViewModelFactory;
+		private readonly IAppSettingsProvider appSettingsProvider;
 
-		public DispatchReportAttachmentProvider(IRepositoryWithTypedId<ServiceOrderChecklist, Guid> serviceOrderChecklistRepository, IPdfService pdfService, IRepositoryWithTypedId<FileResource, Guid> fileResourceRepository, IRenderViewToStringService renderViewToStringService, Func<DynamicFormReference, ServiceOrderChecklistResponseViewModel> responseViewModelFactory)
+		public DispatchReportAttachmentProvider(IRepositoryWithTypedId<ServiceOrderChecklist, Guid> serviceOrderChecklistRepository, IPdfService pdfService, IRepositoryWithTypedId<FileResource, Guid> fileResourceRepository, IRenderViewToStringService renderViewToStringService, Func<DynamicFormReference, ServiceOrderChecklistResponseViewModel> responseViewModelFactory, IAppSettingsProvider appSettingsProvider)
 		{
 			this.serviceOrderChecklistRepository = serviceOrderChecklistRepository;
 			this.pdfService = pdfService;
 			this.fileResourceRepository = fileResourceRepository;
 			this.renderViewToStringService = renderViewToStringService;
 			this.responseViewModelFactory = responseViewModelFactory;
+			this.appSettingsProvider = appSettingsProvider;
 		}
 
 		public virtual IEnumerable<Attachment> GetAttachments(ServiceOrderDispatch dispatch, bool includeInternalInformation)
@@ -56,7 +59,12 @@
 		protected virtual Attachment CreatePdf(ServiceOrderChecklist serviceOrderChecklist)
 		{
 			var model = responseViewModelFactory(serviceOrderChecklist);
-			var viewAsPdf = pdfService.Html2Pdf(renderViewToStringService.RenderViewToString("Crm.DynamicForms", "DynamicForm", "Response", model), headerMargin: 3, footerMargin: 2);
+			
+			// Use consistent margin settings from configuration like the main reports
+			var headerMargin = appSettingsProvider.GetValue(MainPlugin.Settings.Report.HeaderMargin);
+			var footerMargin = appSettingsProvider.GetValue(MainPlugin.Settings.Report.FooterMargin);
+			
+			var viewAsPdf = pdfService.Html2Pdf(renderViewToStringService.RenderViewToString("Crm.DynamicForms", "DynamicForm", "Response", model), headerMargin: headerMargin, footerMargin: footerMargin);
 			var headerAsPdf = pdfService.Html2Pdf(renderViewToStringService.RenderViewToString("Crm.DynamicForms", "DynamicForm", "DynamicFormPageHeader", model), headerMargin: 1);
 			var footerAsPdf = pdfService.Html2Pdf(renderViewToStringService.RenderViewToString("Crm.DynamicForms", "DynamicForm", "DynamicFormPageFooter", model), headerMargin: 27.5);
 			var pdfWithHeaderAndFooter = pdfService.AddPageHeadersFooters(viewAsPdf, headerAsPdf, footerAsPdf);
