@@ -58,8 +58,11 @@ namespace Customer.Kagema.BackgroundServices
 		private readonly IRepositoryWithTypedId<DocumentAttribute, Guid> documentAttributeRepository;
 		private readonly IClientSideGlobalizationService clientSideGlobalizationService;
 		private readonly ReportCompletenessValidator validator;
+		private readonly IPdfService pdfService;
+		private readonly IRenderViewToStringService renderViewToStringService;
+		private readonly Func<DynamicFormReference, ServiceOrderChecklistResponseViewModel> responseViewModelFactory;
 
-		public KagemaServiceOrderDocumentSaverAgent(ISessionProvider sessionProvider, IServiceOrderDocumentSaverConfiguration serviceOrderDocumentSaverConfiguration, IServiceOrderService serviceOrderService, IRepositoryWithTypedId<ServiceOrderHead, Guid> serviceOrderRepository, ILog logger, IAppSettingsProvider appSettingsProvider, IHostApplicationLifetime hostApplicationLifetime, IFileService fileService, IRepositoryWithTypedId<DocumentAttribute, Guid> documentAttributeRepository, IEnumerable<IDispatchReportAttachmentProvider> dispatchReportAttachmentProviders, Func<DynamicFormReference, ServiceOrderChecklistResponseViewModel> responseViewModelFactory, IClientSideGlobalizationService clientSideGlobalizationService)
+		public KagemaServiceOrderDocumentSaverAgent(ISessionProvider sessionProvider, IServiceOrderDocumentSaverConfiguration serviceOrderDocumentSaverConfiguration, IServiceOrderService serviceOrderService, IRepositoryWithTypedId<ServiceOrderHead, Guid> serviceOrderRepository, ILog logger, IAppSettingsProvider appSettingsProvider, IHostApplicationLifetime hostApplicationLifetime, IFileService fileService, IRepositoryWithTypedId<DocumentAttribute, Guid> documentAttributeRepository, IEnumerable<IDispatchReportAttachmentProvider> dispatchReportAttachmentProviders, Func<DynamicFormReference, ServiceOrderChecklistResponseViewModel> responseViewModelFactory, IClientSideGlobalizationService clientSideGlobalizationService, IPdfService pdfService, IRenderViewToStringService renderViewToStringService)
 			: base(sessionProvider,serviceOrderDocumentSaverConfiguration,serviceOrderService,serviceOrderRepository,logger,appSettingsProvider,hostApplicationLifetime)
 		{
 			this.serviceOrderDocumentSaverConfiguration = serviceOrderDocumentSaverConfiguration;
@@ -71,6 +74,9 @@ namespace Customer.Kagema.BackgroundServices
 			this.documentAttributeRepository = documentAttributeRepository;
 			this.clientSideGlobalizationService = clientSideGlobalizationService;
 			this.validator = new ReportCompletenessValidator(logger);
+			this.pdfService = pdfService;
+			this.renderViewToStringService = renderViewToStringService;
+			this.responseViewModelFactory = responseViewModelFactory;
 		}
 
 		protected override void SaveServiceOrderReport(ServiceOrderHead order, string exportServiceOrderReportsPath)
@@ -136,7 +142,8 @@ namespace Customer.Kagema.BackgroundServices
 				{
 					Logger.Info($"Generating service report for order {order.OrderNo} (attempt {attempt}/{maxRetries})");
 
-					var bytes = serviceOrderService.CreateServiceOrderReportAsPdf(order);
+					// Use the same PDF generation method as preview to ensure consistency
+					var bytes = GenerateServiceReportWithProperContext(order);
 
 					// Validate generated content
 					var filename = serviceOrderDocumentSaverConfiguration.GetReportFileName(order);
@@ -211,7 +218,8 @@ namespace Customer.Kagema.BackgroundServices
 
 				try
 				{
-					var bytes = serviceOrderService.CreateDispatchReportAsPdf(dispatch);
+					// Use the same PDF generation method as preview to ensure consistency
+					var bytes = GenerateDispatchReportWithProperContext(dispatch);
 					var fileName = GetDispatchReportFileName(dispatch).AppendIfMissing(".pdf");
 
 					// Validate generated dispatch report
@@ -223,6 +231,7 @@ namespace Customer.Kagema.BackgroundServices
 
 					Checklists.Add(fileService.CreateAndSaveFileResource(bytes, MediaTypeNames.Application.Pdf, fileName));
 
+					// Process attachments using the existing provider logic
 					foreach (var dispatchReportAttachmentProvider in dispatchReportAttachmentProviders)
 					{
 						var attachments = dispatchReportAttachmentProvider.GetAttachments(dispatch, true);
@@ -318,6 +327,103 @@ namespace Customer.Kagema.BackgroundServices
 			}
 
 			return folder;
+		}
+
+		/// <summary>
+		/// Generate service report using the same method as preview to ensure consistency
+		/// </summary>
+		private byte[] GenerateServiceReportWithProperContext(ServiceOrderHead order)
+		{
+			try
+			{
+				// Create service report model with proper context
+				var reportViewModel = new Crm.Service.ViewModels.ServiceOrderReportViewModel(order, appSettingsProvider);
+				
+				// Get configuration values for consistent margins
+				var headerMargin = appSettingsProvider.GetValue(MainPlugin.Settings.Report.HeaderMargin);
+				var footerMargin = appSettingsProvider.GetValue(MainPlugin.Settings.Report.FooterMargin);
+				
+				// Render the view with proper context
+				var htmlContent = renderViewToStringService.RenderViewToString("Crm.Service", "ServiceOrderReport", "ServiceOrderReport", reportViewModel);
+				
+				// Generate PDF with consistent settings
+				return pdfService.Html2Pdf(htmlContent, headerMargin: headerMargin, footerMargin: footerMargin);
+			}
+			catch (Exception ex)
+			{
+				Logger.Error($"Failed to generate service report with proper context for order {order.OrderNo}: {ex.Message}", ex);
+				// Fallback to original method if new method fails
+				return serviceOrderService.CreateServiceOrderReportAsPdf(order);
+			}
+		}
+
+		/// <summary>
+		/// Generate dispatch report using the same method as preview to ensure consistency
+		/// </summary>
+		private byte[] GenerateDispatchReportWithProperContext(ServiceOrderDispatch dispatch)
+		{
+			try
+			{
+				// Create dispatch report model with proper context
+				var reportViewModel = new Crm.Service.ViewModels.DispatchReportViewModel(dispatch, appSettingsProvider);
+				
+				// Get configuration values for consistent margins
+				var headerMargin = appSettingsProvider.GetValue(MainPlugin.Settings.Report.HeaderMargin);
+				var footerMargin = appSettingsProvider.GetValue(MainPlugin.Settings.Report.FooterMargin);
+				
+				// Render the main content
+				var viewAsPdf = pdfService.Html2Pdf(
+					renderViewToStringService.RenderViewToString("Crm.Service", "DispatchReport", "DispatchReport", reportViewModel), 
+					headerMargin: headerMargin, 
+					footerMargin: footerMargin
+				);
+				
+				// Render header if it exists
+				byte[] headerAsPdf = null;
+				try
+				{
+					var headerContent = renderViewToStringService.RenderViewToString("Crm.DynamicForms", "DynamicForm", "DynamicFormPageHeader", reportViewModel);
+					if (!string.IsNullOrWhiteSpace(headerContent))
+					{
+						headerAsPdf = pdfService.Html2Pdf(headerContent, headerMargin: 1);
+					}
+				}
+				catch (Exception ex)
+				{
+					Logger.Warn($"Failed to render header for dispatch {dispatch.Id}: {ex.Message}");
+				}
+				
+				// Render footer if it exists
+				byte[] footerAsPdf = null;
+				try
+				{
+					var footerContent = renderViewToStringService.RenderViewToString("Crm.DynamicForms", "DynamicForm", "DynamicFormPageFooter", reportViewModel);
+					if (!string.IsNullOrWhiteSpace(footerContent))
+					{
+						footerAsPdf = pdfService.Html2Pdf(footerContent, headerMargin: 27.5);
+					}
+				}
+				catch (Exception ex)
+				{
+					Logger.Warn($"Failed to render footer for dispatch {dispatch.Id}: {ex.Message}");
+				}
+				
+				// Combine header, content, and footer like the preview does
+				if (headerAsPdf != null && footerAsPdf != null)
+				{
+					return pdfService.AddPageHeadersFooters(viewAsPdf, headerAsPdf, footerAsPdf);
+				}
+				else
+				{
+					return viewAsPdf;
+				}
+			}
+			catch (Exception ex)
+			{
+				Logger.Error($"Failed to generate dispatch report with proper context for dispatch {dispatch.Id}: {ex.Message}", ex);
+				// Fallback to original method if new method fails
+				return serviceOrderService.CreateDispatchReportAsPdf(dispatch);
+			}
 		}
 
 		public virtual string GetDispatchReportFileName(ServiceOrderDispatch dispatch)
