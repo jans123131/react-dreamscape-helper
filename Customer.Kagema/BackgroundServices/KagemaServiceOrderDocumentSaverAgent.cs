@@ -142,8 +142,8 @@ namespace Customer.Kagema.BackgroundServices
 				{
 					Logger.Info($"Generating service report for order {order.OrderNo} (attempt {attempt}/{maxRetries})");
 
-					// Use the same PDF generation method as preview to ensure consistency
-					var bytes = GenerateServiceReportWithProperContext(order);
+					// Use consistent PDF generation with proper margins
+					var bytes = GenerateServiceReportWithConsistentSettings(order);
 
 					// Validate generated content
 					var filename = serviceOrderDocumentSaverConfiguration.GetReportFileName(order);
@@ -218,8 +218,8 @@ namespace Customer.Kagema.BackgroundServices
 
 				try
 				{
-					// Use the same PDF generation method as preview to ensure consistency
-					var bytes = GenerateDispatchReportWithProperContext(dispatch);
+					// Use consistent PDF generation with proper margins
+					var bytes = GenerateDispatchReportWithConsistentSettings(dispatch);
 					var fileName = GetDispatchReportFileName(dispatch).AppendIfMissing(".pdf");
 
 					// Validate generated dispatch report
@@ -330,44 +330,44 @@ namespace Customer.Kagema.BackgroundServices
 		}
 
 		/// <summary>
-		/// Generate service report using the same method as preview to ensure consistency
+		/// Generate service report using consistent settings to match preview
 		/// </summary>
-		private byte[] GenerateServiceReportWithProperContext(ServiceOrderHead order)
+		private byte[] GenerateServiceReportWithConsistentSettings(ServiceOrderHead order)
 		{
 			try
 			{
 				// Create service report model with proper context
 				var reportViewModel = new Crm.Service.ViewModels.ServiceOrderReportViewModel(order, appSettingsProvider);
 				
-				// Get configuration values for consistent margins
+				// Get consistent margin settings from configuration
 				var headerMargin = appSettingsProvider.GetValue(MainPlugin.Settings.Report.HeaderMargin);
 				var footerMargin = appSettingsProvider.GetValue(MainPlugin.Settings.Report.FooterMargin);
 				
 				// Render the view with proper context
 				var htmlContent = renderViewToStringService.RenderViewToString("Crm.Service", "ServiceOrderReport", "ServiceOrderReport", reportViewModel);
 				
-				// Generate PDF with consistent settings
+				// Generate PDF with consistent settings matching preview
 				return pdfService.Html2Pdf(htmlContent, headerMargin: headerMargin, footerMargin: footerMargin);
 			}
 			catch (Exception ex)
 			{
-				Logger.Error($"Failed to generate service report with proper context for order {order.OrderNo}: {ex.Message}", ex);
+				Logger.Error($"Failed to generate service report with consistent settings for order {order.OrderNo}: {ex.Message}", ex);
 				// Fallback to original method if new method fails
 				return serviceOrderService.CreateServiceOrderReportAsPdf(order);
 			}
 		}
 
 		/// <summary>
-		/// Generate dispatch report using the same method as preview to ensure consistency
+		/// Generate dispatch report using consistent settings to match preview
 		/// </summary>
-		private byte[] GenerateDispatchReportWithProperContext(ServiceOrderDispatch dispatch)
+		private byte[] GenerateDispatchReportWithConsistentSettings(ServiceOrderDispatch dispatch)
 		{
 			try
 			{
 				// Create dispatch report model with proper context
 				var reportViewModel = new Crm.Service.ViewModels.DispatchReportViewModel(dispatch, appSettingsProvider);
 				
-				// Get configuration values for consistent margins
+				// Get consistent margin settings from configuration
 				var headerMargin = appSettingsProvider.GetValue(MainPlugin.Settings.Report.HeaderMargin);
 				var footerMargin = appSettingsProvider.GetValue(MainPlugin.Settings.Report.FooterMargin);
 				
@@ -420,7 +420,7 @@ namespace Customer.Kagema.BackgroundServices
 			}
 			catch (Exception ex)
 			{
-				Logger.Error($"Failed to generate dispatch report with proper context for dispatch {dispatch.Id}: {ex.Message}", ex);
+				Logger.Error($"Failed to generate dispatch report with consistent settings for dispatch {dispatch.Id}: {ex.Message}", ex);
 				// Fallback to original method if new method fails
 				return serviceOrderService.CreateDispatchReportAsPdf(dispatch);
 			}
