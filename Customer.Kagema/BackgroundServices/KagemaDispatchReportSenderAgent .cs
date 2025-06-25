@@ -1,4 +1,4 @@
-﻿
+
 namespace Customer.Kagema.BackgroundServices
 {
 	using System;
@@ -20,6 +20,7 @@ namespace Customer.Kagema.BackgroundServices
 	using Crm.Service;
 	using Crm.Service.BackgroundServices;
 	using Crm.Service.Model;
+	using Crm.Service.Model.Lookup;
 	using Crm.Service.Services.Interfaces;
 	using Crm.Services.Interfaces;
 
@@ -129,7 +130,8 @@ namespace Customer.Kagema.BackgroundServices
 
 				var DisableDispatchReportAttachments = appSettingsProvider.GetValue(KagemaPlugin.Settings.DisableDispatchReportAttachments);
 
-				if (!DisableDispatchReportAttachments || dispatch.FollowUpServiceOrder)
+				if (!DisableDispatchReportAttachments ||  dispatch.StatusKey == ServiceOrderDispatchStatus.ClosedNotCompleteKey)
+
 				{
 					var bytes = serviceOrderService.CreateDispatchReportAsPdf(dispatch);
 					attachments.Add(fileService.CreateAndSaveFileResource(bytes, MediaTypeNames.Application.Pdf, dispatchReportSenderConfiguration.GetReportFileName(dispatch).AppendIfMissing(".pdf")));
