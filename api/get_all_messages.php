@@ -31,8 +31,8 @@ try {
     
     $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
     
-    // Get total count
-    $count_sql = "SELECT COUNT(*) as total FROM messages $where_clause";
+    // Get total count from emails table (contact us)
+    $count_sql = "SELECT COUNT(*) as total FROM emails $where_clause";
     $count_stmt = $db->prepare($count_sql);
     foreach ($params as $key => $value) {
         $count_stmt->bindValue($key, $value);
@@ -40,7 +40,7 @@ try {
     $count_stmt->execute();
     $total_records = $count_stmt->fetch()['total'];
     
-    // Get messages with pagination
+    // Get emails with pagination (contact us)
     $sql = "SELECT 
                 id_message,
                 nom_client,
@@ -50,7 +50,7 @@ try {
                 vue_par_admin,
                 date_vue_admin,
                 date_creation
-            FROM messages 
+            FROM emails 
             $where_clause
             ORDER BY date_creation DESC 
             LIMIT :limit OFFSET :offset";

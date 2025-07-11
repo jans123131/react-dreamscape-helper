@@ -15,19 +15,19 @@ try {
     
     $id_message = (int)$data['id_message'];
     
-    // Check if message exists
-    $check_sql = "SELECT id_message, vue_par_admin FROM messages WHERE id_message = :id_message";
+    // Check if email exists
+    $check_sql = "SELECT id_message, vue_par_admin FROM emails WHERE id_message = :id_message";
     $check_stmt = $db->prepare($check_sql);
     $check_stmt->bindParam(':id_message', $id_message, PDO::PARAM_INT);
     $check_stmt->execute();
     
     $message = $check_stmt->fetch();
     if (!$message) {
-        throw new Exception("Message not found");
+        throw new Exception("Email not found");
     }
     
-    // Update message as viewed
-    $sql = "UPDATE messages 
+    // Update email as viewed
+    $sql = "UPDATE emails 
             SET vue_par_admin = 1, 
                 date_vue_admin = CURRENT_TIMESTAMP 
             WHERE id_message = :id_message";
@@ -38,10 +38,10 @@ try {
     if ($stmt->execute()) {
         echo json_encode([
             'success' => true,
-            'message' => 'Message marked as viewed successfully'
+            'message' => 'Email marked as viewed successfully'
         ]);
     } else {
-        throw new Exception("Failed to update message status");
+        throw new Exception("Failed to update email status");
     }
     
 } catch(Exception $e) {

@@ -26,8 +26,8 @@ try {
         throw new Exception("Invalid email format");
     }
     
-    // Prepare and execute insert statement
-    $sql = "INSERT INTO messages (nom_client, email_client, telephone_client, message_client) 
+    // Prepare and execute insert statement - using emails table for contact us
+    $sql = "INSERT INTO emails (nom_client, email_client, telephone_client, message_client) 
             VALUES (:nom_client, :email_client, :telephone_client, :message_client)";
     
     $stmt = $db->prepare($sql);
@@ -41,11 +41,11 @@ try {
         
         echo json_encode([
             'success' => true,
-            'message' => 'Message sent successfully',
+            'message' => 'Email sent successfully',
             'id_message' => $message_id
         ]);
     } else {
-        throw new Exception("Failed to insert message");
+        throw new Exception("Failed to insert email");
     }
     
 } catch(Exception $e) {
